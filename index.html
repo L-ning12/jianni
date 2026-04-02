@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduLearn - 鐜颁唬璇剧▼瀛︿範骞冲彴</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#6366f1',
+                        accent: '#f97316',
+                        dark: '#1e293b',
+                        light: '#f8fafc'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .transition-custom {
+                transition: all 0.3s ease;
+            }
+            .hover-scale {
+                transition: transform 0.3s ease;
+            }
+            .hover-scale:hover {
+                transform: scale(1.05);
+            }
+        }
+    </style>
+</head>
+<body class="bg-light text-dark">
+    <!-- 瀵艰埅鏍?-->
+    <nav class="fixed top-0 left-0 right-0 bg-white shadow-md z-50 transition-all duration-300" id="navbar">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="#" class="flex items-center space-x-2">
+                <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                    <i class="fa fa-graduation-cap text-white text-xl"></i>
+                </div>
+                <span class="text-xl font-bold text-dark">EduLearn</span>
+            </a>
+            
+            <!-- 妗岄潰瀵艰埅 -->
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#" class="font-medium hover:text-primary transition-custom">棣栭〉</a>
+                <a href="#courses" class="font-medium hover:text-primary transition-custom">璇剧▼</a>
+                <a href="#instructors" class="font-medium hover:text-primary transition-custom">璁插笀</a>
+                <a href="#testimonials" class="font-medium hover:text-primary transition-custom">璇勪环</a>
+                <a href="#faq" class="font-medium hover:text-primary transition-custom">甯歌闂</a>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <div class="relative hidden md:block">
+                    <input type="text" placeholder="鎼滅储璇剧▼..." class="pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+                <a href="#" class="hidden md:block px-4 py-2 rounded-full border border-primary text-primary hover:bg-primary hover:text-white transition-custom">鐧诲綍</a>
+                <a href="#" class="px-4 py-2 rounded-full bg-primary text-white hover:bg-primary/90 transition-custom">娉ㄥ唽</a>
+                <button class="md:hidden text-dark text-xl" id="menu-toggle">
+                    <i class="fa fa-bars"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- 绉诲姩绔鑸彍鍗?-->
+        <div class="md:hidden hidden bg-white shadow-lg absolute w-full" id="mobile-menu">
+            <div class="container mx-auto px-4 py-3 flex flex-col space-y-4">
+                <a href="#" class="font-medium hover:text-primary transition-custom">棣栭〉</a>
+                <a href="#courses" class="font-medium hover:text-primary transition-custom">璇剧▼</a>
+                <a href="#instructors" class="font-medium hover:text-primary transition-custom">璁插笀</a>
+                <a href="#testimonials" class="font-medium hover:text-primary transition-custom">璇勪环</a>
+                <a href="#faq" class="font-medium hover:text-primary transition-custom">甯歌闂</a>
+                <div class="relative">
+                    <input type="text" placeholder="鎼滅储璇剧▼..." class="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 鑻遍泟鍖哄煙 -->
+    <section class="pt-32 pb-20 bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-10 md:mb-0">
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-shadow">
+                        瑙ｉ攣浣犵殑瀛︿範娼滃姏
+                    </h1>
+                    <p class="text-lg md:text-xl text-gray-600 mb-8 max-w-xl">
+                        鎺㈢储鎴戜滑绮惧績璁捐鐨勮绋嬶紝鐢辫涓氫笓瀹舵墦閫狅紝甯姪浣犳帉鎻℃渶鏂版妧鑳斤紝瀹炵幇鑱屼笟鐩爣銆?
+                    </p>
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                        <a href="#courses" class="px-8 py-3 rounded-full bg-primary text-white font-medium hover:bg-primary/90 transition-custom text-center">
+                            娴忚璇剧▼
+                        </a>
+                        <a href="#" class="px-8 py-3 rounded-full border border-primary text-primary font-medium hover:bg-primary/5 transition-custom text-center">
+                            浜嗚В鏇村
+                        </a>
+                    </div>
+                    <div class="mt-10 flex items-center space-x-4">
+                        <div class="flex -space-x-2">
+                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20student%20avatar%201&image_size=square" alt="瀛︾敓澶村儚" class="w-10 h-10 rounded-full border-2 border-white">
+                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20student%20avatar%202&image_size=square" alt="瀛︾敓澶村儚" class="w-10 h-10 rounded-full border-2 border-white">
+                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20student%20avatar%203&image_size=square" alt="瀛︾敓澶村儚" class="w-10 h-10 rounded-full border-2 border-white">
+                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20student%20avatar%204&image_size=square" alt="瀛︾敓澶村儚" class="w-10 h-10 rounded-full border-2 border-white">
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <i class="fa fa-star text-yellow-400"></i>
+                                <i class="fa fa-star text-yellow-400"></i>
+                                <i class="fa fa-star text-yellow-400"></i>
+                                <i class="fa fa-star text-yellow-400"></i>
+                                <i class="fa fa-star-half-o text-yellow-400"></i>
+                                <span class="ml-2 font-medium">4.8/5</span>
+                            </div>
+                            <p class="text-sm text-gray-600">鏉ヨ嚜 2,000+ 瀛︾敓鐨勮瘎浠?/p>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:w-1/2">
+                    <div class="relative">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20online%20learning%20platform%20interface%20with%20students%20studying%20on%20devices&image_size=landscape_16_9" alt="鍦ㄧ嚎瀛︿範" class="rounded-2xl shadow-xl w-full">
+                        <div class="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-lg p-4 flex items-center space-x-4 hover-scale">
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fa fa-check text-green-500 text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">璇剧▼瀹屾垚鐜?/p>
+                                <p class="text-2xl font-bold text-primary">89%</p>
+                            </div>
+                        </div>
+                        <div class="absolute -top-6 -right-6 bg-white rounded-xl shadow-lg p-4 flex items-center space-x-4 hover-scale">
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                <i class="fa fa-users text-blue-500 text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">娲昏穬瀛︾敓</p>
+                                <p class="text-2xl font-bold text-primary">15,000+</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 鐗硅壊鍔熻兘 -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">涓轰粈涔堥€夋嫨 EduLearn</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">鎴戜滑鎻愪緵楂樿川閲忕殑璇剧▼鍐呭鍜屽涔犱綋楠岋紝甯姪浣犲疄鐜颁釜浜哄拰鑱屼笟鐩爣</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-blue-50 rounded-2xl p-8 hover-scale">
+                    <div class="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fa fa-certificate text-primary text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">琛屼笟璁よ瘉</h3>
+                    <p class="text-gray-600">鑾峰緱琚涓氳鍙殑璇佷功锛屾彁鍗囦綘鐨勭畝鍘嗙珵浜夊姏锛屽紑鍚亴涓氭柊绡囩珷銆?/p>
+                </div>
+                <div class="bg-purple-50 rounded-2xl p-8 hover-scale">
+                    <div class="w-16 h-16 bg-secondary/10 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fa fa-laptop text-secondary text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">鐏垫椿瀛︿範</h3>
+                    <p class="text-gray-600">闅忔椂闅忓湴閫氳繃浠讳綍璁惧瀛︿範锛屾寜鐓ц嚜宸辩殑鑺傚鎺屾彙鐭ヨ瘑鍜屾妧鑳姐€?/p>
+                </div>
+                <div class="bg-orange-50 rounded-2xl p-8 hover-scale">
+                    <div class="w-16 h-16 bg-accent/10 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fa fa-users text-accent text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">涓撳鎸囧</h3>
+                    <p class="text-gray-600">鐢辫涓氫笓瀹跺拰璧勬繁鏁欒偛鑰呯簿蹇冭璁″拰鏁欐巿鐨勮绋嬶紝纭繚瀛︿範璐ㄩ噺銆?/p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 璇剧▼鍒嗙被 -->
+    <section class="py-16 bg-gray-50" id="courses">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold">鐑棬璇剧▼鍒嗙被</h2>
+                <a href="#" class="text-primary font-medium flex items-center hover:underline">
+                    鏌ョ湅鍏ㄩ儴 <i class="fa fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <a href="#" class="bg-white rounded-xl p-6 flex flex-col items-center justify-center text-center hover-scale shadow-sm">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-code text-primary text-2xl"></i>
+                    </div>
+                    <h3 class="font-bold mb-2">缂栫▼寮€鍙?/h3>
+                    <p class="text-sm text-gray-600">120+ 璇剧▼</p>
+                </a>
+                <a href="#" class="bg-white rounded-xl p-6 flex flex-col items-center justify-center text-center hover-scale shadow-sm">
+                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-line-chart text-secondary text-2xl"></i>
+                    </div>
+                    <h3 class="font-bold mb-2">鍟嗕笟绠＄悊</h3>
+                    <p class="text-sm text-gray-600">85+ 璇剧▼</p>
+                </a>
+                <a href="#" class="bg-white rounded-xl p-6 flex flex-col items-center justify-center text-center hover-scale shadow-sm">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-paint-brush text-green-500 text-2xl"></i>
+                    </div>
+                    <h3 class="font-bold mb-2">璁捐鍒涙剰</h3>
+                    <p class="text-sm text-gray-600">95+ 璇剧▼</p>
+                </a>
+                <a href="#" class="bg-white rounded-xl p-6 flex flex-col items-center justify-center text-center hover-scale shadow-sm">
+                    <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-language text-accent text-2xl"></i>
+                    </div>
+                    <h3 class="font-bold mb-2">璇█瀛︿範</h3>
+                    <p class="text-sm text-gray-600">70+ 璇剧▼</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 鐑棬璇剧▼ -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold">鐑棬璇剧▼</h2>
+                <a href="#" class="text-primary font-medium flex items-center hover:underline">
+                    鏌ョ湅鍏ㄩ儴 <i class="fa fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- 璇剧▼鍗＄墖 1 -->
+                <div class="bg-white rounded-2xl shadow-md overflow-hidden hover-scale">
+                    <div class="relative">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=web%20development%20course%20thumbnail%20modern%20design&image_size=landscape_16_9" alt="Web寮€鍙戣绋? class="w-full h-48 object-cover">
+                        <div class="absolute top-4 right-4 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">
+                            鐑棬
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-sm text-gray-500">缂栫▼寮€鍙?/span>
+                            <div class="flex items-center">
+                                <i class="fa fa-star text-yellow-400 text-xs"></i>
+                                <span class="text-sm font-medium ml-1">4.9</span>
+                                <span class="text-xs text-gray-500 ml-1">(245)</span>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">鐜颁唬Web寮€鍙戝叏鏍堝伐绋嬪笀</h3>
+                        <p class="text-gray-600 text-sm mb-4">瀛︿範HTML, CSS, JavaScript, React鍜孨ode.js锛屾垚涓轰竴鍚嶅叏鏍圵eb寮€鍙戝伐绋嬪笀銆?/p>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20instructor%20avatar%201&image_size=square" alt="璁插笀澶村儚" class="w-8 h-8 rounded-full mr-2">
+                                <span class="text-sm font-medium">寮犺€佸笀</span>
+                            </div>
+                            <div class="text-primary font-bold">楼299</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 璇剧▼鍗＄墖 2 -->
+                <div class="bg-white rounded-2xl shadow-md overflow-hidden hover-scale">
+                    <div class="relative">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=data%20science%20course%20thumbnail%20modern%20design&image_size=landscape_16_9" alt="鏁版嵁绉戝璇剧▼" class="w-full h-48 object-cover">
+                        <div class="absolute top-4 right-4 bg-secondary text-white text-xs font-bold px-3 py-1 rounded-full">
+                            鏂拌
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-sm text-gray-500">鏁版嵁绉戝</span>
+                            <div class="flex items-center">
+                                <i class="fa fa-star text-yellow-400 text-xs"></i>
+                                <span class="text-sm font-medium ml-1">4.8</span>
+                                <span class="text-xs text-gray-500 ml-1">(189)</span>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Python鏁版嵁绉戝涓庢満鍣ㄥ涔?/h3>
+                        <p class="text-gray-600 text-sm mb-4">鎺屾彙Python鏁版嵁澶勭悊銆佸垎鏋愬拰鏈哄櫒瀛︿範鎶€鏈紝鎴愪负鏁版嵁绉戝涓撳銆?/p>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20instructor%20avatar%202&image_size=square" alt="璁插笀澶村儚" class="w-8 h-8 rounded-full mr-2">
+                                <span class="text-sm font-medium">鏉庤€佸笀</span>
+                            </div>
+                            <div class="text-primary font-bold">楼399</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 璇剧▼鍗＄墖 3 -->
+                <div class="bg-white rounded-2xl shadow-md overflow-hidden hover-scale">
+                    <div class="relative">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ui%20ux%20design%20course%20thumbnail%20modern%20design&image_size=landscape_16_9" alt="UI/UX璁捐璇剧▼" class="w-full h-48 object-cover">
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-sm text-gray-500">璁捐鍒涙剰</span>
+                            <div class="flex items-center">
+                                <i class="fa fa-star text-yellow-400 text-xs"></i>
+                                <span class="text-sm font-medium ml-1">4.7</span>
+                                <span class="text-xs text-gray-500 ml-1">(210)</span>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">UI/UX璁捐瀹炴垬璇剧▼</h3>
+                        <p class="text-gray-600 text-sm mb-4">瀛︿範鐢ㄦ埛鐣岄潰鍜岀敤鎴蜂綋楠岃璁″師鍒欙紝鎺屾彙Figma鍜孉dobe XD绛夎璁″伐鍏枫€?/p>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20instructor%20avatar%203&image_size=square" alt="璁插笀澶村儚" class="w-8 h-8 rounded-full mr-2">
+                                <span class="text-sm font-medium">鐜嬭€佸笀</span>
+                            </div>
+                            <div class="text-primary font-bold">楼249</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 瀛︿範璺緞 -->
+    <section class="py-16 bg-gradient-to-br from-indigo-50 to-blue-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">鎺ㄨ崘瀛︿範璺緞</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">鎸夌収绮惧績璁捐鐨勫涔犺矾寰勶紝绯荤粺鎺屾彙涓撲笟鎶€鑳斤紝瀹炵幇鑱屼笟鐩爣</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- 瀛︿範璺緞 1 -->
+                <div class="bg-white rounded-2xl shadow-md p-8 hover-scale">
+                    <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fa fa-code text-primary text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">鍓嶇寮€鍙戝伐绋嬪笀璺緞</h3>
+                    <p class="text-gray-600 mb-6">浠庡熀纭€HTML/CSS寮€濮嬶紝閫愭鎺屾彙JavaScript銆丷eact绛夊墠绔妧鏈紝鎴愪负涓撲笟鍓嶇寮€鍙戝伐绋嬪笀銆?/p>
+                    <div class="space-y-4 mb-6">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                                <i class="fa fa-check text-green-500"></i>
+                            </div>
+                            <span>HTML5 & CSS3 鍩虹</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                                <i class="fa fa-check text-green-500"></i>
+                            </div>
+                            <span>JavaScript 杩涢樁</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-4">
+                                <i class="fa fa-lock text-gray-400"></i>
+                            </div>
+                            <span>React 妗嗘灦</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-4">
+                                <i class="fa fa-lock text-gray-400"></i>
+                            </div>
+                            <span>鍓嶇宸ョ▼鍖?/span>
+                        </div>
+                    </div>
+                    <a href="#" class="inline-block px-6 py-3 rounded-full bg-primary text-white font-medium hover:bg-primary/90 transition-custom">
+                        寮€濮嬪涔?
+                    </a>
+                </div>
+                <!-- 瀛︿範璺緞 2 -->
+                <div class="bg-white rounded-2xl shadow-md p-8 hover-scale">
+                    <div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fa fa-line-chart text-secondary text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">鏁版嵁鍒嗘瀽涓撳璺緞</h3>
+                    <p class="text-gray-600 mb-6">瀛︿範Python缂栫▼銆佹暟鎹鐞嗐€佸彲瑙嗗寲鍜屾満鍣ㄥ涔狅紝鎴愪负鏁版嵁椹卞姩鐨勫垎鏋愪笓瀹躲€?/p>
+                    <div class="space-y-4 mb-6">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                                <i class="fa fa-check text-green-500"></i>
+                            </div>
+                            <span>Python 鍩虹</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                                <i class="fa fa-check text-green-500"></i>
+                            </div>
+                            <span>鏁版嵁澶勭悊涓庡垎鏋?/span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-4">
+                                <i class="fa fa-lock text-gray-400"></i>
+                            </div>
+                            <span>鏁版嵁鍙鍖?/span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-4">
+                                <i class="fa fa-lock text-gray-400"></i>
+                            </div>
+                            <span>鏈哄櫒瀛︿範鍩虹</span>
+                        </div>
+                    </div>
+                    <a href="#" class="inline-block px-6 py-3 rounded-full bg-secondary text-white font-medium hover:bg-secondary/90 transition-custom">
+                        寮€濮嬪涔?
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 璁插笀鍥㈤槦 -->
+    <section class="py-16 bg-white" id="instructors">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold">涓撲笟璁插笀鍥㈤槦</h2>
+                <a href="#" class="text-primary font-medium flex items-center hover:underline">
+                    鏌ョ湅鍏ㄩ儴 <i class="fa fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+                <!-- 璁插笀 1 -->
+                <div class="bg-white rounded-2xl shadow-md overflow-hidden hover-scale">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20instructor%20portrait%201%20with%20glasses%20and%20formal%20attire&image_size=square" alt="璁插笀澶村儚" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-1">寮犺€佸笀</h3>
+                        <p class="text-gray-500 mb-3">Web寮€鍙戜笓瀹?/p>
+                        <p class="text-gray-600 text-sm mb-4">10骞村墠绔紑鍙戠粡楠岋紝鏇句换鑱屼簬闃块噷宸村反銆佽吘璁瓑鐭ュ悕浼佷笟銆?/p>
+                        <div class="flex space-x-3">
+                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
+                                <i class="fa fa-linkedin"></i>
+                            </a>
+                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
+                                <i class="fa fa-github"></i>
+                            </a>
+                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
+                                <i class="fa fa-twitter"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <!-- 璁插笀 2 -->
+                <div class="bg-white rounded-2xl shadow-md overflow-hidden hover-scale">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20instructor%20portrait%202%20female%20with%20smile%20and%20business%20attire&image_size=square" alt="璁插笀澶村儚" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-1">鏉庤€佸笀</h3>
+                        <p class="text-gray-500 mb-3">鏁版嵁绉戝涓撳</p>
+                        <p class="text-gray-600 text-sm mb-4">鍗氬＋瀛︿綅锛?骞存暟鎹瀛︾粡楠岋紝涓撴敞浜庢満鍣ㄥ涔犲拰浜哄伐鏅鸿兘棰嗗煙銆?/p>
+                        <div class="flex space-x-3">
+                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
+                                <i class="fa fa-linkedin"></i>
+                            </a>
+                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
+                                <i class="fa fa-github"></i>
+                            </a>
+                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
+                                <i class="fa fa-twitter"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <!-- 璁插笀 3 -->
+                <div class="bg-white rounded-2xl shadow-md overflow-hidden hover-scale">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20instructor%20portrait%203%20male%20with%20beard%20and%20casual%20attire&image_size=square" alt="璁插笀澶村儚" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-1">鐜嬭€佸笀</h3>
+                        <p class="text-gray-500 mb-3">UI/UX璁捐涓撳</p>
+                        <p class="text-gray-600 text-sm mb-4">8骞磋璁＄粡楠岋紝鏇句负澶氬鐭ュ悕浼佷笟鎻愪緵璁捐鏈嶅姟锛屾搮闀跨敤鎴蜂綋楠岃璁°€?/p>
+                        <div class="flex space-x-3">
+                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
+                                <i class="fa fa-linkedin"></i>
+                            </a>
+                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
+                                <i class="fa fa-github"></i>
+                            </a>
+                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
+                                <i class="fa fa-twitter"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <!-- 璁插笀 4 -->
+                <div class="bg-white rounded-2xl shadow-md overflow-hidden hover-scale">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20instructor%20portrait%204%20female%20with%20glasses%20and%20academic%20attire&image_size=square" alt="璁插笀澶村儚" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-1">璧佃€佸笀</h3>
+                        <p class="text-gray-500 mb-3">鍟嗕笟绠＄悊涓撳</p>
+                        <p class="text-gray-600 text-sm mb-4">MBA瀛︿綅锛?2骞翠紒涓氱鐞嗙粡楠岋紝涓撴敞浜庡競鍦鸿惀閿€鍜屾垬鐣ヨ鍒掋€?/p>
+                        <div class="flex space-x-3">
+                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
+                                <i class="fa fa-linkedin"></i>
+                            </a>
+                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
+                                <i class="fa fa-github"></i>
+                            </a>
+                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
+                                <i class="fa fa-twitter"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 瀛︾敓璇勪环 -->
+    <section class="py-16 bg-gray-50" id="testimonials">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">瀛︾敓璇勪环</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">鍚惉鎴戜滑鐨勫鐢熸€庝箞璇达紝浠栦滑鐨勬垚鍔熸晠浜嬫槸鎴戜滑鏈€澶х殑鍔ㄥ姏</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- 璇勪环 1 -->
+                <div class="bg-white rounded-2xl shadow-md p-8 hover-scale">
+                    <div class="flex items-center mb-6">
+                        <i class="fa fa-star text-yellow-400"></i>
+                        <i class="fa fa-star text-yellow-400"></i>
+                        <i class="fa fa-star text-yellow-400"></i>
+                        <i class="fa fa-star text-yellow-400"></i>
+                        <i class="fa fa-star text-yellow-400"></i>
+                    </div>
+                    <p class="text-gray-600 mb-6">"閫氳繃EduLearn鐨刉eb寮€鍙戣绋嬶紝鎴戜粠闆跺熀纭€鎴愪负浜嗕竴鍚嶅墠绔紑鍙戝伐绋嬪笀銆傝绋嬪唴瀹归潪甯哥郴缁燂紝璁插笀璁茶В娓呮櫚锛屽疄璺甸」鐩赴瀵岋紝甯姪鎴戝揩閫熸帉鎻′簡鎶€鑳藉苟鎴愬姛鎵惧埌浜嗗伐浣溿€?</p>
+                    <div class="flex items-center">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=student%20testimonial%20avatar%201&image_size=square" alt="瀛︾敓澶村儚" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-bold">闄堝悓瀛?/h4>
+                            <p class="text-sm text-gray-500">鍓嶇寮€鍙戝伐绋嬪笀</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 璇勪环 2 -->
+                <div class="bg-white rounded-2xl shadow-md p-8 hover-scale">
+                    <div class="flex items-center mb-6">
+                        <i class="fa fa-star text-yellow-400"></i>
+                        <i class="fa fa-star text-yellow-400"></i>
+                        <i class="fa fa-star text-yellow-400"></i>
+                        <i class="fa fa-star text-yellow-400"></i>
+                        <i class="fa fa-star text-yellow-400"></i>
+                    </div>
+                    <p class="text-gray-600 mb-6">"鏁版嵁绉戝璇剧▼闈炲父妫掞紒鏉庤€佸笀鐨勮瑙ｆ繁鍏ユ祬鍑猴紝璇剧▼鍐呭娑电洊浜嗕粠鍩虹鍒拌繘闃剁殑鎵€鏈夌煡璇嗙偣锛岄厤濂楃殑瀹炴垬椤圭洰璁╂垜鑳藉灏嗘墍瀛﹀簲鐢ㄥ埌瀹為檯闂涓紝闈炲父鎺ㄨ崘锛?</p>
+                    <div class="flex items-center">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=student%20testimonial%20avatar%202&image_size=square" alt="瀛︾敓澶村儚" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-bold">鏋楀悓瀛?/h4>
+                            <p class="text-sm text-gray-500">鏁版嵁鍒嗘瀽甯?/p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 璇勪环 3 -->
+                <div class="bg-white rounded-2xl shadow-md p-8 hover-scale">
+                    <div class="flex items-center mb-6">
+                        <i class="fa fa-star text-yellow-400"></i>
+                        <i class="fa fa-star text-yellow-400"></i>
+                        <i class="fa fa-star text-yellow-400"></i>
+                        <i class="fa fa-star text-yellow-400"></i>
+                        <i class="fa fa-star-half-o text-yellow-400"></i>
+                    </div>
+                    <p class="text-gray-600 mb-6">"UI/UX璁捐璇剧▼瓒呭嚭浜嗘垜鐨勯鏈燂紝鐜嬭€佸笀涓嶄粎鏁欐巿璁捐鎶€鑳斤紝杩樺垎浜簡寰堝瀹為檯宸ヤ綔涓殑缁忛獙鍜屾妧宸с€傝绋嬬粨鏉熷悗锛屾垜鎴愬姛杞瀷涓篣I璁捐甯堬紝钖祫鎻愬崌浜?0%銆?</p>
+                    <div class="flex items-center">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=student%20testimonial%20avatar%203&image_size=square" alt="瀛︾敓澶村儚" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-bold">榛勫悓瀛?/h4>
+                            <p class="text-sm text-gray-500">UI璁捐甯?/p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 甯歌闂 -->
+    <section class="py-16 bg-white" id="faq">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">甯歌闂</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">瑙ｇ瓟浣犲叧浜庤绋嬪拰瀛︿範鐨勭枒闂?/p>
+            </div>
+            <div class="max-w-3xl mx-auto space-y-4">
+                <!-- FAQ 椤圭洰 1 -->
+                <div class="border border-gray-200 rounded-xl overflow-hidden">
+                    <button class="faq-toggle w-full px-6 py-4 flex justify-between items-center text-left font-medium hover:bg-gray-50 transition-custom">
+                        <span>濡備綍寮€濮嬪涔犺绋嬶紵</span>
+                        <i class="fa fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content px-6 py-4 bg-gray-50 hidden">
+                        <p class="text-gray-600">娉ㄥ唽璐﹀彿鍚庯紝浣犲彲浠ユ祻瑙堣绋嬬洰褰曪紝閫夋嫨鎰熷叴瓒ｇ殑璇剧▼杩涜璐拱銆傝喘涔板悗锛屼綘鍙互绔嬪嵆寮€濮嬪涔狅紝鎸夌収鑷繁鐨勮妭濂忚鐪嬭棰戙€佸畬鎴愮粌涔犲拰椤圭洰銆?/p>
+                    </div>
+                </div>
+                <!-- FAQ 椤圭洰 2 -->
+                <div class="border border-gray-200 rounded-xl overflow-hidden">
+                    <button class="faq-toggle w-full px-6 py-4 flex justify-between items-center text-left font-medium hover:bg-gray-50 transition-custom">
+                        <span>璇剧▼璇佷功濡備綍鑾峰彇锛?/span>
+                        <i class="fa fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content px-6 py-4 bg-gray-50 hidden">
+                        <p class="text-gray-600">瀹屾垚璇剧▼鐨勬墍鏈夊涔犲唴瀹瑰拰浣滀笟鍚庯紝浣犲彲浠ュ弬鍔犺绋嬭€冭瘯銆傝€冭瘯閫氳繃鍚庯紝绯荤粺浼氳嚜鍔ㄩ鍙戠數瀛愮増璇佷功锛屼綘鍙互涓嬭浇鍜屽垎浜埌浣犵殑绀句氦濯掍綋鎴栫畝鍘嗕腑銆?/p>
+                    </div>
+                </div>
+                <!-- FAQ 椤圭洰 3 -->
+                <div class="border border-gray-200 rounded-xl overflow-hidden">
+                    <button class="faq-toggle w-full px-6 py-4 flex justify-between items-center text-left font-medium hover:bg-gray-50 transition-custom">
+                        <span>璇剧▼鏄惁鏈夋湁鏁堟湡锛?/span>
+                        <i class="fa fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content px-6 py-4 bg-gray-50 hidden">
+                        <p class="text-gray-600">涓€鏃﹁喘涔拌绋嬶紝浣犲皢鑾峰緱缁堣韩璁块棶鏉冮檺锛屽彲浠ラ殢鏃跺洖椤惧拰澶嶄範璇剧▼鍐呭銆傛垜浠篃浼氬畾鏈熸洿鏂拌绋嬪唴瀹癸紝纭繚浣犲涔犲埌鏈€鏂扮殑鐭ヨ瘑鍜屾妧鑳姐€?/p>
+                    </div>
+                </div>
+                <!-- FAQ 椤圭洰 4 -->
+                <div class="border border-gray-200 rounded-xl overflow-hidden">
+                    <button class="faq-toggle w-full px-6 py-4 flex justify-between items-center text-left font-medium hover:bg-gray-50 transition-custom">
+                        <span>濡備綍鑾峰緱瀛︿範鏀寔锛?/span>
+                        <i class="fa fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content px-6 py-4 bg-gray-50 hidden">
+                        <p class="text-gray-600">鎴戜滑鎻愪緵澶氱瀛︿範鏀寔鏂瑰紡锛屽寘鎷绋嬭璁哄尯銆佽甯堢瓟鐤戙€佸涔犵ぞ鍖虹瓑銆備綘鍙互鍦ㄥ涔犺繃绋嬩腑闅忔椂鎻愰棶锛岃幏寰楄甯堝拰鍏朵粬瀛﹀憳鐨勫府鍔┿€?/p>
+                    </div>
+                </div>
+                <!-- FAQ 椤圭洰 5 -->
+                <div class="border border-gray-200 rounded-xl overflow-hidden">
+                    <button class="faq-toggle w-full px-6 py-4 flex justify-between items-center text-left font-medium hover:bg-gray-50 transition-custom">
+                        <span>鏄惁鎻愪緵閫€娆炬湇鍔★紵</span>
+                        <i class="fa fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content px-6 py-4 bg-gray-50 hidden">
+                        <p class="text-gray-600">鎴戜滑鎻愪緵30澶╂棤鐞嗙敱閫€娆句繚璇併€傚鏋滀綘瀵硅绋嬩笉婊℃剰锛屽彲浠ュ湪璐拱鍚?0澶╁唴鐢宠鍏ㄩ閫€娆撅紝鏃犻渶璇存槑鐞嗙敱銆?/p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 琛屽姩鍙敜 -->
+    <section class="py-20 bg-gradient-to-r from-primary to-secondary text-white">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-6">鍑嗗濂藉紑濮嬩綘鐨勫涔犱箣鏃呬簡鍚楋紵</h2>
+            <p class="text-xl mb-8 max-w-2xl mx-auto">鍔犲叆鎴戜滑鐨勫涔犵ぞ鍖猴紝涓?thousands of students涓€璧锋垚闀匡紝瀹炵幇浣犵殑鑱屼笟鐩爣銆?/p>
+            <a href="#" class="inline-block px-8 py-4 rounded-full bg-white text-primary font-bold hover:bg-gray-100 transition-custom text-lg">
+                绔嬪嵆娉ㄥ唽
+            </a>
+        </div>
+    </section>
+
+    <!-- 椤佃剼 -->
+    <footer class="bg-dark text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-6">
+                        <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                            <i class="fa fa-graduation-cap text-white text-xl"></i>
+                        </div>
+                        <span class="text-xl font-bold">EduLearn</span>
+                    </div>
+                    <p class="text-gray-400 mb-6">鎻愪緵楂樿川閲忕殑鍦ㄧ嚎璇剧▼锛屽府鍔╀綘鎺屾彙鏈€鏂版妧鑳斤紝瀹炵幇鑱屼笟鐩爣銆?/p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-custom">
+                            <i class="fa fa-facebook"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-custom">
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-custom">
+                            <i class="fa fa-instagram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-custom">
+                            <i class="fa fa-linkedin"></i>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-6">蹇€熼摼鎺?/h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-custom">棣栭〉</a></li>
+                        <li><a href="#courses" class="text-gray-400 hover:text-white transition-custom">璇剧▼</a></li>
+                        <li><a href="#instructors" class="text-gray-400 hover:text-white transition-custom">璁插笀</a></li>
+                        <li><a href="#testimonials" class="text-gray-400 hover:text-white transition-custom">璇勪环</a></li>
+                        <li><a href="#faq" class="text-gray-400 hover:text-white transition-custom">甯歌闂</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-6">璇剧▼鍒嗙被</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-custom">缂栫▼寮€鍙?/a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-custom">鏁版嵁绉戝</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-custom">璁捐鍒涙剰</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-custom">鍟嗕笟绠＄悊</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-custom">璇█瀛︿範</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-6">鑱旂郴鎴戜滑</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-center">
+                            <i class="fa fa-map-marker text-primary mr-3"></i>
+                            <span class="text-gray-400">鍖椾含甯傛捣娣€鍖轰腑鍏虫潙澶ц1鍙?/span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fa fa-phone text-primary mr-3"></i>
+                            <span class="text-gray-400">+86 10 8888 8888</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fa fa-envelope text-primary mr-3"></i>
+                            <span class="text-gray-400">contact@edulearn.com</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 mb-4 md:mb-0">漏 2026 EduLearn. 淇濈暀鎵€鏈夋潈鍒┿€?/p>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition-custom">闅愮鏀跨瓥</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-custom">鏈嶅姟鏉℃</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-custom">Cookie 鏀跨瓥</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // 瀵艰埅鏍忔粴鍔ㄦ晥鏋?
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('py-2', 'shadow-lg');
+                navbar.classList.remove('py-3', 'shadow-md');
+            } else {
+                navbar.classList.add('py-3', 'shadow-md');
+                navbar.classList.remove('py-2', 'shadow-lg');
+            }
+        });
+
+        // 绉诲姩绔彍鍗曞垏鎹?
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // FAQ 鎶樺彔鏁堟灉
+        document.querySelectorAll('.faq-toggle').forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                const content = this.nextElementSibling;
+                const icon = this.querySelector('i');
+                
+                content.classList.toggle('hidden');
+                icon.classList.toggle('rotate-180');
+            });
+        });
+
+        // 骞虫粦婊氬姩
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
