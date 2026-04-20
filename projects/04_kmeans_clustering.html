@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KMeans聚类</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/python/python.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/theme/monokai.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
+    <script src="../common/pyodide_setup.js"></script>
+    <script src="../common/code_runner.js"></script>
+    <script src="../common/storage.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#64748b',
+                    },
+                },
+            }
+        }
+    </script>
+    <style>
+        .CodeMirror {
+            height: 300px;
+            border-radius: 0.375rem;
+        }
+        .output-area {
+            min-height: 100px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8">
+            <a href="../index.html" class="text-primary hover:underline mb-4 inline-block">
+                <i class="fa fa-arrow-left mr-2"></i>返回首页
+            </a>
+            <h1 class="text-3xl font-bold text-gray-800">KMeans聚类</h1>
+            <p class="text-gray-600 mt-2">使用KMeans算法对用户进行聚类分析，并计算轮廓系数</p>
+        </header>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">数据预览</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">user_id</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">total_amount</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">freq</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">avg_session_time</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="data-preview">
+                        <!-- 数据将通过JavaScript动态填充 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">代码编辑器</h2>
+                <div>
+                    <button id="run-btn" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-600 mr-2">
+                        <i class="fa fa-play mr-1"></i>运行
+                    </button>
+                    <button id="answer-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300">
+                        <i class="fa fa-lightbulb-o mr-1"></i>参考答案
+                    </button>
+                </div>
+            </div>
+            <textarea id="code-editor"># KMeans聚类分析
+# 使用KMeans算法对用户进行聚类，并计算轮廓系数
+
+import pandas as pd
+import numpy as np
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+from sklearn.preprocessing import StandardScaler
+
+# 准备特征数据
+features = df[['total_amount', 'freq', 'avg_session_time']]
+
+# 标准化特征
+scaler = StandardScaler()
+scaled_features = scaler.fit_transform(features)
+
+# 尝试不同的k值
+k_values = range(2, 6)
+silhouette_scores = []
+
+for k in k_values:
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    cluster_labels = kmeans.fit_predict(scaled_features)
+    score = silhouette_score(scaled_features, cluster_labels)
+    silhouette_scores.append(score)
+    print(f"k={k}, 轮廓系数={score:.4f}")
+
+# 选择最佳k值（轮廓系数最大的）
+best_k = k_values[np.argmax(silhouette_scores)]
+print(f"最佳k值: {best_k}")
+
+# 使用最佳k值进行聚类
+kmeans = KMeans(n_clusters=best_k, random_state=42)
+df['cluster'] = kmeans.fit_predict(scaled_features)
+
+# 分析每个聚类的特征
+cluster_analysis = df.groupby('cluster').agg({
+    'total_amount': 'mean',
+    'freq': 'mean',
+    'avg_session_time': 'mean',
+    'user_id': 'count'
+}).rename(columns={'user_id': 'user_count'})
+
+# 显示结果
+print("\n每个聚类的特征：")
+print(cluster_analysis)
+
+# 存储结果以便显示
+df_names = ['df', 'cluster_analysis']
+</textarea>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">输出结果</h2>
+            <div class="bg-gray-50 p-4 rounded-md output-area" id="output"></div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">数据表格</h2>
+            <div id="table-output"></div>
+        </div>
+    </div>
+
+    <script>
+        // 示例CSV数据
+        const csvData = `user_id,total_amount,freq,avg_session_time
+1,1000,5,10
+2,2000,10,15
+3,500,2,5
+4,3000,15,20
+5,800,4,8
+6,2500,12,18
+7,600,3,6
+8,3500,18,22
+9,1200,6,12
+10,1800,8,14
+11,400,1,4
+12,2200,11,16
+13,900,5,9
+14,2800,13,19
+15,700,3,7
+16,3200,16,21
+17,1100,6,11
+18,1900,9,15
+19,450,2,5
+20,2300,12,17`;
+
+        // 初始化CodeMirror编辑器
+        const editor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
+            mode: 'python',
+            theme: 'monokai',
+            lineNumbers: true,
+            indentUnit: 4,
+            tabSize: 4,
+            autofocus: false
+        });
+
+        // 加载保存的代码
+        const projectId = '04_kmeans_clustering';
+        const savedCode = loadCode(projectId);
+        if (savedCode) {
+            editor.setValue(savedCode);
+        }
+
+        // 填充数据预览
+        function populateDataPreview() {
+            const rows = csvData.split('\n');
+            const headers = rows[0].split(',');
+            const tbody = document.getElementById('data-preview');
+            
+            // 显示前5行数据
+            for (let i = 1; i < Math.min(rows.length, 6); i++) {
+                const rowData = rows[i].split(',');
+                const tr = document.createElement('tr');
+                
+                for (const value of rowData) {
+                    const td = document.createElement('td');
+                    td.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-500';
+                    td.textContent = value;
+                    tr.appendChild(td);
+                }
+                
+                tbody.appendChild(tr);
+            }
+        }
+
+        // 运行按钮点击事件
+        document.getElementById('run-btn').addEventListener('click', async () => {
+            const code = editor.getValue();
+            const outputElement = document.getElementById('output');
+            const tableElement = document.getElementById('table-output');
+            
+            // 保存代码
+            saveCode(projectId, code);
+            
+            // 准备代码（添加数据加载）
+            const fullCode = prepareCodeWithData(code, csvData);
+            
+            // 运行代码
+            outputElement.textContent = '运行中...';
+            await runCode(fullCode, outputElement, tableElement);
+        });
+
+        // 参考答案按钮点击事件
+        document.getElementById('answer-btn').addEventListener('click', () => {
+            const answerCode = `# KMeans聚类分析
+# 使用KMeans算法对用户进行聚类，并计算轮廓系数
+
+import pandas as pd
+import numpy as np
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+from sklearn.preprocessing import StandardScaler
+
+# 准备特征数据
+features = df[['total_amount', 'freq', 'avg_session_time']]
+
+# 标准化特征
+scaler = StandardScaler()
+scaled_features = scaler.fit_transform(features)
+
+# 尝试不同的k值
+k_values = range(2, 6)
+silhouette_scores = []
+
+for k in k_values:
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    cluster_labels = kmeans.fit_predict(scaled_features)
+    score = silhouette_score(scaled_features, cluster_labels)
+    silhouette_scores.append(score)
+    print(f"k={k}, 轮廓系数={score:.4f}")
+
+# 选择最佳k值（轮廓系数最大的）
+best_k = k_values[np.argmax(silhouette_scores)]
+print(f"最佳k值: {best_k}")
+
+# 使用最佳k值进行聚类
+kmeans = KMeans(n_clusters=best_k, random_state=42)
+df['cluster'] = kmeans.fit_predict(scaled_features)
+
+# 分析每个聚类的特征
+cluster_analysis = df.groupby('cluster').agg({
+    'total_amount': 'mean',
+    'freq': 'mean',
+    'avg_session_time': 'mean',
+    'user_id': 'count'
+}).rename(columns={'user_id': 'user_count'})
+
+# 显示结果
+print("\n每个聚类的特征：")
+print(cluster_analysis)
+
+# 存储结果以便显示
+df_names = ['df', 'cluster_analysis']
+`;
+            editor.setValue(answerCode);
+            saveCode(projectId, answerCode);
+        });
+
+        // 初始化
+        async function init() {
+            // 初始化Pyodide
+            await initializePyodide();
+            // 填充数据预览
+            populateDataPreview();
+        }
+
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

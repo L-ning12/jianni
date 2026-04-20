@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据分析训练网站</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#64748b',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                },
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .card-hover {
+                @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">数据分析训练网站</h1>
+            <p class="text-xl text-gray-600">在浏览器中运行Python代码，学习数据分析技能</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- 项目1：购物车放弃分析 -->
+            <a href="projects/01_cart_abandonment.html" class="block">
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fa fa-shopping-cart"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold mb-2">购物车放弃分析</h2>
+                    <p class="text-gray-600">分析用户购物车放弃行为，按小时分组计算放弃率</p>
+                </div>
+            </a>
+
+            <!-- 项目2：RFM分层 -->
+            <a href="projects/02_rfm_segmentation.html" class="block">
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fa fa-bar-chart"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold mb-2">RFM分层</h2>
+                    <p class="text-gray-600">基于最近购买时间、购买频率和消费金额进行用户分层</p>
+                </div>
+            </a>
+
+            <!-- 项目3：价格异常检测 -->
+            <a href="projects/03_price_anomaly.html" class="block">
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fa fa-line-chart"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold mb-2">价格异常检测</h2>
+                    <p class="text-gray-600">使用IQR方法检测商品价格异常值</p>
+                </div>
+            </a>
+
+            <!-- 项目4：KMeans聚类 -->
+            <a href="projects/04_kmeans_clustering.html" class="block">
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fa fa-circle-o"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold mb-2">KMeans聚类</h2>
+                    <p class="text-gray-600">使用KMeans算法对用户进行聚类分析，并计算轮廓系数</p>
+                </div>
+            </a>
+
+            <!-- 项目5：购物篮分析 -->
+            <a href="projects/05_market_basket.html" class="block">
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fa fa-shopping-basket"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold mb-2">购物篮分析</h2>
+                    <p class="text-gray-600">分析商品之间的关联关系，计算商品对支持度</p>
+                </div>
+            </a>
+
+            <!-- 项目6：行为序列特征 -->
+            <a href="projects/06_behavior_sequence.html" class="block">
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fa fa-sitemap"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold mb-2">行为序列特征</h2>
+                    <p class="text-gray-600">分析用户行为序列，计算访问间隔时间</p>
+                </div>
+            </a>
+
+            <!-- 项目7：促销活动对比 -->
+            <a href="projects/07_promo_comparison.html" class="block">
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fa fa-percent"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold mb-2">促销活动对比</h2>
+                    <p class="text-gray-600">对比促销活动与非促销活动的销售情况</p>
+                </div>
+            </a>
+
+            <!-- 项目8：评论情感分析 -->
+            <a href="projects/08_sentiment_analysis.html" class="block">
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fa fa-comments"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold mb-2">评论情感分析</h2>
+                    <p class="text-gray-600">分析用户评论的情感倾向，计算评分相关性</p>
+                </div>
+            </a>
+
+            <!-- 项目9：LTV计算 -->
+            <a href="projects/09_ltv_calculation.html" class="block">
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fa fa-line-chart"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold mb-2">LTV计算</h2>
+                    <p class="text-gray-600">计算用户生命周期价值，预测第30天LTV</p>
+                </div>
+            </a>
+
+            <!-- 项目10：实时特征模拟 -->
+            <a href="projects/10_realtime_features.html" class="block">
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fa fa-clock-o"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold mb-2">实时特征模拟</h2>
+                    <p class="text-gray-600">模拟实时数据流，计算1小时滚动窗口特征</p>
+                </div>
+            </a>
+        </div>
+
+        <footer class="mt-16 text-center text-gray-600">
+            <p>© 2026 数据分析训练网站 | 纯前端实现</p>
+        </footer>
+    </div>
+</body>
+</html>

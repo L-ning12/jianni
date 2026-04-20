@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>价格异常检测</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/python/python.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/theme/monokai.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
+    <script src="../common/pyodide_setup.js"></script>
+    <script src="../common/code_runner.js"></script>
+    <script src="../common/storage.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#64748b',
+                    },
+                },
+            }
+        }
+    </script>
+    <style>
+        .CodeMirror {
+            height: 300px;
+            border-radius: 0.375rem;
+        }
+        .output-area {
+            min-height: 100px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8">
+            <a href="../index.html" class="text-primary hover:underline mb-4 inline-block">
+                <i class="fa fa-arrow-left mr-2"></i>返回首页
+            </a>
+            <h1 class="text-3xl font-bold text-gray-800">价格异常检测</h1>
+            <p class="text-gray-600 mt-2">使用IQR方法检测商品价格异常值</p>
+        </header>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">数据预览</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">product_id</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">category</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">price</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="data-preview">
+                        <!-- 数据将通过JavaScript动态填充 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">代码编辑器</h2>
+                <div>
+                    <button id="run-btn" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-600 mr-2">
+                        <i class="fa fa-play mr-1"></i>运行
+                    </button>
+                    <button id="answer-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300">
+                        <i class="fa fa-lightbulb-o mr-1"></i>参考答案
+                    </button>
+                </div>
+            </div>
+            <textarea id="code-editor"># 价格异常检测
+# 使用IQR方法检测商品价格异常值
+
+import pandas as pd
+import numpy as np
+
+# 按类别分组检测异常值
+def detect_anomalies_iqr(df, column):
+    Q1 = df[column].quantile(0.25)
+    Q3 = df[column].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    
+    # 标记异常值
+    df['is_anomaly'] = (df[column] < lower_bound) | (df[column] > upper_bound)
+    df['lower_bound'] = lower_bound
+    df['upper_bound'] = upper_bound
+    
+    return df
+
+# 对每个类别进行异常检测
+anomaly_results = []
+for category in df['category'].unique():
+    category_df = df[df['category'] == category].copy()
+    category_df = detect_anomalies_iqr(category_df, 'price')
+    anomaly_results.append(category_df)
+
+# 合并结果
+result = pd.concat(anomaly_results)
+
+# 提取异常值
+anomalies = result[result['is_anomaly'] == True]
+
+# 显示结果
+print("检测到的价格异常值：")
+print(anomalies)
+
+# 存储结果以便显示
+df_names = ['result', 'anomalies']
+</textarea>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">输出结果</h2>
+            <div class="bg-gray-50 p-4 rounded-md output-area" id="output"></div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">数据表格</h2>
+            <div id="table-output"></div>
+        </div>
+    </div>
+
+    <script>
+        // 示例CSV数据
+        const csvData = `product_id,category,price
+1,electronics,1000
+2,electronics,1500
+3,electronics,1200
+4,electronics,5000
+5,electronics,1300
+6,clothing,50
+7,clothing,80
+8,clothing,60
+9,clothing,200
+10,clothing,70
+11,furniture,500
+12,furniture,800
+13,furniture,600
+14,furniture,3000
+15,furniture,700
+16,electronics,900
+17,electronics,1100
+18,electronics,1400
+19,electronics,1600
+20,electronics,100
+21,clothing,40
+22,clothing,90
+23,clothing,55
+24,clothing,65
+25,clothing,75`;
+
+        // 初始化CodeMirror编辑器
+        const editor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
+            mode: 'python',
+            theme: 'monokai',
+            lineNumbers: true,
+            indentUnit: 4,
+            tabSize: 4,
+            autofocus: false
+        });
+
+        // 加载保存的代码
+        const projectId = '03_price_anomaly';
+        const savedCode = loadCode(projectId);
+        if (savedCode) {
+            editor.setValue(savedCode);
+        }
+
+        // 填充数据预览
+        function populateDataPreview() {
+            const rows = csvData.split('\n');
+            const headers = rows[0].split(',');
+            const tbody = document.getElementById('data-preview');
+            
+            // 显示前5行数据
+            for (let i = 1; i < Math.min(rows.length, 6); i++) {
+                const rowData = rows[i].split(',');
+                const tr = document.createElement('tr');
+                
+                for (const value of rowData) {
+                    const td = document.createElement('td');
+                    td.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-500';
+                    td.textContent = value;
+                    tr.appendChild(td);
+                }
+                
+                tbody.appendChild(tr);
+            }
+        }
+
+        // 运行按钮点击事件
+        document.getElementById('run-btn').addEventListener('click', async () => {
+            const code = editor.getValue();
+            const outputElement = document.getElementById('output');
+            const tableElement = document.getElementById('table-output');
+            
+            // 保存代码
+            saveCode(projectId, code);
+            
+            // 准备代码（添加数据加载）
+            const fullCode = prepareCodeWithData(code, csvData);
+            
+            // 运行代码
+            outputElement.textContent = '运行中...';
+            await runCode(fullCode, outputElement, tableElement);
+        });
+
+        // 参考答案按钮点击事件
+        document.getElementById('answer-btn').addEventListener('click', () => {
+            const answerCode = `# 价格异常检测
+# 使用IQR方法检测商品价格异常值
+
+import pandas as pd
+import numpy as np
+
+# 按类别分组检测异常值
+def detect_anomalies_iqr(df, column):
+    Q1 = df[column].quantile(0.25)
+    Q3 = df[column].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    
+    # 标记异常值
+    df['is_anomaly'] = (df[column] < lower_bound) | (df[column] > upper_bound)
+    df['lower_bound'] = lower_bound
+    df['upper_bound'] = upper_bound
+    
+    return df
+
+# 对每个类别进行异常检测
+anomaly_results = []
+for category in df['category'].unique():
+    category_df = df[df['category'] == category].copy()
+    category_df = detect_anomalies_iqr(category_df, 'price')
+    anomaly_results.append(category_df)
+
+# 合并结果
+result = pd.concat(anomaly_results)
+
+# 提取异常值
+anomalies = result[result['is_anomaly'] == True]
+
+# 显示结果
+print("检测到的价格异常值：")
+print(anomalies)
+
+# 存储结果以便显示
+df_names = ['result', 'anomalies']
+`;
+            editor.setValue(answerCode);
+            saveCode(projectId, answerCode);
+        });
+
+        // 初始化
+        async function init() {
+            // 初始化Pyodide
+            await initializePyodide();
+            // 填充数据预览
+            populateDataPreview();
+        }
+
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

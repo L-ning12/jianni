@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RFM分层</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/python/python.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/theme/monokai.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
+    <script src="../common/pyodide_setup.js"></script>
+    <script src="../common/code_runner.js"></script>
+    <script src="../common/storage.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#64748b',
+                    },
+                },
+            }
+        }
+    </script>
+    <style>
+        .CodeMirror {
+            height: 300px;
+            border-radius: 0.375rem;
+        }
+        .output-area {
+            min-height: 100px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8">
+            <a href="../index.html" class="text-primary hover:underline mb-4 inline-block">
+                <i class="fa fa-arrow-left mr-2"></i>返回首页
+            </a>
+            <h1 class="text-3xl font-bold text-gray-800">RFM分层</h1>
+            <p class="text-gray-600 mt-2">基于最近购买时间、购买频率和消费金额进行用户分层</p>
+        </header>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">数据预览</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">user_id</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">order_date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">amount</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="data-preview">
+                        <!-- 数据将通过JavaScript动态填充 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">代码编辑器</h2>
+                <div>
+                    <button id="run-btn" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-600 mr-2">
+                        <i class="fa fa-play mr-1"></i>运行
+                    </button>
+                    <button id="answer-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300">
+                        <i class="fa fa-lightbulb-o mr-1"></i>参考答案
+                    </button>
+                </div>
+            </div>
+            <textarea id="code-editor"># RFM分层分析
+# 基于最近购买时间、购买频率和消费金额进行用户分层
+
+import pandas as pd
+import numpy as np
+
+# 转换日期格式
+df['order_date'] = pd.to_datetime(df['order_date'])
+
+# 计算RFM值
+reference_date = df['order_date'].max() + pd.Timedelta(days=1)
+
+rfm = df.groupby('user_id').agg({
+    'order_date': lambda x: (reference_date - x.max()).days,  # Recency
+    'user_id': 'count',  # Frequency
+    'amount': 'sum'  # Monetary
+}).rename(columns={
+    'order_date': 'Recency',
+    'user_id': 'Frequency',
+    'amount': 'Monetary'
+}).reset_index()
+
+# 计算分位数
+rfm['R_quantile'] = pd.qcut(rfm['Recency'], 4, labels=[4, 3, 2, 1])  # 注意：Recency越小越好，所以标签反转
+rfm['F_quantile'] = pd.qcut(rfm['Frequency'], 4, labels=[1, 2, 3, 4])
+rfm['M_quantile'] = pd.qcut(rfm['Monetary'], 4, labels=[1, 2, 3, 4])
+
+# 计算RFM总分
+rfm['RFM_Score'] = rfm['R_quantile'].astype(int) + rfm['F_quantile'].astype(int) + rfm['M_quantile'].astype(int)
+
+# 基于总分进行分层
+rfm['Segment'] = pd.cut(rfm['RFM_Score'], 
+                       bins=[0, 6, 8, 10, 12], 
+                       labels=['低价值用户', '一般价值用户', '高价值用户', '超级用户'])
+
+# 显示结果
+print("RFM分层结果：")
+print(rfm)
+
+# 存储结果以便显示
+df_names = ['rfm']
+</textarea>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">输出结果</h2>
+            <div class="bg-gray-50 p-4 rounded-md output-area" id="output"></div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">数据表格</h2>
+            <div id="table-output"></div>
+        </div>
+    </div>
+
+    <script>
+        // 示例CSV数据
+        const csvData = `user_id,order_date,amount
+1,2023-09-01,100
+1,2023-09-15,150
+1,2023-10-01,200
+2,2023-08-10,80
+2,2023-08-25,120
+3,2023-09-05,200
+3,2023-09-20,150
+3,2023-10-05,100
+3,2023-10-20,250
+4,2023-07-15,50
+5,2023-09-10,180
+5,2023-09-25,120
+6,2023-10-01,200
+7,2023-08-01,100
+7,2023-08-15,150
+7,2023-08-30,200
+7,2023-09-15,120
+7,2023-10-01,180
+8,2023-09-01,150
+9,2023-09-15,100
+9,2023-10-01,120
+10,2023-08-10,80
+10,2023-08-25,100
+10,2023-09-10,120
+10,2023-09-25,150
+10,2023-10-10,180`;
+
+        // 初始化CodeMirror编辑器
+        const editor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
+            mode: 'python',
+            theme: 'monokai',
+            lineNumbers: true,
+            indentUnit: 4,
+            tabSize: 4,
+            autofocus: false
+        });
+
+        // 加载保存的代码
+        const projectId = '02_rfm_segmentation';
+        const savedCode = loadCode(projectId);
+        if (savedCode) {
+            editor.setValue(savedCode);
+        }
+
+        // 填充数据预览
+        function populateDataPreview() {
+            const rows = csvData.split('\n');
+            const headers = rows[0].split(',');
+            const tbody = document.getElementById('data-preview');
+            
+            // 显示前5行数据
+            for (let i = 1; i < Math.min(rows.length, 6); i++) {
+                const rowData = rows[i].split(',');
+                const tr = document.createElement('tr');
+                
+                for (const value of rowData) {
+                    const td = document.createElement('td');
+                    td.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-500';
+                    td.textContent = value;
+                    tr.appendChild(td);
+                }
+                
+                tbody.appendChild(tr);
+            }
+        }
+
+        // 运行按钮点击事件
+        document.getElementById('run-btn').addEventListener('click', async () => {
+            const code = editor.getValue();
+            const outputElement = document.getElementById('output');
+            const tableElement = document.getElementById('table-output');
+            
+            // 保存代码
+            saveCode(projectId, code);
+            
+            // 准备代码（添加数据加载）
+            const fullCode = prepareCodeWithData(code, csvData);
+            
+            // 运行代码
+            outputElement.textContent = '运行中...';
+            await runCode(fullCode, outputElement, tableElement);
+        });
+
+        // 参考答案按钮点击事件
+        document.getElementById('answer-btn').addEventListener('click', () => {
+            const answerCode = `# RFM分层分析
+# 基于最近购买时间、购买频率和消费金额进行用户分层
+
+import pandas as pd
+import numpy as np
+
+# 转换日期格式
+df['order_date'] = pd.to_datetime(df['order_date'])
+
+# 计算RFM值
+reference_date = df['order_date'].max() + pd.Timedelta(days=1)
+
+rfm = df.groupby('user_id').agg({
+    'order_date': lambda x: (reference_date - x.max()).days,  # Recency
+    'user_id': 'count',  # Frequency
+    'amount': 'sum'  # Monetary
+}).rename(columns={
+    'order_date': 'Recency',
+    'user_id': 'Frequency',
+    'amount': 'Monetary'
+}).reset_index()
+
+# 计算分位数
+rfm['R_quantile'] = pd.qcut(rfm['Recency'], 4, labels=[4, 3, 2, 1])  # 注意：Recency越小越好，所以标签反转
+rfm['F_quantile'] = pd.qcut(rfm['Frequency'], 4, labels=[1, 2, 3, 4])
+rfm['M_quantile'] = pd.qcut(rfm['Monetary'], 4, labels=[1, 2, 3, 4])
+
+# 计算RFM总分
+rfm['RFM_Score'] = rfm['R_quantile'].astype(int) + rfm['F_quantile'].astype(int) + rfm['M_quantile'].astype(int)
+
+# 基于总分进行分层
+rfm['Segment'] = pd.cut(rfm['RFM_Score'], 
+                       bins=[0, 6, 8, 10, 12], 
+                       labels=['低价值用户', '一般价值用户', '高价值用户', '超级用户'])
+
+# 显示结果
+print("RFM分层结果：")
+print(rfm)
+
+# 存储结果以便显示
+df_names = ['rfm']
+`;
+            editor.setValue(answerCode);
+            saveCode(projectId, answerCode);
+        });
+
+        // 初始化
+        async function init() {
+            // 初始化Pyodide
+            await initializePyodide();
+            // 填充数据预览
+            populateDataPreview();
+        }
+
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
