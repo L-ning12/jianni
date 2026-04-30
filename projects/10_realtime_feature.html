@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实时特征滚动窗口模拟 - Pandas 数据分析实战训练营</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/python/python.min.js"></script>
+    <link rel="stylesheet" href="../common/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Geist+Mono:wght="400;500&display=swap" rel="stylesheet">
+</head>
+<body class="gradient-bg min-h-screen">
+    <div id="app"></div>
+    
+    <script type="module">
+        const { createApp, ref, onMounted, nextTick } = Vue;
+        import { saveCode, loadCode, markCompleted, isCompleted } from '../common/storage.js';
+        import { runCode } from '../common/code_runner.js';
+        
+        const projectId = '10_realtime_feature';
+        const projectTitle = '实时特征滚动窗口模拟';
+        const difficulty = 'expert';
+        const difficultyLabel = '专家';
+        
+        const defaultCode = `import pandas as pd
+import io
+
+# 加载数据
+csv_data = """user_id,event_time,event_type,product_id,amount,payment_method
+1,2024-01-01 08:00:00,view,101,0,
+1,2024-01-01 08:05:00,view,102,0,
+1,2024-01-01 08:10:00,add_cart,101,0,
+1,2024-01-01 08:15:00,purchase,101,299,wechat
+2,2024-01-01 09:00:00,view,201,0,
+2,2024-01-01 09:03:00,purchase,201,199,alipay
+3,2024-01-01 10:00:00,view,301,0,
+3,2024-01-01 10:15:00,view,302,0,
+3,2024-01-01 10:30:00,view,303,0,
+3,2024-01-01 10:45:00,add_cart,302,0,
+4,2024-01-01 11:00:00,view,401,0,
+4,2024-01-01 11:10:00,purchase,401,899,wechat
+5,2024-01-01 12:00:00,view,501,0,
+5,2024-01-01 12:05:00,add_cart,501,0,
+5,2024-01-01 12:10:00,view,502,0,
+5,2024-01-01 12:20:00,add_cart,502,0,
+5,2024-01-01 12:30:00,purchase,502,499,alipay
+6,2024-01-01 13:00:00,view,601,0,
+6,2024-01-01 13:15:00,view,602,0,
+7,2024-01-01 14:00:00,purchase,701,299,wechat
+8,2024-01-01 15:00:00,view,801,0,
+8,2024-01-01 15:30:00,add_cart,801,0,
+9,2024-01-01 16:00:00,view,901,0,
+9,2024-01-01 16:10:00,purchase,901,1599,alipay
+10,2024-01-01 17:00:00,view,1001,0,
+1,2024-01-01 18:00:00,view,102,0,
+1,2024-01-01 18:30:00,purchase,102,199,wechat
+"""
+
+df = pd.read_csv(io.StringIO(csv_data))
+df['event_time'] = pd.to_datetime(df['event_time'])
+
+# TODO: 完成以下分析任务
+# 1. 按1小时滚动窗口计算活跃用户数
+# 2. 计算各用户最近1小时、6小时、24小时的行为统计
+# 3. 计算滚动购买转化率
+# 4. 识别用户最近浏览和购买的商品特征
+
+# 查看数据前5行
+print("数据预览:")
+print(df.head())
+`;
+        
+        const answerCode = `import pandas as pd
+import io
+
+csv_data = """user_id,event_time,event_type,product_id,amount,payment_method
+1,2024-01-01 08:00:00,view,101,0,
+1,2024-01-01 08:05:00,view,102,0,
+1,2024-01-01 08:10:00,add_cart,101,0,
+1,2024-01-01 08:15:00,purchase,101,299,wechat
+2,2024-01-01 09:00:00,view,201,0,
+2,2024-01-01 09:03:00,purchase,201,199,alipay
+3,2024-01-01 10:00:00,view,301,0,
+3,2024-01-01 10:15:00,view,302,0,
+3,2024-01-01 10:30:00,view,303,0,
+3,2024-01-01 10:45:00,add_cart,302,0,
+4,2024-01-01 11:00:00,view,401,0,
+4,2024-01-01 11:10:00,purchase,401,899,wechat
+5,2024-01-01 12:00:00,view,501,0,
+5,2024-01-01 12:05:00,add_cart,501,0,
+5,2024-01-01 12:10:00,view,502,0,
+5,2024-01-01 12:20:00,add_cart,502,0,
+5,2024-01-01 12:30:00,purchase,502,499,alipay
+6,2024-01-01 13:00:00,view,601,0,
+6,2024-01-01 13:15:00,view,602,0,
+7,2024-01-01 14:00:00,purchase,701,299,wechat
+8,2024-01-01 15:00:00,view,801,0,
+8,2024-01-01 15:30:00,add_cart,801,0,
+9,2024-01-01 16:00:00,view,901,0,
+9,2024-01-01 16:10:00,purchase,901,1599,alipay
+10,2024-01-01 17:00:00,view,1001,0,
+1,2024-01-01 18:00:00,view,102,0,
+1,2024-01-01 18:30:00,purchase,102,199,wechat
+"""
+
+df = pd.read_csv(io.StringIO(csv_data))
+df['event_time'] = pd.to_datetime(df['event_time'])
+df = df.sort_values('event_time').reset_index(drop=True)
+
+print("=" * 50)
+print("实时特征滚动窗口模拟分析报告")
+print("=" * 50)
+
+# 1. 按1小时滚动窗口计算活跃用户数
+print("\\n1. 滚动窗口统计分析:")
+df = df.set_index('event_time')
+
+# 1小时滚动窗口统计
+hourly_stats = df.rolling('1h').agg({
+    'user_id': 'nunique',
+    'product_id': 'count',
+    'amount': 'sum'
+})
+hourly_stats.columns = ['活跃用户数', '事件数', '总金额']
+print(hourly_stats.to_string())
+
+# 2. 计算各用户最近的行为统计
+print("\\n2. 用户实时特征:")
+df = df.reset_index()
+
+# 计算每个用户的累计行为
+user_features = df.groupby('user_id').agg({
+    'event_time': ['min', 'max', 'count'],
+    'product_id': 'nunique',
+    'amount': 'sum'
+}).round(2)
+
+user_features.columns = ['首次活跃时间', '末次活跃时间', '总行为数', '浏览商品数', '总消费金额']
+
+# 计算用户最近1小时、6小时的行为
+current_time = df['event_time'].max()
+
+def get_user_recent_stats(user_df, time_window_hours):
+    window_start = current_time - pd.Timedelta(hours=time_window_hours)
+    recent_df = user_df[user_df['event_time'] >= window_start]
+    return pd.Series({
+        f'最近{time_window_hours}h行为数': len(recent_df),
+        f'最近{time_window_hours}h消费金额': recent_df['amount'].sum(),
+        f'最近{time_window_hours}h购买数': len(recent_df[recent_df['event_type'] == 'purchase']),
+        f'最近{time_window_hours}h浏览数': len(recent_df[recent_df['event_type'] == 'view'])
+    })
+
+recent_features = df.groupby('user_id').apply(lambda x: get_user_recent_stats(x, 1)).round(0)
+user_features = user_features.join(recent_features)
+
+recent_features_6h = df.groupby('user_id').apply(lambda x: get_user_recent_stats(x, 6)).round(0)
+user_features = user_features.join(recent_features_6h)
+
+print(user_features.to_string())
+
+# 3. 计算滚动购买转化率
+print("\\n3. 滚动购买转化率分析:")
+df_sorted = df.sort_values('event_time').reset_index(drop=True)
+
+# 对每个时间点，计算过去1小时内的浏览->加购->购买转化率
+conversion_data = []
+
+for idx, row in df_sorted.iterrows():
+    current_time = row['event_time']
+    window_start = current_time - pd.Timedelta(hours=1)
+    
+    window_events = df_sorted[(df_sorted['event_time'] >= window_start) & (df_sorted['event_time'] <= current_time)]
+    
+    view_count = len(window_events[window_events['event_type'] == 'view'])
+    add_cart_count = len(window_events[window_events['event_type'] == 'add_cart'])
+    purchase_count = len(window_events[window_events['event_type'] == 'purchase'])
+    
+    view_to_cart_rate = (add_cart_count / view_count * 100) if view_count > 0 else 0
+    cart_to_purchase_rate = (purchase_count / add_cart_count * 100) if add_cart_count > 0 else 0
+    view_to_purchase_rate = (purchase_count / view_count * 100) if view_count > 0 else 0
+    
+    conversion_data.append({
+        '时间点': current_time,
+        '浏览数': view_count,
+        '加购数': add_cart_count,
+        '购买数': purchase_count,
+        '浏览->加购率(%)': round(view_to_cart_rate, 1),
+        '加购->购买率(%)': round(cart_to_purchase_rate, 1),
+        '浏览->购买率(%)': round(view_to_purchase_rate, 1)
+    })
+
+conversion_df = pd.DataFrame(conversion_data).drop_duplicates(subset=['时间点'])
+print(conversion_df.to_string(index=False))
+
+# 4. 识别用户最近浏览和购买的商品特征
+print("\\n4. 用户最近行为特征:")
+user_last_actions = df.groupby('user_id').agg({
+    'event_type': 'last',
+    'product_id': 'last',
+    'amount': 'last',
+    'event_time': 'last'
+})
+user_last_actions.columns = ['最后行为类型', '最后商品ID', '最后金额', '最后时间']
+print(user_last_actions.to_string())
+
+# 5. 支付方式统计
+print("\\n5. 支付方式分布:")
+payment_stats = df[df['event_type'] == 'purchase']['payment_method'].value_counts()
+print(payment_stats)
+
+print("\\n" + "=" * 50)
+print("分析完成!")
+print("=" * 50)
+`;
+        
+        const csvData = `user_id,event_time,event_type,product_id,amount,payment_method
+1,2024-01-01 08:00:00,view,101,0,
+1,2024-01-01 08:05:00,view,102,0,
+1,2024-01-01 08:10:00,add_cart,101,0,
+1,2024-01-01 08:15:00,purchase,101,299,wechat
+2,2024-01-01 09:00:00,view,201,0,
+2,2024-01-01 09:03:00,purchase,201,199,alipay
+3,2024-01-01 10:00:00,view,301,0,
+3,2024-01-01 10:15:00,view,302,0,
+3,2024-01-01 10:30:00,view,303,0,
+3,2024-01-01 10:45:00,add_cart,302,0,
+4,2024-01-01 11:00:00,view,401,0,
+4,2024-01-01 11:10:00,purchase,401,899,wechat
+5,2024-01-01 12:00:00,view,501,0,
+5,2024-01-01 12:05:00,add_cart,501,0,
+5,2024-01-01 12:10:00,view,502,0,
+5,2024-01-01 12:20:00,add_cart,502,0,
+5,2024-01-01 12:30:00,purchase,502,499,alipay
+6,2024-01-01 13:00:00,view,601,0,
+6,2024-01-01 13:15:00,view,602,0,
+7,2024-01-01 14:00:00,purchase,701,299,wechat
+8,2024-01-01 15:00:00,view,801,0,
+8,2024-01-01 15:30:00,add_cart,801,0,
+9,2024-01-01 16:00:00,view,901,0,
+9,2024-01-01 16:10:00,purchase,901,1599,alipay
+10,2024-01-01 17:00:00,view,1001,0,
+1,2024-01-01 18:00:00,view,102,0,
+1,2024-01-01 18:30:00,purchase,102,199,wechat
+`;
+        
+        const parseCSV = (csv) => {
+            const lines = csv.trim().split('\n');
+            const headers = lines[0].split(',');
+            const rows = lines.slice(1, 21).map(line => {
+                const values = line.split(',');
+                const obj = {};
+                headers.forEach((header, index) => {
+                    obj[header] = values[index];
+                });
+                return obj;
+            });
+            return { headers, rows };
+        };
+        
+        const { headers, rows } = parseCSV(csvData);
+        
+        createApp({
+            setup() {
+                const code = ref(loadCode(projectId) || defaultCode);
+                const output = ref([]);
+                const isRunning = ref(false);
+                const isCompletedStatus = ref(isCompleted(projectId));
+                const showAnswer = ref(false);
+                let editor = null;
+                
+                const addOutput = (type, content) => {
+                    output.value.push({
+                        type,
+                        content,
+                        id: Date.now()
+                    });
+                };
+                
+                const handleRun = async () => {
+                    isRunning.value = true;
+                    output.value = [];
+                    addOutput('info', '正在运行代码...');
+                    
+                    try {
+                        await runCode(code.value, (result) => {
+                            if (result.type === 'text') {
+                                addOutput('text', result.content);
+                            } else if (result.type === 'table') {
+                                addOutput('table', result.content);
+                            } else if (result.type === 'error') {
+                                addOutput('error', result.content);
+                            }
+                        });
+                    } catch (error) {
+                        addOutput('error', String(error));
+                    } finally {
+                        isRunning.value = false;
+                    }
+                };
+                
+                const handleReset = () => {
+                    code.value = defaultCode;
+                    if (editor) {
+                        editor.setValue(defaultCode);
+                    }
+                    saveCode(projectId, defaultCode);
+                };
+                
+                const handleShowAnswer = () => {
+                    showAnswer.value = !showAnswer.value;
+                    if (showAnswer.value) {
+                        code.value = answerCode;
+                        if (editor) {
+                            editor.setValue(answerCode);
+                        }
+                    } else {
+                        code.value = loadCode(projectId) || defaultCode;
+                        if (editor) {
+                            editor.setValue(loadCode(projectId) || defaultCode);
+                        }
+                    }
+                };
+                
+                const handleComplete = () => {
+                    markCompleted(projectId);
+                    isCompletedStatus.value = true;
+                };
+                
+                const handleCodeChange = (newCode) => {
+                    code.value = newCode;
+                    saveCode(projectId, newCode);
+                };
+                
+                onMounted(async () => {
+                    await nextTick();
+                    
+                    if (typeof CodeMirror !== 'undefined') {
+                        const textarea = document.getElementById('code-editor');
+                        if (textarea) {
+                            editor = CodeMirror.fromTextArea(textarea, {
+                                mode: 'python',
+                                theme: 'dracula',
+                                lineNumbers: true,
+                                indentUnit: 4,
+                                tabSize: 4,
+                                indentWithTabs: false,
+                                lineWrapping: true,
+                                autoCloseBrackets: true,
+                                matchBrackets: true
+                            });
+                            
+                            editor.setValue(code.value);
+                            
+                            editor.on('change', () => {
+                                handleCodeChange(editor.getValue());
+                            });
+                        }
+                    }
+                });
+                
+                return {
+                    code,
+                    output,
+                    isRunning,
+                    isCompletedStatus,
+                    showAnswer,
+                    projectId,
+                    projectTitle,
+                    difficulty,
+                    difficultyLabel,
+                    headers,
+                    rows,
+                    handleRun,
+                    handleReset,
+                    handleShowAnswer,
+                    handleComplete
+                };
+            },
+            template: \`
+                <div class="min-h-screen">
+                    <!-- Header -->
+                    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-50">
+                        <div class="max-w-7xl mx-auto px-6 py-5">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <a href="../index.html" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                        </svg>
+                                        返回首页
+                                    </a>
+                                    <div class="w-px h-8 bg-slate-700"></div>
+                                    <div>
+                                        <h1 class="text-xl font-bold text-white">{{ projectTitle }}</h1>
+                                        <div class="flex items-center gap-2">
+                                            <span :class="['badge', 'badge-' + difficulty]">{{ difficultyLabel }}</span>
+                                            <span v-if="isCompletedStatus" class="badge badge-completed">已完成</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+                    
+                    <main class="max-w-7xl mx-auto px-6 py-8">
+                        <!-- Introduction -->
+                        <section class="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 mb-8 fade-in">
+                            <h2 class="text-2xl font-bold text-white mb-4">项目介绍</h2>
+                            <p class="text-slate-400 mb-6">
+                                时间窗口滚动统计，模拟实时推荐/风控特征工程，计算用户实时特征、滚动转化率和最近行为序列。
+                            </p>
+                            
+                            <h3 class="text-lg font-semibold text-white mb-3">数据集说明</h3>
+                            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                                <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30">
+                                    <h4 class="text-sm font-medium text-blue-400 mb-2">字段说明</h4>
+                                    <ul class="text-sm text-slate-400 space-y-1">
+                                        <li><code class="code-font text-pink-400">user_id</code> - 用户ID</li>
+                                        <li><code class="code-font text-pink-400">event_time</code> - 事件时间</li>
+                                        <li><code class="code-font text-pink-400">event_type</code> - 事件类型</li>
+                                        <li><code class="code-font text-pink-400">product_id</code> - 商品ID</li>
+                                        <li><code class="code-font text-pink-400">amount</code> - 金额</li>
+                                        <li><code class="code-font text-pink-400">payment_method</code> - 支付方式</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30">
+                                    <h4 class="text-sm font-medium text-green-400 mb-2">任务要求</h4>
+                                    <ul class="text-sm text-slate-400 space-y-1">
+                                        <li>✓ 按1小时滚动窗口计算活跃用户数</li>
+                                        <li>✓ 计算各用户最近的行为统计</li>
+                                        <li>✓ 计算滚动购买转化率</li>
+                                        <li>✓ 识别用户最近浏览和购买特征</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- Data Preview -->
+                            <h3 class="text-lg font-semibold text-white mb-3">数据预览</h3>
+                            <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30 overflow-x-auto">
+                                <table class="data-table w-full text-sm">
+                                    <thead>
+                                        <tr>
+                                            <th v-for="header in headers" :key="header">{{ header }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(row, index) in rows" :key="index">
+                                            <td v-for="(value, header) in row" :key="header" class="code-font">{{ value }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p class="text-slate-400 text-xs mt-2">... showing 20 of 28 rows</p>
+                            </div>
+                        </section>
+                        
+                        <!-- Code Editor -->
+                        <section class="mb-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-xl font-bold text-white">代码编辑器</h2>
+                                <div class="flex items-center gap-3">
+                                    <button @click="handleReset" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                        重置代码
+                                    </button>
+                                    <button @click="handleShowAnswer" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm font-medium transition-colors">
+                                        {{ showAnswer ? '隐藏答案' : '查看答案' }}
+                                    </button>
+                                    <button @click="handleRun" :disabled="isRunning" class="px-6 py-2 btn-primary text-white rounded-lg text-sm font-medium flex items-center gap-2">
+                                        <svg v-if="isRunning" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                        </svg>
+                                        {{ isRunning ? '运行中...' : '运行代码' }}
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 overflow-hidden">
+                                <textarea id="code-editor"></textarea>
+                            </div>
+                        </section>
+                        
+                        <!-- Output Console -->
+                        <section class="mb-8">
+                            <h2 class="text-xl font-bold text-white mb-4">输出控制台</h2>
+                            <div class="bg-slate-900 rounded-2xl border border-slate-700 p-6 max-h-96 overflow-y-auto">
+                                <div v-if="output.length === 0" class="text-slate-500 text-center py-8">
+                                    运行代码后输出将显示在这里
+                                </div>
+                                <div v-for="item in output" :key="item.id" class="mb-4 last:mb-0">
+                                    <div v-if="item.type === 'info'" class="text-blue-400 text-sm">{{ item.content }}</div>
+                                    <div v-else-if="item.type === 'text'" class="text-slate-300 text-sm whitespace-pre-wrap font-mono">{{ item.content }}</div>
+                                    <div v-else-if="item.type === 'table'" v-html="item.content" class="overflow-x-auto"></div>
+                                    <div v-else-if="item.type === 'error'" class="text-red-400 text-sm whitespace-pre-wrap font-mono">{{ item.content }}</div>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Complete Button -->
+                        <section class="text-center">
+                            <button v-if="!isCompletedStatus" @click="handleComplete" class="px-8 py-3 bg-green-600 hover:bg-green-500 text-white rounded-xl font-semibold flex items-center gap-2 mx-auto transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                标记完成
+                            </button>
+                            <div v-else class="px-8 py-3 bg-green-900/30 border border-green-700/50 text-green-400 rounded-xl font-semibold flex items-center gap-2 mx-auto justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                项目已完成
+                            </div>
+                        </section>
+                    </main>
+                </div>
+            \`
+        }).mount('#app');
+    </script>
+</body>
+</html>

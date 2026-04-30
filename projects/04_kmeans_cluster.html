@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K-Means用户聚类 - Pandas 数据分析实战训练营</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/python/python.min.js"></script>
+    <link rel="stylesheet" href="../common/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="gradient-bg min-h-screen">
+    <div id="app"></div>
+    
+    <script type="module">
+        const { createApp, ref, onMounted, nextTick } = Vue;
+        import { saveCode, loadCode, markCompleted, isCompleted } from '../common/storage.js';
+        import { runCode } from '../common/code_runner.js';
+        
+        const projectId = '04_kmeans_cluster';
+        const projectTitle = 'K-Means用户聚类';
+        const difficulty = 'advanced';
+        const difficultyLabel = '进阶';
+        
+        const defaultCode = `import pandas as pd
+import io
+import numpy as np
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+
+# 加载数据
+csv_data = """user_id,recency,frequency,monetary,avg_order_value
+U001,10,5,2500,500
+U002,20,3,1800,600
+U003,5,10,5000,500
+U004,30,2,800,400
+U005,15,7,3500,500
+U006,25,1,300,300
+U007,8,12,6000,500
+U008,40,1,200,200
+U009,12,6,3000,500
+U010,35,2,900,450
+U011,7,15,7500,500
+U012,50,1,150,150
+U013,18,8,4000,500
+U014,45,2,1000,500
+U015,6,20,10000,500
+U016,55,1,100,100
+U017,22,4,2200,550
+U018,60,1,80,80
+U019,14,9,4500,500
+U020,70,1,50,50"""
+
+df = pd.read_csv(io.StringIO(csv_data))
+
+# TODO: 完成以下分析任务
+# 1. 数据标准化
+# 2. 使用K-Means进行聚类（选择合适的聚类数）
+# 3. 分析每个聚类的特征
+# 4. 给每个聚类命名
+
+# 查看数据前5行
+print("数据预览:")
+print(df.head())
+`;
+        
+        const answerCode = `import pandas as pd
+import io
+import numpy as np
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+
+csv_data = """user_id,recency,frequency,monetary,avg_order_value
+U001,10,5,2500,500
+U002,20,3,1800,600
+U003,5,10,5000,500
+U004,30,2,800,400
+U005,15,7,3500,500
+U006,25,1,300,300
+U007,8,12,6000,500
+U008,40,1,200,200
+U009,12,6,3000,500
+U010,35,2,900,450
+U011,7,15,7500,500
+U012,50,1,150,150
+U013,18,8,4000,500
+U014,45,2,1000,500
+U015,6,20,10000,500
+U016,55,1,100,100
+U017,22,4,2200,550
+U018,60,1,80,80
+U019,14,9,4500,500
+U020,70,1,50,50"""
+
+df = pd.read_csv(io.StringIO(csv_data))
+
+print("=" * 50)
+print("K-Means用户聚类分析报告")
+print("=" * 50)
+
+# 1. 数据准备
+features = ['recency', 'frequency', 'monetary', 'avg_order_value']
+X = df[features]
+
+print("\\n1. 数据统计:")
+print(X.describe().to_string())
+
+# 2. 数据标准化
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+print("\\n2. 数据标准化完成")
+
+# 3. 使用K-Means进行聚类（选择4个聚类）
+n_clusters = 4
+kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+df['cluster'] = kmeans.fit_predict(X_scaled)
+
+print(f"\\n3. K-Means聚类完成，聚类数: {n_clusters}")
+
+# 4. 分析每个聚类的特征
+cluster_analysis = df.groupby('cluster').agg({
+    'user_id': 'count',
+    'recency': 'mean',
+    'frequency': 'mean',
+    'monetary': 'mean',
+    'avg_order_value': 'mean'
+}).round(2)
+
+cluster_analysis.columns = ['用户数量', '平均最近购买', '平均购买频次', '平均消费金额', '平均客单价']
+
+print("\\n4. 各聚类特征分析:")
+print(cluster_analysis.to_string())
+
+# 5. 给每个聚类命名
+cluster_names = {
+    0: '重要价值用户',
+    1: '一般发展用户',
+    2: '流失预警用户',
+    3: '潜力新用户'
+}
+
+df['cluster_name'] = df['cluster'].map(cluster_names)
+
+print("\\n5. 各聚类用户列表:")
+for cluster in range(n_clusters):
+    cluster_data = df[df['cluster'] == cluster]
+    print(f"\\n{cluster_names[cluster]} (Cluster {cluster}):")
+    print(cluster_data[['user_id', 'recency', 'frequency', 'monetary']].to_string(index=False))
+
+# 6. 统计各聚类用户数
+cluster_distribution = df['cluster_name'].value_counts().sort_values(ascending=False)
+print("\\n6. 聚类分布统计:")
+print(cluster_distribution.to_string())
+
+print("\\n" + "=" * 50)
+print("分析完成!")
+print("=" * 50)
+`;
+        
+        const csvData = `user_id,recency,frequency,monetary,avg_order_value
+U001,10,5,2500,500
+U002,20,3,1800,600
+U003,5,10,5000,500
+U004,30,2,800,400
+U005,15,7,3500,500
+U006,25,1,300,300
+U007,8,12,6000,500
+U008,40,1,200,200
+U009,12,6,3000,500
+U010,35,2,900,450
+U011,7,15,7500,500
+U012,50,1,150,150
+U013,18,8,4000,500
+U014,45,2,1000,500
+U015,6,20,10000,500
+U016,55,1,100,100
+U017,22,4,2200,550
+U018,60,1,80,80
+U019,14,9,4500,500
+U020,70,1,50,50`;
+        
+        const parseCSV = (csv) => {
+            const lines = csv.trim().split('\n');
+            const headers = lines[0].split(',');
+            const rows = lines.slice(1, 21).map(line => {
+                const values = line.split(',');
+                const obj = {};
+                headers.forEach((header, index) => {
+                    obj[header] = values[index];
+                });
+                return obj;
+            });
+            return { headers, rows };
+        };
+        
+        const { headers, rows } = parseCSV(csvData);
+        
+        createApp({
+            setup() {
+                const code = ref(loadCode(projectId) || defaultCode);
+                const output = ref([]);
+                const isRunning = ref(false);
+                const isCompletedStatus = ref(isCompleted(projectId));
+                const showAnswer = ref(false);
+                let editor = null;
+                
+                const addOutput = (type, content) => {
+                    output.value.push({
+                        type,
+                        content,
+                        id: Date.now()
+                    });
+                };
+                
+                const handleRun = async () => {
+                    isRunning.value = true;
+                    output.value = [];
+                    addOutput('info', '正在运行代码...');
+                    
+                    try {
+                        await runCode(code.value, (result) => {
+                            if (result.type === 'text') {
+                                addOutput('text', result.content);
+                            } else if (result.type === 'table') {
+                                addOutput('table', result.content);
+                            } else if (result.type === 'error') {
+                                addOutput('error', result.content);
+                            }
+                        });
+                    } catch (error) {
+                        addOutput('error', String(error));
+                    } finally {
+                        isRunning.value = false;
+                    }
+                };
+                
+                const handleReset = () => {
+                    code.value = defaultCode;
+                    if (editor) {
+                        editor.setValue(defaultCode);
+                    }
+                    saveCode(projectId, defaultCode);
+                };
+                
+                const handleShowAnswer = () => {
+                    showAnswer.value = !showAnswer.value;
+                    if (showAnswer.value) {
+                        code.value = answerCode;
+                        if (editor) {
+                            editor.setValue(answerCode);
+                        }
+                    } else {
+                        code.value = loadCode(projectId) || defaultCode;
+                        if (editor) {
+                            editor.setValue(loadCode(projectId) || defaultCode);
+                        }
+                    }
+                };
+                
+                const handleComplete = () => {
+                    markCompleted(projectId);
+                    isCompletedStatus.value = true;
+                };
+                
+                const handleCodeChange = (newCode) => {
+                    code.value = newCode;
+                    saveCode(projectId, newCode);
+                };
+                
+                onMounted(async () => {
+                    await nextTick();
+                    
+                    if (typeof CodeMirror !== 'undefined') {
+                        const textarea = document.getElementById('code-editor');
+                        if (textarea) {
+                            editor = CodeMirror.fromTextArea(textarea, {
+                                mode: 'python',
+                                theme: 'dracula',
+                                lineNumbers: true,
+                                indentUnit: 4,
+                                tabSize: 4,
+                                indentWithTabs: false,
+                                lineWrapping: true,
+                                autoCloseBrackets: true,
+                                matchBrackets: true
+                            });
+                            
+                            editor.setValue(code.value);
+                            
+                            editor.on('change', () => {
+                                handleCodeChange(editor.getValue());
+                            });
+                        }
+                    }
+                });
+                
+                return {
+                    code,
+                    output,
+                    isRunning,
+                    isCompletedStatus,
+                    showAnswer,
+                    projectId,
+                    projectTitle,
+                    difficulty,
+                    difficultyLabel,
+                    headers,
+                    rows,
+                    handleRun,
+                    handleReset,
+                    handleShowAnswer,
+                    handleComplete
+                };
+            },
+            template: `
+                <div class="min-h-screen">
+                    <!-- Header -->
+                    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-50">
+                        <div class="max-w-7xl mx-auto px-6 py-5">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <a href="../index.html" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                        </svg>
+                                        返回首页
+                                    </a>
+                                    <div class="w-px h-8 bg-slate-700"></div>
+                                    <div>
+                                        <h1 class="text-xl font-bold text-white">{{ projectTitle }}</h1>
+                                        <div class="flex items-center gap-2">
+                                            <span :class="['badge', 'badge-' + difficulty]">{{ difficultyLabel }}</span>
+                                            <span v-if="isCompletedStatus" class="badge badge-completed">已完成</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+                    
+                    <main class="max-w-7xl mx-auto px-6 py-8">
+                        <!-- Introduction -->
+                        <section class="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 mb-8 fade-in">
+                            <h2 class="text-2xl font-bold text-white mb-4">项目介绍</h2>
+                            <p class="text-slate-400 mb-6">
+                                K-Means是一种无监督学习算法，用于将相似的用户自动分群。通过用户的行为特征（如最近购买时间、购买频率、消费金额等）进行聚类，帮助企业实现精准营销和用户分层管理。
+                            </p>
+                            
+                            <h3 class="text-lg font-semibold text-white mb-3">数据集说明</h3>
+                            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                                <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30">
+                                    <h4 class="text-sm font-medium text-blue-400 mb-2">字段说明</h4>
+                                    <ul class="text-sm text-slate-400 space-y-1">
+                                        <li><code class="code-font text-pink-400">user_id</code> - 用户ID</li>
+                                        <li><code class="code-font text-pink-400">recency</code> - 最近购买时间（天数）</li>
+                                        <li><code class="code-font text-pink-400">frequency</code> - 购买频率</li>
+                                        <li><code class="code-font text-pink-400">monetary</code> - 消费金额</li>
+                                        <li><code class="code-font text-pink-400">avg_order_value</code> - 平均客单价</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30">
+                                    <h4 class="text-sm font-medium text-green-400 mb-2">任务要求</h4>
+                                    <ul class="text-sm text-slate-400 space-y-1">
+                                        <li>✓ 数据标准化</li>
+                                        <li>✓ 使用K-Means进行聚类</li>
+                                        <li>✓ 分析每个聚类的特征</li>
+                                        <li>✓ 给每个聚类命名</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- Data Preview -->
+                            <h3 class="text-lg font-semibold text-white mb-3">数据预览</h3>
+                            <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30 overflow-x-auto">
+                                <table class="data-table w-full text-sm">
+                                    <thead>
+                                        <tr>
+                                            <th v-for="header in headers" :key="header">{{ header }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(row, index) in rows" :key="index">
+                                            <td v-for="(value, header) in row" :key="header" class="code-font">{{ value }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p class="text-slate-400 text-xs mt-2">... showing all 20 rows</p>
+                            </div>
+                        </section>
+                        
+                        <!-- Code Editor -->
+                        <section class="mb-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-xl font-bold text-white">代码编辑器</h2>
+                                <div class="flex items-center gap-3">
+                                    <button @click="handleReset" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                        重置代码
+                                    </button>
+                                    <button @click="handleShowAnswer" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm font-medium transition-colors">
+                                        {{ showAnswer ? '隐藏答案' : '查看答案' }}
+                                    </button>
+                                    <button @click="handleRun" :disabled="isRunning" class="px-6 py-2 btn-primary text-white rounded-lg text-sm font-medium flex items-center gap-2">
+                                        <svg v-if="isRunning" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                        </svg>
+                                        {{ isRunning ? '运行中...' : '运行代码' }}
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 overflow-hidden">
+                                <textarea id="code-editor"></textarea>
+                            </div>
+                        </section>
+                        
+                        <!-- Output Console -->
+                        <section class="mb-8">
+                            <h2 class="text-xl font-bold text-white mb-4">输出控制台</h2>
+                            <div class="bg-slate-900 rounded-2xl border border-slate-700 p-6 max-h-96 overflow-y-auto">
+                                <div v-if="output.length === 0" class="text-slate-500 text-center py-8">
+                                    运行代码后输出将显示在这里
+                                </div>
+                                <div v-for="item in output" :key="item.id" class="mb-4 last:mb-0">
+                                    <div v-if="item.type === 'info'" class="text-blue-400 text-sm">{{ item.content }}</div>
+                                    <div v-else-if="item.type === 'text'" class="text-slate-300 text-sm whitespace-pre-wrap font-mono">{{ item.content }}</div>
+                                    <div v-else-if="item.type === 'table'" v-html="item.content" class="overflow-x-auto"></div>
+                                    <div v-else-if="item.type === 'error'" class="text-red-400 text-sm whitespace-pre-wrap font-mono">{{ item.content }}</div>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Complete Button -->
+                        <section class="text-center">
+                            <button v-if="!isCompletedStatus" @click="handleComplete" class="px-8 py-3 bg-green-600 hover:bg-green-500 text-white rounded-xl font-semibold flex items-center gap-2 mx-auto transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                标记完成
+                            </button>
+                            <div v-else class="px-8 py-3 bg-green-900/30 border border-green-700/50 text-green-400 rounded-xl font-semibold flex items-center gap-2 mx-auto justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                项目已完成
+                            </div>
+                        </section>
+                    </main>
+                </div>
+            `
+        }).mount('#app');
+    </script>
+</body>
+</html>

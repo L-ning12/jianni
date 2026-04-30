@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RFM用户分层 - Pandas 数据分析实战训练营</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/python/python.min.js"></script>
+    <link rel="stylesheet" href="../common/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="gradient-bg min-h-screen">
+    <div id="app"></div>
+    
+    <script type="module">
+        const { createApp, ref, onMounted, nextTick } = Vue;
+        import { saveCode, loadCode, markCompleted, isCompleted } from '../common/storage.js';
+        import { runCode } from '../common/code_runner.js';
+        
+        const projectId = '02_rfm_analysis';
+        const projectTitle = 'RFM用户分层';
+        const difficulty = 'basic';
+        const difficultyLabel = '基础';
+        
+        const defaultCode = `import pandas as pd
+import io
+from datetime import datetime
+
+# 加载数据
+csv_data = """user_id,order_id,order_date,order_amount,product_count
+U001,O001,2024-01-15,299,1
+U001,O002,2024-02-20,598,2
+U002,O003,2024-01-10,1599,1
+U002,O004,2024-03-05,899,2
+U003,O005,2024-03-01,199,1
+U004,O006,2023-12-25,399,2
+U004,O007,2024-01-28,299,1
+U004,O008,2024-03-08,598,2
+U005,O009,2023-11-20,899,1
+U006,O010,2024-02-14,1299,1
+U006,O011,2024-03-02,199,1
+U007,O012,2024-01-05,399,1
+U008,O013,2023-10-15,1599,1
+U009,O014,2024-03-10,299,1
+U010,O015,2024-01-25,499,1
+U010,O016,2024-02-25,799,2
+U011,O017,2024-03-03,199,1
+U012,O018,2023-12-10,299,1
+U012,O019,2024-01-30,599,2
+U013,O020,2024-03-06,1599,1
+U014,O021,2024-02-08,799,2
+U015,O022,2023-11-30,399,1
+U015,O023,2024-01-18,299,1
+U016,O024,2024-03-09,199,1
+U017,O025,2024-01-22,599,1
+U018,O026,2024-02-28,1299,1
+U019,O027,2024-03-04,299,1
+U020,O028,2023-12-20,399,1
+U020,O029,2024-02-15,799,2"""
+
+df = pd.read_csv(io.StringIO(csv_data))
+df['order_date'] = pd.to_datetime(df['order_date'])
+
+# 假设分析日期是 2024-03-15
+analysis_date = pd.to_datetime('2024-03-15')
+
+# TODO: 完成以下分析任务
+# 1. 计算每个用户的RFM指标
+# 2. 对RFM进行打分（1-5分）
+# 3. 根据RFM分数进行用户分层
+# 4. 统计各分层的用户数量和贡献
+
+# 查看数据前5行
+print("数据预览:")
+print(df.head())
+`;
+        
+        const answerCode = `import pandas as pd
+import io
+from datetime import datetime
+
+csv_data = """user_id,order_id,order_date,order_amount,product_count
+U001,O001,2024-01-15,299,1
+U001,O002,2024-02-20,598,2
+U002,O003,2024-01-10,1599,1
+U002,O004,2024-03-05,899,2
+U003,O005,2024-03-01,199,1
+U004,O006,2023-12-25,399,2
+U004,O007,2024-01-28,299,1
+U004,O008,2024-03-08,598,2
+U005,O009,2023-11-20,899,1
+U006,O010,2024-02-14,1299,1
+U006,O011,2024-03-02,199,1
+U007,O012,2024-01-05,399,1
+U008,O013,2023-10-15,1599,1
+U009,O014,2024-03-10,299,1
+U010,O015,2024-01-25,499,1
+U010,O016,2024-02-25,799,2
+U011,O017,2024-03-03,199,1
+U012,O018,2023-12-10,299,1
+U012,O019,2024-01-30,599,2
+U013,O020,2024-03-06,1599,1
+U014,O021,2024-02-08,799,2
+U015,O022,2023-11-30,399,1
+U015,O023,2024-01-18,299,1
+U016,O024,2024-03-09,199,1
+U017,O025,2024-01-22,599,1
+U018,O026,2024-02-28,1299,1
+U019,O027,2024-03-04,299,1
+U020,O028,2023-12-20,399,1
+U020,O029,2024-02-15,799,2"""
+
+df = pd.read_csv(io.StringIO(csv_data))
+df['order_date'] = pd.to_datetime(df['order_date'])
+
+# 假设分析日期是 2024-03-15
+analysis_date = pd.to_datetime('2024-03-15')
+
+print("=" * 50)
+print("RFM用户分层分析报告")
+print("=" * 50)
+
+# 1. 计算RFM指标
+rfm = df.groupby('user_id').agg(
+    recency=('order_date', lambda x: (analysis_date - x.max()).days),
+    frequency=('order_id', 'count'),
+    monetary=('order_amount', 'sum')
+).reset_index()
+
+print("\\n1. RFM指标计算结果:")
+print(rfm.to_string(index=False))
+
+# 2. 对RFM进行打分（1-5分）
+# Recency: 越小越好，所以分位数反转
+rfm['r_score'] = pd.qcut(rfm['recency'], 5, labels=[5, 4, 3, 2, 1])
+rfm['f_score'] = pd.qcut(rfm['frequency'].rank(method='first'), 5, labels=[1, 2, 3, 4, 5])
+rfm['m_score'] = pd.qcut(rfm['monetary'], 5, labels=[1, 2, 3, 4, 5])
+
+# 转换为整数
+rfm[['r_score', 'f_score', 'm_score']] = rfm[['r_score', 'f_score', 'm_score']].astype(int)
+
+# 计算RFM总分
+rfm['rfm_score'] = rfm['r_score'] * 100 + rfm['f_score'] * 10 + rfm['m_score']
+
+print("\\n2. RFM打分结果:")
+print(rfm[['user_id', 'recency', 'frequency', 'monetary', 'r_score', 'f_score', 'm_score', 'rfm_score']].to_string(index=False))
+
+# 3. 用户分层
+def segment_user(row):
+    r, f, m = row['r_score'], row['f_score'], row['m_score']
+    if r >= 4 and f >= 4 and m >= 4:
+        return '重要价值用户'
+    elif r >= 4 and f < 4 and m >= 4:
+        return '重要发展用户'
+    elif r < 4 and f >= 4 and m >= 4:
+        return '重要保持用户'
+    elif r < 4 and f < 4 and m >= 4:
+        return '重要挽留用户'
+    elif r >= 4 and f >= 4 and m < 4:
+        return '一般价值用户'
+    elif r >= 4 and f < 4 and m < 4:
+        return '一般发展用户'
+    elif r < 4 and f >= 4 and m < 4:
+        return '一般保持用户'
+    else:
+        return '一般挽留用户'
+
+rfm['segment'] = rfm.apply(segment_user, axis=1)
+
+print("\\n3. 用户分层结果:")
+print(rfm[['user_id', 'rfm_score', 'segment']].to_string(index=False))
+
+# 4. 统计各分层用户
+segment_stats = rfm.groupby('segment').agg(
+    user_count=('user_id', 'count'),
+    total_amount=('monetary', 'sum'),
+    avg_amount=('monetary', 'mean')
+).reset_index()
+
+# 按金额排序
+segment_stats = segment_stats.sort_values('total_amount', ascending=False)
+
+print("\\n4. 各分层用户统计:")
+print(segment_stats.to_string(index=False))
+
+print("\\n" + "=" * 50)
+print("分析完成!")
+print("=" * 50)
+`;
+        
+        const csvData = `user_id,order_id,order_date,order_amount,product_count
+U001,O001,2024-01-15,299,1
+U001,O002,2024-02-20,598,2
+U002,O003,2024-01-10,1599,1
+U002,O004,2024-03-05,899,2
+U003,O005,2024-03-01,199,1
+U004,O006,2023-12-25,399,2
+U004,O007,2024-01-28,299,1
+U004,O008,2024-03-08,598,2
+U005,O009,2023-11-20,899,1
+U006,O010,2024-02-14,1299,1
+U006,O011,2024-03-02,199,1
+U007,O012,2024-01-05,399,1
+U008,O013,2023-10-15,1599,1
+U009,O014,2024-03-10,299,1
+U010,O015,2024-01-25,499,1
+U010,O016,2024-02-25,799,2
+U011,O017,2024-03-03,199,1
+U012,O018,2023-12-10,299,1
+U012,O019,2024-01-30,599,2
+U013,O020,2024-03-06,1599,1
+U014,O021,2024-02-08,799,2
+U015,O022,2023-11-30,399,1
+U015,O023,2024-01-18,299,1
+U016,O024,2024-03-09,199,1
+U017,O025,2024-01-22,599,1
+U018,0026,2024-02-28,1299,1
+U019,O027,2024-03-04,299,1
+U020,O028,2023-12-20,399,1
+U020,O029,2024-02-15,799,2`;
+        
+        const parseCSV = (csv) => {
+            const lines = csv.trim().split('\n');
+            const headers = lines[0].split(',');
+            const rows = lines.slice(1, 21).map(line => {
+                const values = line.split(',');
+                const obj = {};
+                headers.forEach((header, index) => {
+                    obj[header] = values[index];
+                });
+                return obj;
+            });
+            return { headers, rows };
+        };
+        
+        const { headers, rows } = parseCSV(csvData);
+        
+        createApp({
+            setup() {
+                const code = ref(loadCode(projectId) || defaultCode);
+                const output = ref([]);
+                const isRunning = ref(false);
+                const isCompletedStatus = ref(isCompleted(projectId));
+                const showAnswer = ref(false);
+                let editor = null;
+                
+                const addOutput = (type, content) => {
+                    output.value.push({
+                        type,
+                        content,
+                        id: Date.now()
+                    });
+                };
+                
+                const handleRun = async () => {
+                    isRunning.value = true;
+                    output.value = [];
+                    addOutput('info', '正在运行代码...');
+                    
+                    try {
+                        await runCode(code.value, (result) => {
+                            if (result.type === 'text') {
+                                addOutput('text', result.content);
+                            } else if (result.type === 'table') {
+                                addOutput('table', result.content);
+                            } else if (result.type === 'error') {
+                                addOutput('error', result.content);
+                            }
+                        });
+                    } catch (error) {
+                        addOutput('error', String(error));
+                    } finally {
+                        isRunning.value = false;
+                    }
+                };
+                
+                const handleReset = () => {
+                    code.value = defaultCode;
+                    if (editor) {
+                        editor.setValue(defaultCode);
+                    }
+                    saveCode(projectId, defaultCode);
+                };
+                
+                const handleShowAnswer = () => {
+                    showAnswer.value = !showAnswer.value;
+                    if (showAnswer.value) {
+                        code.value = answerCode;
+                        if (editor) {
+                            editor.setValue(answerCode);
+                        }
+                    } else {
+                        code.value = loadCode(projectId) || defaultCode;
+                        if (editor) {
+                            editor.setValue(loadCode(projectId) || defaultCode);
+                        }
+                    }
+                };
+                
+                const handleComplete = () => {
+                    markCompleted(projectId);
+                    isCompletedStatus.value = true;
+                };
+                
+                const handleCodeChange = (newCode) => {
+                    code.value = newCode;
+                    saveCode(projectId, newCode);
+                };
+                
+                onMounted(async () => {
+                    await nextTick();
+                    
+                    if (typeof CodeMirror !== 'undefined') {
+                        const textarea = document.getElementById('code-editor');
+                        if (textarea) {
+                            editor = CodeMirror.fromTextArea(textarea, {
+                                mode: 'python',
+                                theme: 'dracula',
+                                lineNumbers: true,
+                                indentUnit: 4,
+                                tabSize: 4,
+                                indentWithTabs: false,
+                                lineWrapping: true,
+                                autoCloseBrackets: true,
+                                matchBrackets: true
+                            });
+                            
+                            editor.setValue(code.value);
+                            
+                            editor.on('change', () => {
+                                handleCodeChange(editor.getValue());
+                            });
+                        }
+                    }
+                });
+                
+                return {
+                    code,
+                    output,
+                    isRunning,
+                    isCompletedStatus,
+                    showAnswer,
+                    projectId,
+                    projectTitle,
+                    difficulty,
+                    difficultyLabel,
+                    headers,
+                    rows,
+                    handleRun,
+                    handleReset,
+                    handleShowAnswer,
+                    handleComplete
+                };
+            },
+            template: \`
+                <div class="min-h-screen">
+                    <!-- Header -->
+                    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-50">
+                        <div class="max-w-7xl mx-auto px-6 py-5">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <a href="../index.html" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                        </svg>
+                                        返回首页
+                                    </a>
+                                    <div class="w-px h-8 bg-slate-700"></div>
+                                    <div>
+                                        <h1 class="text-xl font-bold text-white">{{ projectTitle }}</h1>
+                                        <div class="flex items-center gap-2">
+                                            <span :class="['badge', 'badge-' + difficulty]">{{ difficultyLabel }}</span>
+                                            <span v-if="isCompletedStatus" class="badge badge-completed">已完成</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+                    
+                    <main class="max-w-7xl mx-auto px-6 py-8">
+                        <!-- Introduction -->
+                        <section class="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 mb-8 fade-in">
+                            <h2 class="text-2xl font-bold text-white mb-4">项目介绍</h2>
+                            <p class="text-slate-400 mb-6">
+                                RFM模型是衡量客户价值和客户创利能力的重要工具，通过最近一次消费(Recency)、消费频率(Frequency)、消费金额(Monetary)三个维度对用户进行分层，精准识别高价值用户。
+                            </p>
+                            
+                            <h3 class="text-lg font-semibold text-white mb-3">数据集说明</h3>
+                            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                                <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30">
+                                    <h4 class="text-sm font-medium text-blue-400 mb-2">字段说明</h4>
+                                    <ul class="text-sm text-slate-400 space-y-1">
+                                        <li><code class="code-font text-pink-400">user_id</code> - 用户ID</li>
+                                        <li><code class="code-font text-pink-400">order_id</code> - 订单ID</li>
+                                        <li><code class="code-font text-pink-400">order_date</code> - 订单日期</li>
+                                        <li><code class="code-font text-pink-400">order_amount</code> - 订单金额</li>
+                                        <li><code class="code-font text-pink-400">product_count</code> - 商品数量</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30">
+                                    <h4 class="text-sm font-medium text-green-400 mb-2">任务要求</h4>
+                                    <ul class="text-sm text-slate-400 space-y-1">
+                                        <li>✓ 计算每个用户的RFM指标</li>
+                                        <li>✓ 对RFM进行打分（1-5分）</li>
+                                        <li>✓ 根据RFM分数进行用户分层</li>
+                                        <li>✓ 统计各分层的用户数量和贡献</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- Data Preview -->
+                            <h3 class="text-lg font-semibold text-white mb-3">数据预览</h3>
+                            <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30 overflow-x-auto">
+                                <table class="data-table w-full text-sm">
+                                    <thead>
+                                        <tr>
+                                            <th v-for="header in headers" :key="header">{{ header }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(row, index) in rows" :key="index">
+                                            <td v-for="(value, header) in row" :key="header" class="code-font">{{ value }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p class="text-slate-400 text-xs mt-2">... showing 20 of 28 rows</p>
+                            </div>
+                        </section>
+                        
+                        <!-- Code Editor -->
+                        <section class="mb-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-xl font-bold text-white">代码编辑器</h2>
+                                <div class="flex items-center gap-3">
+                                    <button @click="handleReset" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                        重置代码
+                                    </button>
+                                    <button @click="handleShowAnswer" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm font-medium transition-colors">
+                                        {{ showAnswer ? '隐藏答案' : '查看答案' }}
+                                    </button>
+                                    <button @click="handleRun" :disabled="isRunning" class="px-6 py-2 btn-primary text-white rounded-lg text-sm font-medium flex items-center gap-2">
+                                        <svg v-if="isRunning" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                        </svg>
+                                        {{ isRunning ? '运行中...' : '运行代码' }}
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 overflow-hidden">
+                                <textarea id="code-editor"></textarea>
+                            </div>
+                        </section>
+                        
+                        <!-- Output Console -->
+                        <section class="mb-8">
+                            <h2 class="text-xl font-bold text-white mb-4">输出控制台</h2>
+                            <div class="bg-slate-900 rounded-2xl border border-slate-700 p-6 max-h-96 overflow-y-auto">
+                                <div v-if="output.length === 0" class="text-slate-500 text-center py-8">
+                                    运行代码后输出将显示在这里
+                                </div>
+                                <div v-for="item in output" :key="item.id" class="mb-4 last:mb-0">
+                                    <div v-if="item.type === 'info'" class="text-blue-400 text-sm">{{ item.content }}</div>
+                                    <div v-else-if="item.type === 'text'" class="text-slate-300 text-sm whitespace-pre-wrap font-mono">{{ item.content }}</div>
+                                    <div v-else-if="item.type === 'table'" v-html="item.content" class="overflow-x-auto"></div>
+                                    <div v-else-if="item.type === 'error'" class="text-red-400 text-sm whitespace-pre-wrap font-mono">{{ item.content }}</div>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Complete Button -->
+                        <section class="text-center">
+                            <button v-if="!isCompletedStatus" @click="handleComplete" class="px-8 py-3 bg-green-600 hover:bg-green-500 text-white rounded-xl font-semibold flex items-center gap-2 mx-auto transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                标记完成
+                            </button>
+                            <div v-else class="px-8 py-3 bg-green-900/30 border border-green-700/50 text-green-400 rounded-xl font-semibold flex items-center gap-2 mx-auto justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                项目已完成
+                            </div>
+                        </section>
+                    </main>
+                </div>
+            \`
+        }).mount('#app');
+    </script>
+</body>
+</html>

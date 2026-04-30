@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户行为序列特征 - Pandas 数据分析实战训练营</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/python/python.min.js"></script>
+    <link rel="stylesheet" href="../common/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="gradient-bg min-h-screen">
+    <div id="app"></div>
+    
+    <script type="module">
+        const { createApp, ref, onMounted, nextTick } = Vue;
+        import { saveCode, loadCode, markCompleted, isCompleted } from '../common/storage.js';
+        import { runCode } from '../common/code_runner.js';
+        
+        const projectId = '06_behavior_sequence';
+        const projectTitle = '用户行为序列特征';
+        const difficulty = 'advanced';
+        const difficultyLabel = '进阶';
+        
+        const defaultCode = `import pandas as pd
+import io
+
+# 加载数据
+csv_data = """user_id,session_id,event_type,product_id,event_time,device,channel
+1,1001,view,201,2024-01-15 09:00:00,mobile,search
+1,1001,view,202,2024-01-15 09:01:30,mobile,search
+1,1001,add_cart,201,2024-01-15 09:03:00,mobile,search
+1,1001,purchase,201,2024-01-15 09:05:00,mobile,search
+2,1002,view,203,2024-01-15 10:00:00,desktop,direct
+2,1002,view,204,2024-01-15 10:02:00,desktop,direct
+2,1002,view,205,2024-01-15 10:05:00,desktop,direct
+3,1003,view,206,2024-01-15 11:00:00,tablet,social
+3,1003,add_cart,206,2024-01-15 11:02:30,tablet,social
+4,1004,view,207,2024-01-15 12:00:00,mobile,email
+4,1004,view,208,2024-01-15 12:01:30,mobile,email
+4,1004,view,209,2024-01-15 12:03:00,mobile,email
+4,1004,add_cart,208,2024-01-15 12:05:00,mobile,email
+4,1004,purchase,208,2024-01-15 12:07:30,mobile,email
+5,1005,view,210,2024-01-15 13:00:00,desktop,search
+5,1005,view,211,2024-01-15 13:02:00,desktop,search
+6,1006,view,212,2024-01-15 14:00:00,mobile,direct
+6,1006,add_cart,212,2024-01-15 14:02:30,mobile,direct
+6,1006,purchase,212,2024-01-15 14:04:00,mobile,direct
+7,1007,view,213,2024-01-15 15:00:00,tablet,social
+7,1007,view,214,2024-01-15 15:01:30,tablet,social
+7,1007,view,215,2024-01-15 15:03:00,tablet,social
+8,1008,view,216,2024-01-15 16:00:00,mobile,email
+8,1008,add_cart,216,2024-01-15 16:02:00,mobile,email
+9,1009,view,217,2024-01-15 17:00:00,desktop,search
+9,1009,view,218,2024-01-15 17:03:00,desktop,search
+9,1009,view,219,2024-01-15 17:05:00,desktop,search
+9,1009,add_cart,217,2024-01-15 17:07:30,desktop,search
+10,1010,view,220,2024-01-15 18:00:00,mobile,direct
+10,1010,purchase,220,2024-01-15 18:02:30,mobile,direct
+11,1011,view,221,2024-01-15 19:00:00,mobile,social
+11,1011,view,222,2024-01-15 19:02:00,mobile,social
+12,1012,view,223,2024-01-15 20:00:00,desktop,email
+12,1012,add_cart,223,2024-01-15 20:03:00,desktop,email
+12,1012,purchase,223,2024-01-15 20:05:30,desktop,email
+13,1013,view,224,2024-01-15 21:00:00,tablet,search
+14,1014,view,225,2024-01-15 22:00:00,mobile,direct
+14,1014,view,226,2024-01-15 22:02:00,mobile,direct
+14,1014,add_cart,225,2024-01-15 22:04:30,mobile,direct
+15,1015,view,227,2024-01-16 09:00:00,desktop,social
+15,1015,purchase,227,2024-01-16 09:02:30,desktop,social"""
+
+df = pd.read_csv(io.StringIO(csv_data))
+
+# TODO: 完成以下分析任务
+# 1. 计算每个用户的访问深度和时长
+# 2. 分析用户行为路径和转化漏斗
+# 3. 统计各事件类型的分布
+# 4. 分析不同渠道的转化效果
+
+# 查看数据前5行
+print("数据预览:")
+print(df.head())
+`;
+        
+        const answerCode = `import pandas as pd
+import io
+from collections import defaultdict
+
+csv_data = """user_id,session_id,event_type,product_id,event_time,device,channel
+1,1001,view,201,2024-01-15 09:00:00,mobile,search
+1,1001,view,202,2024-01-15 09:01:30,mobile,search
+1,1001,add_cart,201,2024-01-15 09:03:00,mobile,search
+1,1001,purchase,201,2024-01-15 09:05:00,mobile,search
+2,1002,view,203,2024-01-15 10:00:00,desktop,direct
+2,1002,view,204,2024-01-15 10:02:00,desktop,direct
+2,1002,view,205,2024-01-15 10:05:00,desktop,direct
+3,1003,view,206,2024-01-15 11:00:00,tablet,social
+3,1003,add_cart,206,2024-01-15 11:02:30,tablet,social
+4,1004,view,207,2024-01-15 12:00:00,mobile,email
+4,1004,view,208,2024-01-15 12:01:30,mobile,email
+4,1004,view,209,2024-01-15 12:03:00,mobile,email
+4,1004,add_cart,208,2024-01-15 12:05:00,mobile,email
+4,1004,purchase,208,2024-01-15 12:07:30,mobile,email
+5,1005,view,210,2024-01-15 13:00:00,desktop,search
+5,1005,view,211,2024-01-15 13:02:00,desktop,search
+6,1006,view,212,2024-01-15 14:00:00,mobile,direct
+6,1006,add_cart,212,2024-01-15 14:02:30,mobile,direct
+6,1006,purchase,212,2024-01-15 14:04:00,mobile,direct
+7,1007,view,213,2024-01-15 15:00:00,tablet,social
+7,1007,view,214,2024-01-15 15:01:30,tablet,social
+7,1007,view,215,2024-01-15 15:03:00,tablet,social
+8,1008,view,216,2024-01-15 16:00:00,mobile,email
+8,1008,add_cart,216,2024-01-15 16:02:00,mobile,email
+9,1009,view,217,2024-01-15 17:00:00,desktop,search
+9,1009,view,218,2024-01-15 17:03:00,desktop,search
+9,1009,view,219,2024-01-15 17:05:00,desktop,search
+9,1009,add_cart,217,2024-01-15 17:07:30,desktop,search
+10,1010,view,220,2024-01-15 18:00:00,mobile,direct
+10,1010,purchase,220,2024-01-15 18:02:30,mobile,direct
+11,1011,view,221,2024-01-15 19:00:00,mobile,social
+11,1011,view,222,2024-01-15 19:02:00,mobile,social
+12,1012,view,223,2024-01-15 20:00:00,desktop,email
+12,1012,add_cart,223,2024-01-15 20:03:00,desktop,email
+12,1012,purchase,223,2024-01-15 20:05:30,desktop,email
+13,1013,view,224,2024-01-15 21:00:00,tablet,search
+14,1014,view,225,2024-01-15 22:00:00,mobile,direct
+14,1014,view,226,2024-01-15 22:02:00,mobile,direct
+14,1014,add_cart,225,2024-01-15 22:04:30,mobile,direct
+15,1015,view,227,2024-01-16 09:00:00,desktop,social
+15,1015,purchase,227,2024-01-16 09:02:30,desktop,social"""
+
+df = pd.read_csv(io.StringIO(csv_data))
+df['event_time'] = pd.to_datetime(df['event_time'])
+
+print("=" * 50)
+print("用户行为序列特征分析报告")
+print("=" * 50)
+
+# 1. 会话级别统计
+print("\\n1. 会话级别统计:")
+session_stats = df.groupby('session_id').agg({
+    'user_id': 'first',
+    'event_type': 'count',
+    'event_time': ['min', 'max'],
+    'product_id': 'nunique'
+})
+session_stats.columns = ['user_id', 'event_count', 'start_time', 'end_time', 'product_count']
+session_stats['session_duration_sec'] = (session_stats['end_time'] - session_stats['start_time']).dt.total_seconds()
+print(f"   总会话数: {len(session_stats)}")
+print(f"   平均会话时长(秒): {session_stats['session_duration_sec'].mean():.1f}")
+print(f"   平均事件数: {session_stats['event_count'].mean():.1f}")
+print(f"   平均浏览商品数: {session_stats['product_count'].mean():.1f}")
+
+# 2. 事件类型分布
+print("\\n2. 事件类型分布:")
+event_dist = df['event_type'].value_counts()
+print(event_dist)
+
+# 3. 用户转化漏斗
+print("\\n3. 用户转化漏斗:")
+users = df['user_id'].nunique()
+view_users = df[df['event_type'] == 'view']['user_id'].nunique()
+add_cart_users = df[df['event_type'] == 'add_cart']['user_id'].nunique()
+purchase_users = df[df['event_type'] == 'purchase']['user_id'].nunique()
+
+print(f"   总用户数: {users}")
+print(f"   浏览用户: {view_users} (100.0%)")
+print(f"   加购用户: {add_cart_users} ({add_cart_users/view_users*100:.1f}%)")
+print(f"   购买用户: {purchase_users} ({purchase_users/view_users*100:.1f}%)")
+
+# 4. 渠道分析
+print("\\n4. 渠道转化分析:")
+channel_metrics = []
+for channel in df['channel'].unique():
+    channel_data = df[df['channel'] == channel]
+    channel_users = channel_data['user_id'].nunique()
+    channel_purchasers = channel_data[channel_data['event_type'] == 'purchase']['user_id'].nunique()
+    conversion_rate = channel_purchasers / channel_users * 100 if channel_users > 0 else 0
+    channel_metrics.append({
+        '渠道': channel,
+        '用户数': channel_users,
+        '购买用户数': channel_purchasers,
+        '转化率(%)': round(conversion_rate, 1)
+    })
+channel_df = pd.DataFrame(channel_metrics).sort_values('转化率(%)', ascending=False)
+print(channel_df.to_string(index=False))
+
+# 5. 设备分布
+print("\\n5. 设备分布:")
+device_dist = df.groupby('device')['user_id'].nunique().sort_values(ascending=False)
+print(device_dist)
+
+print("\\n" + "=" * 50)
+print("分析完成!")
+print("=" * 50)
+`;
+        
+        const csvData = `user_id,session_id,event_type,product_id,event_time,device,channel
+1,1001,view,201,2024-01-15 09:00:00,mobile,search
+1,1001,view,202,2024-01-15 09:01:30,mobile,search
+1,1001,add_cart,201,2024-01-15 09:03:00,mobile,search
+1,1001,purchase,201,2024-01-15 09:05:00,mobile,search
+2,1002,view,203,2024-01-15 10:00:00,desktop,direct
+2,1002,view,204,2024-01-15 10:02:00,desktop,direct
+2,1002,view,205,2024-01-15 10:05:00,desktop,direct
+3,1003,view,206,2024-01-15 11:00:00,tablet,social
+3,1003,add_cart,206,2024-01-15 11:02:30,tablet,social
+4,1004,view,207,2024-01-15 12:00:00,mobile,email
+4,1004,view,208,2024-01-15 12:01:30,mobile,email
+4,1004,view,209,2024-01-15 12:03:00,mobile,email
+4,1004,add_cart,208,2024-01-15 12:05:00,mobile,email
+4,1004,purchase,208,2024-01-15 12:07:30,mobile,email
+5,1005,view,210,2024-01-15 13:00:00,desktop,search
+5,1005,view,211,2024-01-15 13:02:00,desktop,search
+6,1006,view,212,2024-01-15 14:00:00,mobile,direct
+6,1006,add_cart,212,2024-01-15 14:02:30,mobile,direct
+6,1006,purchase,212,2024-01-15 14:04:00,mobile,direct
+7,1007,view,213,2024-01-15 15:00:00,tablet,social
+7,1007,view,214,2024-01-15 15:01:30,tablet,social
+7,1007,view,215,2024-01-15 15:03:00,tablet,social
+8,1008,view,216,2024-01-15 16:00:00,mobile,email
+8,1008,add_cart,216,2024-01-15 16:02:00,mobile,email
+9,1009,view,217,2024-01-15 17:00:00,desktop,search
+9,1009,view,218,2024-01-15 17:03:00,desktop,search
+9,1009,view,219,2024-01-15 17:05:00,desktop,search
+9,1009,add_cart,217,2024-01-15 17:07:30,desktop,search
+10,1010,view,220,2024-01-15 18:00:00,mobile,direct
+10,1010,purchase,220,2024-01-15 18:02:30,mobile,direct
+11,1011,view,221,2024-01-15 19:00:00,mobile,social
+11,1011,view,222,2024-01-15 19:02:00,mobile,social
+12,1012,view,223,2024-01-15 20:00:00,desktop,email
+12,1012,add_cart,223,2024-01-15 20:03:00,desktop,email
+12,1012,purchase,223,2024-01-15 20:05:30,desktop,email
+13,1013,view,224,2024-01-15 21:00:00,tablet,search
+14,1014,view,225,2024-01-15 22:00:00,mobile,direct
+14,1014,view,226,2024-01-15 22:02:00,mobile,direct
+14,1014,add_cart,225,2024-01-15 22:04:30,mobile,direct
+15,1015,view,227,2024-01-16 09:00:00,desktop,social
+15,1015,purchase,227,2024-01-16 09:02:30,desktop,social`;
+        
+        const parseCSV = (csv) => {
+            const lines = csv.trim().split('\n');
+            const headers = lines[0].split(',');
+            const rows = lines.slice(1, 21).map(line => {
+                const values = line.split(',');
+                const obj = {};
+                headers.forEach((header, index) => {
+                    obj[header] = values[index];
+                });
+                return obj;
+            });
+            return { headers, rows };
+        };
+        
+        const { headers, rows } = parseCSV(csvData);
+        
+        createApp({
+            setup() {
+                const code = ref(loadCode(projectId) || defaultCode);
+                const output = ref([]);
+                const isRunning = ref(false);
+                const isCompletedStatus = ref(isCompleted(projectId));
+                const showAnswer = ref(false);
+                let editor = null;
+                
+                const addOutput = (type, content) => {
+                    output.value.push({
+                        type,
+                        content,
+                        id: Date.now()
+                    });
+                };
+                
+                const handleRun = async () => {
+                    isRunning.value = true;
+                    output.value = [];
+                    addOutput('info', '正在运行代码...');
+                    
+                    try {
+                        await runCode(code.value, (result) => {
+                            if (result.type === 'text') {
+                                addOutput('text', result.content);
+                            } else if (result.type === 'table') {
+                                addOutput('table', result.content);
+                            } else if (result.type === 'error') {
+                                addOutput('error', result.content);
+                            }
+                        });
+                    } catch (error) {
+                        addOutput('error', String(error));
+                    } finally {
+                        isRunning.value = false;
+                    }
+                };
+                
+                const handleReset = () => {
+                    code.value = defaultCode;
+                    if (editor) {
+                        editor.setValue(defaultCode);
+                    }
+                    saveCode(projectId, defaultCode);
+                };
+                
+                const handleShowAnswer = () => {
+                    showAnswer.value = !showAnswer.value;
+                    if (showAnswer.value) {
+                        code.value = answerCode;
+                        if (editor) {
+                            editor.setValue(answerCode);
+                        }
+                    } else {
+                        code.value = loadCode(projectId) || defaultCode;
+                        if (editor) {
+                            editor.setValue(loadCode(projectId) || defaultCode);
+                        }
+                    }
+                };
+                
+                const handleComplete = () => {
+                    markCompleted(projectId);
+                    isCompletedStatus.value = true;
+                };
+                
+                const handleCodeChange = (newCode) => {
+                    code.value = newCode;
+                    saveCode(projectId, newCode);
+                };
+                
+                onMounted(async () => {
+                    await nextTick();
+                    
+                    if (typeof CodeMirror !== 'undefined') {
+                        const textarea = document.getElementById('code-editor');
+                        if (textarea) {
+                            editor = CodeMirror.fromTextArea(textarea, {
+                                mode: 'python',
+                                theme: 'dracula',
+                                lineNumbers: true,
+                                indentUnit: 4,
+                                tabSize: 4,
+                                indentWithTabs: false,
+                                lineWrapping: true,
+                                autoCloseBrackets: true,
+                                matchBrackets: true
+                            });
+                            
+                            editor.setValue(code.value);
+                            
+                            editor.on('change', () => {
+                                handleCodeChange(editor.getValue());
+                            });
+                        }
+                    }
+                });
+                
+                return {
+                    code,
+                    output,
+                    isRunning,
+                    isCompletedStatus,
+                    showAnswer,
+                    projectId,
+                    projectTitle,
+                    difficulty,
+                    difficultyLabel,
+                    headers,
+                    rows,
+                    handleRun,
+                    handleReset,
+                    handleShowAnswer,
+                    handleComplete
+                };
+            },
+            template: \`
+                <div class="min-h-screen">
+                    <!-- Header -->
+                    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-50">
+                        <div class="max-w-7xl mx-auto px-6 py-5">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <a href="../index.html" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                        </svg>
+                                        返回首页
+                                    </a>
+                                    <div class="w-px h-8 bg-slate-700"></div>
+                                    <div>
+                                        <h1 class="text-xl font-bold text-white">{{ projectTitle }}</h1>
+                                        <div class="flex items-center gap-2">
+                                            <span :class="['badge', 'badge-' + difficulty]">{{ difficultyLabel }}</span>
+                                            <span v-if="isCompletedStatus" class="badge badge-completed">已完成</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+                    
+                    <main class="max-w-7xl mx-auto px-6 py-8">
+                        <!-- Introduction -->
+                        <section class="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 mb-8 fade-in">
+                            <h2 class="text-2xl font-bold text-white mb-4">项目介绍</h2>
+                            <p class="text-slate-400 mb-6">
+                                分析用户点击/加购/支付行为序列，计算访问间隔、转化路径，构建用户行为漏斗，优化用户转化体验。
+                            </p>
+                            
+                            <h3 class="text-lg font-semibold text-white mb-3">数据集说明</h3>
+                            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                                <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30">
+                                    <h4 class="text-sm font-medium text-blue-400 mb-2">字段说明</h4>
+                                    <ul class="text-sm text-slate-400 space-y-1">
+                                        <li><code class="code-font text-pink-400">user_id</code> - 用户ID</li>
+                                        <li><code class="code-font text-pink-400">session_id</code> - 会话ID</li>
+                                        <li><code class="code-font text-pink-400">event_type</code> - 事件类型</li>
+                                        <li><code class="code-font text-pink-400">product_id</code> - 商品ID</li>
+                                        <li><code class="code-font text-pink-400">event_time</code> - 事件时间</li>
+                                        <li><code class="code-font text-pink-400">device</code> - 设备类型</li>
+                                        <li><code class="code-font text-pink-400">channel</code> - 渠道来源</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30">
+                                    <h4 class="text-sm font-medium text-green-400 mb-2">任务要求</h4>
+                                    <ul class="text-sm text-slate-400 space-y-1">
+                                        <li>✓ 计算访问深度和时长</li>
+                                        <li>✓ 分析用户行为路径</li>
+                                        <li>✓ 构建转化漏斗</li>
+                                        <li>✓ 分析渠道转化效果</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- Data Preview -->
+                            <h3 class="text-lg font-semibold text-white mb-3">数据预览</h3>
+                            <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30 overflow-x-auto">
+                                <table class="data-table w-full text-sm">
+                                    <thead>
+                                        <tr>
+                                            <th v-for="header in headers" :key="header">{{ header }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(row, index) in rows" :key="index">
+                                            <td v-for="(value, header) in row" :key="header" class="code-font">{{ value }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p class="text-slate-400 text-xs mt-2">... showing 20 of 50 rows</p>
+                            </div>
+                        </section>
+                        
+                        <!-- Code Editor -->
+                        <section class="mb-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-xl font-bold text-white">代码编辑器</h2>
+                                <div class="flex items-center gap-3">
+                                    <button @click="handleReset" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                        重置代码
+                                    </button>
+                                    <button @click="handleShowAnswer" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm font-medium transition-colors">
+                                        {{ showAnswer ? '隐藏答案' : '查看答案' }}
+                                    </button>
+                                    <button @click="handleRun" :disabled="isRunning" class="px-6 py-2 btn-primary text-white rounded-lg text-sm font-medium flex items-center gap-2">
+                                        <svg v-if="isRunning" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                        </svg>
+                                        {{ isRunning ? '运行中...' : '运行代码' }}
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 overflow-hidden">
+                                <textarea id="code-editor"></textarea>
+                            </div>
+                        </section>
+                        
+                        <!-- Output Console -->
+                        <section class="mb-8">
+                            <h2 class="text-xl font-bold text-white mb-4">输出控制台</h2>
+                            <div class="bg-slate-900 rounded-2xl border border-slate-700 p-6 max-h-96 overflow-y-auto">
+                                <div v-if="output.length === 0" class="text-slate-500 text-center py-8">
+                                    运行代码后输出将显示在这里
+                                </div>
+                                <div v-for="item in output" :key="item.id" class="mb-4 last:mb-0">
+                                    <div v-if="item.type === 'info'" class="text-blue-400 text-sm">{{ item.content }}</div>
+                                    <div v-else-if="item.type === 'text'" class="text-slate-300 text-sm whitespace-pre-wrap font-mono">{{ item.content }}</div>
+                                    <div v-else-if="item.type === 'table'" v-html="item.content" class="overflow-x-auto"></div>
+                                    <div v-else-if="item.type === 'error'" class="text-red-400 text-sm whitespace-pre-wrap font-mono">{{ item.content }}</div>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Complete Button -->
+                        <section class="text-center">
+                            <button v-if="!isCompletedStatus" @click="handleComplete" class="px-8 py-3 bg-green-600 hover:bg-green-500 text-white rounded-xl font-semibold flex items-center gap-2 mx-auto transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                标记完成
+                            </button>
+                            <div v-else class="px-8 py-3 bg-green-900/30 border border-green-700/50 text-green-400 rounded-xl font-semibold flex items-center gap-2 mx-auto justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                项目已完成
+                            </div>
+                        </section>
+                    </main>
+                </div>
+            \`
+        }).mount('#app');
+    </script>
+</body>
+</html>

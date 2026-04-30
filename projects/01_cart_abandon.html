@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>购物车放弃分析 - Pandas 数据分析实战训练营</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/python/python.min.js"></script>
+    <link rel="stylesheet" href="../common/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="gradient-bg min-h-screen">
+    <div id="app"></div>
+    
+    <script type="module">
+        const { createApp, ref, onMounted, nextTick } = Vue;
+        import { saveCode, loadCode, markCompleted, isCompleted } from '../common/storage.js';
+        import { runCode } from '../common/code_runner.js';
+        
+        const projectId = '01_cart_abandon';
+        const projectTitle = '购物车放弃分析';
+        const difficulty = 'beginner';
+        const difficultyLabel = '入门';
+        
+        const defaultCode = `import pandas as pd
+import io
+
+# 加载数据
+csv_data = """user_id,session_id,product_id,product_name,price,add_to_cart_time,abandon_time,abandon_reason,device,channel
+1,s100,101,无线耳机,299,2024-01-15 09:30:00,2024-01-15 09:35:00,价格太高,mobile,search
+2,s101,102,智能手表,1299,2024-01-15 10:15:00,2024-01-15 10:20:00,找到更好的,desktop,direct
+3,s102,103,蓝牙音箱,499,2024-01-15 11:00:00,,,,mobile,social
+4,s103,104,运动手环,199,2024-01-15 12:30:00,2024-01-15 12:45:00,支付失败,mobile,email
+5,s104,105,平板电脑,2499,2024-01-15 14:00:00,2024-01-15 14:10:00,价格太高,tablet,search
+6,s105,106,手机壳,39,2024-01-15 15:30:00,,,,desktop,direct
+7,s106,107,充电宝,89,2024-01-15 16:45:00,2024-01-15 16:50:00,价格太高,mobile,social
+8,s107,108,数据线,19,2024-01-15 17:20:00,2024-01-15 17:25:00,找到更好的,mobile,search
+9,s108,109,耳机套,29,2024-01-15 18:00:00,,,,desktop,email
+10,s109,110,智能灯泡,59,2024-01-15 19:30:00,2024-01-15 19:40:00,支付失败,mobile,direct
+11,s110,111,无线键盘,159,2024-01-16 09:00:00,2024-01-16 09:15:00,价格太高,desktop,search
+12,s111,112,鼠标,99,2024-01-16 10:30:00,,,,mobile,social
+13,s112,113,显示器,1599,2024-01-16 11:45:00,2024-01-16 12:00:00,找到更好的,desktop,direct
+14,s113,114,摄像头,299,2024-01-16 13:20:00,2024-01-16 13:30:00,价格太高,mobile,email
+15,s114,115,音箱支架,69,2024-01-16 14:50:00,,,,tablet,search
+16,s115,116,扩展坞,249,2024-01-16 16:15:00,2024-01-16 16:20:00,支付失败,desktop,direct
+17,s116,117,键盘膜,29,2024-01-16 17:40:00,,,,mobile,social
+18,s117,118,鼠标垫,39,2024-01-16 18:55:00,2024-01-16 19:00:00,找到更好的,mobile,search
+19,s118,119,路由器,399,2024-01-16 20:10:00,2024-01-16 20:25:00,价格太高,desktop,email
+20,s119,120,网卡,79,2024-01-16 21:30:00,,,,mobile,direct
+21,s120,121,机械键盘,499,2024-01-17 09:20:00,2024-01-17 09:35:00,找到更好的,desktop,search
+22,s121,122,游戏鼠标,199,2024-01-17 10:50:00,2024-01-17 11:00:00,价格太高,mobile,social
+23,s122,123,耳机支架,49,2024-01-17 12:15:00,,,,desktop,direct
+24,s123,124,手机支架,29,2024-01-17 13:40:00,2024-01-17 13:50:00,支付失败,mobile,email
+25,s124,125,平板支架,59,2024-01-17 15:05:00,,,,tablet,search
+26,s125,126,散热支架,89,2024-01-17 16:30:00,2024-01-17 16:40:00,找到更好的,desktop,direct
+27,s126,127,屏幕挂灯,129,2024-01-17 17:55:00,2024-01-17 18:05:00,价格太高,mobile,social
+28,s127,128,清洁套装,39,2024-01-17 19:20:00,,,,mobile,search
+29,s128,129,收纳包,49,2024-01-17 20:45:00,2024-01-17 21:00:00,找到更好的,desktop,email
+30,s129,130,保护壳,29,2024-01-17 22:10:00,,,,mobile,direct"""
+
+df = pd.read_csv(io.StringIO(csv_data))
+
+# TODO: 完成以下分析任务
+# 1. 计算总放弃率
+# 2. 分析各时段放弃情况
+# 3. 分析放弃原因分布
+# 4. 分析不同设备/渠道的放弃率
+
+# 查看数据前5行
+print("数据预览:")
+print(df.head())
+`;
+        
+        const answerCode = `import pandas as pd
+import io
+
+csv_data = """user_id,session_id,product_id,product_name,price,add_to_cart_time,abandon_time,abandon_reason,device,channel
+1,s100,101,无线耳机,299,2024-01-15 09:30:00,2024-01-15 09:35:00,价格太高,mobile,search
+2,s101,102,智能手表,1299,2024-01-15 10:15:00,2024-01-15 10:20:00,找到更好的,desktop,direct
+3,s102,103,蓝牙音箱,499,2024-01-15 11:00:00,,,,mobile,social
+4,s103,104,运动手环,199,2024-01-15 12:30:00,2024-01-15 12:45:00,支付失败,mobile,email
+5,s104,105,平板电脑,2499,2024-01-15 14:00:00,2024-01-15 14:10:00,价格太高,tablet,search
+6,s105,106,手机壳,39,2024-01-15 15:30:00,,,,desktop,direct
+7,s106,107,充电宝,89,2024-01-15 16:45:00,2024-01-15 16:50:00,价格太高,mobile,social
+8,s107,108,数据线,19,2024-01-15 17:20:00,2024-01-15 17:25:00,找到更好的,mobile,search
+9,s108,109,耳机套,29,2024-01-15 18:00:00,,,,desktop,email
+10,s109,110,智能灯泡,59,2024-01-15 19:30:00,2024-01-15 19:40:00,支付失败,mobile,direct
+11,s110,111,无线键盘,159,2024-01-16 09:00:00,2024-01-16 09:15:00,价格太高,desktop,search
+12,s111,112,鼠标,99,2024-01-16 10:30:00,,,,mobile,social
+13,s112,113,显示器,1599,2024-01-16 11:45:00,2024-01-16 12:00:00,找到更好的,desktop,direct
+14,s113,114,摄像头,299,2024-01-16 13:20:00,2024-01-16 13:30:00,价格太高,mobile,email
+15,s114,115,音箱支架,69,2024-01-16 14:50:00,,,,tablet,search
+16,s115,116,扩展坞,249,2024-01-16 16:15:00,2024-01-16 16:20:00,支付失败,desktop,direct
+17,s116,117,键盘膜,29,2024-01-16 17:40:00,,,,mobile,social
+18,s117,118,鼠标垫,39,2024-01-16 18:55:00,2024-01-16 19:00:00,找到更好的,mobile,search
+19,s118,119,路由器,399,2024-01-16 20:10:00,2024-01-16 20:25:00,价格太高,desktop,email
+20,s119,120,网卡,79,2024-01-16 21:30:00,,,,mobile,direct
+21,s120,121,机械键盘,499,2024-01-17 09:20:00,2024-01-17 09:35:00,找到更好的,desktop,search
+22,s121,122,游戏鼠标,199,2024-01-17 10:50:00,2024-01-17 11:00:00,价格太高,mobile,social
+23,s122,123,耳机支架,49,2024-01-17 12:15:00,,,,desktop,direct
+24,s123,124,手机支架,29,2024-01-17 13:40:00,2024-01-17 13:50:00,支付失败,mobile,email
+25,s124,125,平板支架,59,2024-01-17 15:05:00,,,,tablet,search
+26,s125,126,散热支架,89,2024-01-17 16:30:00,2024-01-17 16:40:00,找到更好的,desktop,direct
+27,s126,127,屏幕挂灯,129,2024-01-17 17:55:00,2024-01-17 18:05:00,价格太高,mobile,social
+28,s127,128,清洁套装,39,2024-01-17 19:20:00,,,,mobile,search
+29,s128,129,收纳包,49,2024-01-17 20:45:00,2024-01-17 21:00:00,找到更好的,desktop,email
+30,s129,130,保护壳,29,2024-01-17 22:10:00,,,,mobile,direct"""
+
+df = pd.read_csv(io.StringIO(csv_data))
+
+print("=" * 50)
+print("购物车放弃分析报告")
+print("=" * 50)
+
+# 1. 计算总放弃率
+total = len(df)
+abandoned = df['abandon_time'].notna().sum()
+abandon_rate = (abandoned / total * 100).round(2)
+print(f"\\n1. 总放弃率:")
+print(f"   总加购数: {total}")
+print(f"   放弃数: {abandoned}")
+print(f"   放弃率: {abandon_rate}%")
+
+# 2. 分析放弃原因分布
+print("\\n2. 放弃原因分布:")
+reason_counts = df['abandon_reason'].value_counts()
+print(reason_counts)
+
+# 3. 分析各渠道放弃率
+print("\\n3. 各渠道放弃率:")
+channel_abandon = df.groupby('channel').apply(
+    lambda x: pd.Series({
+        'total': len(x),
+        'abandoned': x['abandon_time'].notna().sum(),
+        'abandon_rate': (x['abandon_time'].notna().sum() / len(x) * 100).round(2)
+    })
+)
+print(channel_abandon)
+
+# 4. 分析各设备放弃率
+print("\\n4. 各设备放弃率:")
+device_abandon = df.groupby('device').apply(
+    lambda x: pd.Series({
+        'total': len(x),
+        'abandoned': x['abandon_time'].notna().sum(),
+        'abandon_rate': (x['abandon_time'].notna().sum() / len(x) * 100).round(2)
+    })
+)
+print(device_abandon)
+
+print("\\n" + "=" * 50)
+print("分析完成!")
+print("=" * 50)
+`;
+        
+        const csvData = `user_id,session_id,product_id,product_name,price,add_to_cart_time,abandon_time,abandon_reason,device,channel
+1,s100,101,无线耳机,299,2024-01-15 09:30:00,2024-01-15 09:35:00,价格太高,mobile,search
+2,s101,102,智能手表,1299,2024-01-15 10:15:00,2024-01-15 10:20:00,找到更好的,desktop,direct
+3,s102,103,蓝牙音箱,499,2024-01-15 11:00:00,,,,mobile,social
+4,s103,104,运动手环,199,2024-01-15 12:30:00,2024-01-15 12:45:00,支付失败,mobile,email
+5,s104,105,平板电脑,2499,2024-01-15 14:00:00,2024-01-15 14:10:00,价格太高,tablet,search
+6,s105,106,手机壳,39,2024-01-15 15:30:00,,,,desktop,direct
+7,s106,107,充电宝,89,2024-01-15 16:45:00,2024-01-15 16:50:00,价格太高,mobile,social
+8,s107,108,数据线,19,2024-01-15 17:20:00,2024-01-15 17:25:00,找到更好的,mobile,search
+9,s108,109,耳机套,29,2024-01-15 18:00:00,,,,desktop,email
+10,s109,110,智能灯泡,59,2024-01-15 19:30:00,2024-01-15 19:40:00,支付失败,mobile,direct
+11,s110,111,无线键盘,159,2024-01-16 09:00:00,2024-01-16 09:15:00,价格太高,desktop,search
+12,s111,112,鼠标,99,2024-01-16 10:30:00,,,,mobile,social
+13,s112,113,显示器,1599,2024-01-16 11:45:00,2024-01-16 12:00:00,找到更好的,desktop,direct
+14,s113,114,摄像头,299,2024-01-16 13:20:00,2024-01-16 13:30:00,价格太高,mobile,email
+15,s114,115,音箱支架,69,2024-01-16 14:50:00,,,,tablet,search
+16,s115,116,扩展坞,249,2024-01-16 16:15:00,2024-01-16 16:20:00,支付失败,desktop,direct
+17,s116,117,键盘膜,29,2024-01-16 17:40:00,,,,mobile,social
+18,s117,118,鼠标垫,39,2024-01-16 18:55:00,2024-01-16 19:00:00,找到更好的,mobile,search
+19,s118,119,路由器,399,2024-01-16 20:10:00,2024-01-16 20:25:00,价格太高,desktop,email
+20,s119,120,网卡,79,2024-01-16 21:30:00,,,,mobile,direct
+21,s120,121,机械键盘,499,2024-01-17 09:20:00,2024-01-17 09:35:00,找到更好的,desktop,search
+22,s121,122,游戏鼠标,199,2024-01-17 10:50:00,2024-01-17 11:00:00,价格太高,mobile,social
+23,s122,123,耳机支架,49,2024-01-17 12:15:00,,,,desktop,direct
+24,s123,124,手机支架,29,2024-01-17 13:40:00,2024-01-17 13:50:00,支付失败,mobile,email
+25,s124,125,平板支架,59,2024-01-17 15:05:00,,,,tablet,search
+26,s125,126,散热支架,89,2024-01-17 16:30:00,2024-01-17 16:40:00,找到更好的,desktop,direct
+27,s126,127,屏幕挂灯,129,2024-01-17 17:55:00,2024-01-17 18:05:00,价格太高,mobile,social
+28,s127,128,清洁套装,39,2024-01-17 19:20:00,,,,mobile,search
+29,s128,129,收纳包,49,2024-01-17 20:45:00,2024-01-17 21:00:00,找到更好的,desktop,email
+30,s129,130,保护壳,29,2024-01-17 22:10:00,,,,mobile,direct`;
+        
+        const parseCSV = (csv) => {
+            const lines = csv.trim().split('\\n');
+            const headers = lines[0].split(',');
+            const rows = lines.slice(1, 21).map(line => {
+                const values = line.split(',');
+                const obj = {};
+                headers.forEach((header, index) => {
+                    obj[header] = values[index];
+                });
+                return obj;
+            });
+            return { headers, rows };
+        };
+        
+        const { headers, rows } = parseCSV(csvData);
+        
+        createApp({
+            setup() {
+                const code = ref(loadCode(projectId) || defaultCode);
+                const output = ref([]);
+                const isRunning = ref(false);
+                const isCompletedStatus = ref(isCompleted(projectId));
+                const showAnswer = ref(false);
+                let editor = null;
+                
+                const addOutput = (type, content) => {
+                    output.value.push({
+                        type,
+                        content,
+                        id: Date.now()
+                    });
+                };
+                
+                const handleRun = async () => {
+                    isRunning.value = true;
+                    output.value = [];
+                    addOutput('info', '正在运行代码...');
+                    
+                    try {
+                        await runCode(code.value, (result) => {
+                            if (result.type === 'text') {
+                                addOutput('text', result.content);
+                            } else if (result.type === 'table') {
+                                addOutput('table', result.content);
+                            } else if (result.type === 'error') {
+                                addOutput('error', result.content);
+                            }
+                        });
+                    } catch (error) {
+                        addOutput('error', String(error));
+                    } finally {
+                        isRunning.value = false;
+                    }
+                };
+                
+                const handleReset = () => {
+                    code.value = defaultCode;
+                    if (editor) {
+                        editor.setValue(defaultCode);
+                    }
+                    saveCode(projectId, defaultCode);
+                };
+                
+                const handleShowAnswer = () => {
+                    showAnswer.value = !showAnswer.value;
+                    if (showAnswer.value) {
+                        code.value = answerCode;
+                        if (editor) {
+                            editor.setValue(answerCode);
+                        }
+                    } else {
+                        code.value = loadCode(projectId) || defaultCode;
+                        if (editor) {
+                            editor.setValue(loadCode(projectId) || defaultCode);
+                        }
+                    }
+                };
+                
+                const handleComplete = () => {
+                    markCompleted(projectId);
+                    isCompletedStatus.value = true;
+                };
+                
+                const handleCodeChange = (newCode) => {
+                    code.value = newCode;
+                    saveCode(projectId, newCode);
+                };
+                
+                onMounted(async () => {
+                    await nextTick();
+                    
+                    if (typeof CodeMirror !== 'undefined') {
+                        const textarea = document.getElementById('code-editor');
+                        if (textarea) {
+                            editor = CodeMirror.fromTextArea(textarea, {
+                                mode: 'python',
+                                theme: 'dracula',
+                                lineNumbers: true,
+                                indentUnit: 4,
+                                tabSize: 4,
+                                indentWithTabs: false,
+                                lineWrapping: true,
+                                autoCloseBrackets: true,
+                                matchBrackets: true
+                            });
+                            
+                            editor.setValue(code.value);
+                            
+                            editor.on('change', () => {
+                                handleCodeChange(editor.getValue());
+                            });
+                        }
+                    }
+                });
+                
+                return {
+                    code,
+                    output,
+                    isRunning,
+                    isCompletedStatus,
+                    showAnswer,
+                    projectId,
+                    projectTitle,
+                    difficulty,
+                    difficultyLabel,
+                    headers,
+                    rows,
+                    handleRun,
+                    handleReset,
+                    handleShowAnswer,
+                    handleComplete
+                };
+            },
+            template: \`
+                <div class="min-h-screen">
+                    <!-- Header -->
+                    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-50">
+                        <div class="max-w-7xl mx-auto px-6 py-5">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <a href="../index.html" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                        </svg>
+                                        返回首页
+                                    </a>
+                                    <div class="w-px h-8 bg-slate-700"></div>
+                                    <div>
+                                        <h1 class="text-xl font-bold text-white">{{ projectTitle }}</h1>
+                                        <div class="flex items-center gap-2">
+                                            <span :class="['badge', 'badge-' + difficulty]">{{ difficultyLabel }}</span>
+                                            <span v-if="isCompletedStatus" class="badge badge-completed">已完成</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+                    
+                    <main class="max-w-7xl mx-auto px-6 py-8">
+                        <!-- Introduction -->
+                        <section class="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 mb-8 fade-in">
+                            <h2 class="text-2xl font-bold text-white mb-4">项目介绍</h2>
+                            <p class="text-slate-400 mb-6">
+                                分析用户加购未付款行为，计算放弃率、时段趋势、核心原因指标，帮助业务团队优化用户体验和转化漏斗。
+                            </p>
+                            
+                            <h3 class="text-lg font-semibold text-white mb-3">数据集说明</h3>
+                            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                                <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30">
+                                    <h4 class="text-sm font-medium text-blue-400 mb-2">字段说明</h4>
+                                    <ul class="text-sm text-slate-400 space-y-1">
+                                        <li><code class="code-font text-pink-400">user_id</code> - 用户ID</li>
+                                        <li><code class="code-font text-pink-400">session_id</code> - 会话ID</li>
+                                        <li><code class="code-font text-pink-400">product_id</code> - 商品ID</li>
+                                        <li><code class="code-font text-pink-400">product_name</code> - 商品名称</li>
+                                        <li><code class="code-font text-pink-400">price</code> - 价格</li>
+                                        <li><code class="code-font text-pink-400">add_to_cart_time</code> - 加购时间</li>
+                                        <li><code class="code-font text-pink-400">abandon_time</code> - 放弃时间</li>
+                                        <li><code class="code-font text-pink-400">abandon_reason</code> - 放弃原因</li>
+                                        <li><code class="code-font text-pink-400">device</code> - 设备类型</li>
+                                        <li><code class="code-font text-pink-400">channel</code> - 渠道来源</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30">
+                                    <h4 class="text-sm font-medium text-green-400 mb-2">任务要求</h4>
+                                    <ul class="text-sm text-slate-400 space-y-1">
+                                        <li>✓ 计算总放弃率</li>
+                                        <li>✓ 分析放弃原因分布</li>
+                                        <li>✓ 分析各渠道放弃率</li>
+                                        <li>✓ 分析各设备放弃率</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- Data Preview -->
+                            <h3 class="text-lg font-semibold text-white mb-3">数据预览</h3>
+                            <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30 overflow-x-auto">
+                                <table class="data-table w-full text-sm">
+                                    <thead>
+                                        <tr>
+                                            <th v-for="header in headers" :key="header">{{ header }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(row, index) in rows" :key="index">
+                                            <td v-for="(value, header) in row" :key="header" class="code-font">{{ value }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p class="text-slate-400 text-xs mt-2">... showing 20 of 30 rows</p>
+                            </div>
+                        </section>
+                        
+                        <!-- Code Editor -->
+                        <section class="mb-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-xl font-bold text-white">代码编辑器</h2>
+                                <div class="flex items-center gap-3">
+                                    <button @click="handleReset" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                        重置代码
+                                    </button>
+                                    <button @click="handleShowAnswer" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm font-medium transition-colors">
+                                        {{ showAnswer ? '隐藏答案' : '查看答案' }}
+                                    </button>
+                                    <button @click="handleRun" :disabled="isRunning" class="px-6 py-2 btn-primary text-white rounded-lg text-sm font-medium flex items-center gap-2">
+                                        <svg v-if="isRunning" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                        </svg>
+                                        {{ isRunning ? '运行中...' : '运行代码' }}
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 overflow-hidden">
+                                <textarea id="code-editor"></textarea>
+                            </div>
+                        </section>
+                        
+                        <!-- Output Console -->
+                        <section class="mb-8">
+                            <h2 class="text-xl font-bold text-white mb-4">输出控制台</h2>
+                            <div class="bg-slate-900 rounded-2xl border border-slate-700 p-6 max-h-96 overflow-y-auto">
+                                <div v-if="output.length === 0" class="text-slate-500 text-center py-8">
+                                    运行代码后输出将显示在这里
+                                </div>
+                                <div v-for="item in output" :key="item.id" class="mb-4 last:mb-0">
+                                    <div v-if="item.type === 'info'" class="text-blue-400 text-sm">{{ item.content }}</div>
+                                    <div v-else-if="item.type === 'text'" class="text-slate-300 text-sm whitespace-pre-wrap font-mono">{{ item.content }}</div>
+                                    <div v-else-if="item.type === 'table'" v-html="item.content" class="overflow-x-auto"></div>
+                                    <div v-else-if="item.type === 'error'" class="text-red-400 text-sm whitespace-pre-wrap font-mono">{{ item.content }}</div>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Complete Button -->
+                        <section class="text-center">
+                            <button v-if="!isCompletedStatus" @click="handleComplete" class="px-8 py-3 bg-green-600 hover:bg-green-500 text-white rounded-xl font-semibold flex items-center gap-2 mx-auto transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                标记完成
+                            </button>
+                            <div v-else class="px-8 py-3 bg-green-900/30 border border-green-700/50 text-green-400 rounded-xl font-semibold flex items-center gap-2 mx-auto justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                项目已完成
+                            </div>
+                        </section>
+                    </main>
+                </div>
+            \`
+        }).mount('#app');
+    </script>
+</body>
+</html>

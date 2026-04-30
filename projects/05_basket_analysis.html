@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>购物篮商品关联分析 - Pandas 数据分析实战训练营</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/python/python.min.js"></script>
+    <link rel="stylesheet" href="../common/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="gradient-bg min-h-screen">
+    <div id="app"></div>
+    
+    <script type="module">
+        const { createApp, ref, onMounted, nextTick } = Vue;
+        import { saveCode, loadCode, markCompleted, isCompleted } from '../common/storage.js';
+        import { runCode } from '../common/code_runner.js';
+        
+        const projectId = '05_basket_analysis';
+        const projectTitle = '购物篮商品关联分析';
+        const difficulty = 'advanced';
+        const difficultyLabel = '进阶';
+        
+        const defaultCode = `import pandas as pd
+import io
+from itertools import combinations
+
+# 加载数据
+csv_data = """order_id,product_id,product_name,category,price,quantity
+1001,201,牛奶,食品,25,2
+1001,202,面包,食品,15,1
+1001,203,黄油,食品,30,1
+1002,201,牛奶,食品,25,1
+1002,204,鸡蛋,食品,20,1
+1003,205,洗发水,个护,45,1
+1003,206,护发素,个护,55,1
+1004,207,笔记本,文具,12,3
+1004,208,钢笔,文具,25,2
+1004,209,文件夹,文具,8,5
+1005,201,牛奶,食品,25,1
+1005,202,面包,食品,15,2
+1005,210,咖啡,食品,35,1
+1006,205,洗发水,个护,45,2
+1006,211,沐浴露,个护,38,1
+1007,207,笔记本,文具,12,2
+1007,212,橡皮擦,文具,5,3
+1008,201,牛奶,食品,25,1
+1008,204,鸡蛋,食品,20,1
+1008,202,面包,食品,15,1
+1009,213,牙刷,个护,18,2
+1009,214,牙膏,个护,22,2
+1010,207,笔记本,文具,12,1
+1010,208,钢笔,文具,25,1
+1010,215,尺子,文具,10,1
+1011,201,牛奶,食品,25,3
+1011,210,咖啡,食品,35,2
+1012,205,洗发水,个护,45,1
+1012,206,护发素,个护,55,1
+1012,211,沐浴露,个护,38,1
+1013,216,手机壳,数码,29,1
+1013,217,钢化膜,数码,19,2
+1014,201,牛奶,食品,25,1
+1014,202,面包,食品,15,1
+1014,203,黄油,食品,30,1
+1014,204,鸡蛋,食品,20,1
+1015,218,耳机,数码,199,1
+1015,219,耳机套,数码,29,1
+1016,205,洗发水,个护,45,1
+1016,220,洗手液,个护,15,3
+1017,207,笔记本,文具,12,5
+1017,221,便利贴,文具,6,10
+1018,201,牛奶,食品,25,2
+1018,222,酸奶,食品,12,4
+1019,223,薯片,食品,8,5
+1019,224,饼干,食品,10,3
+1020,205,洗发水,个护,45,1
+1020,206,护发素,个护,55,1
+1020,211,沐浴露,个护,38,1
+1020,220,洗手液,个护,15,2
+1021,225,键盘,数码,159,1
+1021,226,鼠标,数码,99,1
+1022,201,牛奶,食品,25,1
+1022,202,面包,食品,15,1
+1023,207,笔记本,文具,12,2
+1023,208,钢笔,文具,25,1
+1023,215,尺子,文具,10,1
+1024,227,T恤,服饰,89,2
+1024,228,裤子,服饰,159,1
+1025,205,洗发水,个护,45,2
+1025,206,护发素,个护,55,2
+1025,214,牙膏,个护,22,1
+1026,201,牛奶,食品,25,1
+1026,210,咖啡,食品,35,2
+1026,222,酸奶,食品,12,3
+1027,229,书包,箱包,129,1
+1027,230,钱包,箱包,79,1
+1028,207,笔记本,文具,12,3
+1028,209,文件夹,文具,8,4
+1028,212,橡皮擦,文具,5,2
+1029,201,牛奶,食品,25,1
+1029,204,鸡蛋,食品,20,1
+1030,231,运动鞋,服饰,299,1
+1030,232,运动袜,服饰,29,3"""
+
+df = pd.read_csv(io.StringIO(csv_data))
+
+# TODO: 完成以下分析任务
+# 1. 分析各商品销量排名
+# 2. 计算商品组合出现频率
+# 3. 找出高频商品组合（支持度）
+# 4. 按类别分析关联关系
+
+# 查看数据前5行
+print("数据预览:")
+print(df.head())
+`;
+        
+        const answerCode = `import pandas as pd
+import io
+from itertools import combinations
+
+csv_data = """order_id,product_id,product_name,category,price,quantity
+1001,201,牛奶,食品,25,2
+1001,202,面包,食品,15,1
+1001,203,黄油,食品,30,1
+1002,201,牛奶,食品,25,1
+1002,204,鸡蛋,食品,20,1
+1003,205,洗发水,个护,45,1
+1003,206,护发素,个护,55,1
+1004,207,笔记本,文具,12,3
+1004,208,钢笔,文具,25,2
+1004,209,文件夹,文具,8,5
+1005,201,牛奶,食品,25,1
+1005,202,面包,食品,15,2
+1005,210,咖啡,食品,35,1
+1006,205,洗发水,个护,45,2
+1006,211,沐浴露,个护,38,1
+1007,207,笔记本,文具,12,2
+1007,212,橡皮擦,文具,5,3
+1008,201,牛奶,食品,25,1
+1008,204,鸡蛋,食品,20,1
+1008,202,面包,食品,15,1
+1009,213,牙刷,个护,18,2
+1009,214,牙膏,个护,22,2
+1010,207,笔记本,文具,12,1
+1010,208,钢笔,文具,25,1
+1010,215,尺子,文具,10,1
+1011,201,牛奶,食品,25,3
+1011,210,咖啡,食品,35,2
+1012,205,洗发水,个护,45,1
+1012,206,护发素,个护,55,1
+1012,211,沐浴露,个护,38,1
+1013,216,手机壳,数码,29,1
+1013,217,钢化膜,数码,19,2
+1014,201,牛奶,食品,25,1
+1014,202,面包,食品,15,1
+1014,203,黄油,食品,30,1
+1014,204,鸡蛋,食品,20,1
+1015,218,耳机,数码,199,1
+1015,219,耳机套,数码,29,1
+1016,205,洗发水,个护,45,1
+1016,220,洗手液,个护,15,3
+1017,207,笔记本,文具,12,5
+1017,221,便利贴,文具,6,10
+1018,201,牛奶,食品,25,2
+1018,222,酸奶,食品,12,4
+1019,223,薯片,食品,8,5
+1019,224,饼干,食品,10,3
+1020,205,洗发水,个护,45,1
+1020,206,护发素,个护,55,1
+1020,211,沐浴露,个护,38,1
+1020,220,洗手液,个护,15,2
+1021,225,键盘,数码,159,1
+1021,226,鼠标,数码,99,1
+1022,201,牛奶,食品,25,1
+1022,202,面包,食品,15,1
+1023,207,笔记本,文具,12,2
+1023,208,钢笔,文具,25,1
+1023,215,尺子,文具,10,1
+1024,227,T恤,服饰,89,2
+1024,228,裤子,服饰,159,1
+1025,205,洗发水,个护,45,2
+1025,206,护发素,个护,55,2
+1025,214,牙膏,个护,22,1
+1026,201,牛奶,食品,25,1
+1026,210,咖啡,食品,35,2
+1026,222,酸奶,食品,12,3
+1027,229,书包,箱包,129,1
+1027,230,钱包,箱包,79,1
+1028,207,笔记本,文具,12,3
+1028,209,文件夹,文具,8,4
+1028,212,橡皮擦,文具,5,2
+1029,201,牛奶,食品,25,1
+1029,204,鸡蛋,食品,20,1
+1030,231,运动鞋,服饰,299,1
+1030,232,运动袜,服饰,29,3"""
+
+df = pd.read_csv(io.StringIO(csv_data))
+
+print("=" * 50)
+print("购物篮商品关联分析报告")
+print("=" * 50)
+
+# 1. 基础统计
+total_orders = df['order_id'].nunique()
+print(f"\\n1. 基础统计:")
+print(f"   总订单数: {total_orders}")
+print(f"   总商品数: {len(df)}")
+print(f"   商品种类: {df['product_name'].nunique()}")
+
+# 2. 商品销量排名
+print("\\n2. 商品销量排名 (Top 10):")
+product_sales = df.groupby('product_name')['quantity'].sum().sort_values(ascending=False).head(10)
+print(product_sales)
+
+# 3. 按类别分布
+print("\\n3. 类别分布:")
+category_dist = df.groupby('category').agg({
+    'product_name': 'nunique',
+    'quantity': 'sum'
+}).sort_values('quantity', ascending=False)
+print(category_dist)
+
+# 4. 生成购物篮分析 - 找出同时购买的商品组合
+print("\\n4. 高频商品组合分析:")
+
+# 按订单分组，获取每个订单的商品列表
+order_products = df.groupby('order_id')['product_name'].apply(list)
+
+# 计算商品组合出现频率
+pair_counts = {}
+for products in order_products:
+    if len(products) >= 2:
+        for pair in combinations(sorted(products), 2):
+            pair_key = ' + '.join(pair)
+            pair_counts[pair_key] = pair_counts.get(pair_key, 0) + 1
+
+# 转换为DataFrame并排序
+pair_df = pd.DataFrame(list(pair_counts.items()), columns=['商品组合', '出现次数'])
+pair_df = pair_df.sort_values('出现次数', ascending=False).head(10)
+print("\\nTop 10 商品组合:")
+print(pair_df)
+
+# 5. 计算支持度
+print("\\n5. 商品组合支持度 (Top 10):")
+pair_df['支持度(%)'] = (pair_df['出现次数'] / total_orders * 100
+print(pair_df[['商品组合', '出现次数', '支持度(%)']].round(2))
+
+print("\\n" + "=" * 50)
+print("分析完成!")
+print("=" * 50)
+`;
+        
+        const csvData = `order_id,product_id,product_name,category,price,quantity
+1001,201,牛奶,食品,25,2
+1001,202,面包,食品,15,1
+1001,203,黄油,食品,30,1
+1002,201,牛奶,食品,25,1
+1002,204,鸡蛋,食品,20,1
+1003,205,洗发水,个护,45,1
+1003,206,护发素,个护,55,1
+1004,207,笔记本,文具,12,3
+1004,208,钢笔,文具,25,2
+1004,209,文件夹,文具,8,5
+1005,201,牛奶,食品,25,1
+1005,202,面包,食品,15,2
+1005,210,咖啡,食品,35,1
+1006,205,洗发水,个护,45,2
+1006,211,沐浴露,个护,38,1
+1007,207,笔记本,文具,12,2
+1007,212,橡皮擦,文具,5,3
+1008,201,牛奶,食品,25,1
+1008,204,鸡蛋,食品,20,1
+1008,202,面包,食品,15,1
+1009,213,牙刷,个护,18,2
+1009,214,牙膏,个护,22,2
+1010,207,笔记本,文具,12,1
+1010,208,钢笔,文具,25,1
+1010,215,尺子,文具,10,1
+1011,201,牛奶,食品,25,3
+1011,210,咖啡,食品,35,2
+1012,205,洗发水,个护,45,1
+1012,206,护发素,个护,55,1
+1012,211,沐浴露,个护,38,1
+1013,216,手机壳,数码,29,1
+1013,217,钢化膜,数码,19,2
+1014,201,牛奶,食品,25,1
+1014,202,面包,食品,15,1
+1014,203,黄油,食品,30,1
+1014,204,鸡蛋,食品,20,1
+1015,218,耳机,数码,199,1
+1015,219,耳机套,数码,29,1
+1016,205,洗发水,个护,45,1
+1016,220,洗手液,个护,15,3
+1017,207,笔记本,文具,12,5
+1017,221,便利贴,文具,6,10
+1018,201,牛奶,食品,25,2
+1018,222,酸奶,食品,12,4
+1019,223,薯片,食品,8,5
+1019,224,饼干,食品,10,3
+1020,205,洗发水,个护,45,1
+1020,206,护发素,个护,55,1
+1020,211,沐浴露,个护,38,1
+1020,220,洗手液,个护,15,2
+1021,225,键盘,数码,159,1
+1021,226,鼠标,数码,99,1
+1022,201,牛奶,食品,25,1
+1022,202,面包,食品,15,1
+1023,207,笔记本,文具,12,2
+1023,208,钢笔,文具,25,1
+1023,215,尺子,文具,10,1
+1024,227,T恤,服饰,89,2
+1024,228,裤子,服饰,159,1
+1025,205,洗发水,个护,45,2
+1025,206,护发素,个护,55,2
+1025,214,牙膏,个护,22,1
+1026,201,牛奶,食品,25,1
+1026,210,咖啡,食品,35,2
+1026,222,酸奶,食品,12,3
+1027,229,书包,箱包,129,1
+1027,230,钱包,箱包,79,1
+1028,207,笔记本,文具,12,3
+1028,209,文件夹,文具,8,4
+1028,212,橡皮擦,文具,5,2
+1029,201,牛奶,食品,25,1
+1029,204,鸡蛋,食品,20,1
+1030,231,运动鞋,服饰,299,1
+1030,232,运动袜,服饰,29,3`;
+        
+        const parseCSV = (csv) => {
+            const lines = csv.trim().split('\n');
+            const headers = lines[0].split(',');
+            const rows = lines.slice(1, 21).map(line => {
+                const values = line.split(',');
+                const obj = {};
+                headers.forEach((header, index) => {
+                    obj[header] = values[index];
+                });
+                return obj;
+            });
+            return { headers, rows };
+        };
+        
+        const { headers, rows } = parseCSV(csvData);
+        
+        createApp({
+            setup() {
+                const code = ref(loadCode(projectId) || defaultCode);
+                const output = ref([]);
+                const isRunning = ref(false);
+                const isCompletedStatus = ref(isCompleted(projectId));
+                const showAnswer = ref(false);
+                let editor = null;
+                
+                const addOutput = (type, content) => {
+                    output.value.push({
+                        type,
+                        content,
+                        id: Date.now()
+                    });
+                };
+                
+                const handleRun = async () => {
+                    isRunning.value = true;
+                    output.value = [];
+                    addOutput('info', '正在运行代码...');
+                    
+                    try {
+                        await runCode(code.value, (result) => {
+                            if (result.type === 'text') {
+                                addOutput('text', result.content);
+                            } else if (result.type === 'table') {
+                                addOutput('table', result.content);
+                            } else if (result.type === 'error') {
+                                addOutput('error', result.content);
+                            }
+                        });
+                    } catch (error) {
+                        addOutput('error', String(error));
+                    } finally {
+                        isRunning.value = false;
+                    }
+                };
+                
+                const handleReset = () => {
+                    code.value = defaultCode;
+                    if (editor) {
+                        editor.setValue(defaultCode);
+                    }
+                    saveCode(projectId, defaultCode);
+                };
+                
+                const handleShowAnswer = () => {
+                    showAnswer.value = !showAnswer.value;
+                    if (showAnswer.value) {
+                        code.value = answerCode;
+                        if (editor) {
+                            editor.setValue(answerCode);
+                        }
+                    } else {
+                        code.value = loadCode(projectId) || defaultCode;
+                        if (editor) {
+                            editor.setValue(loadCode(projectId) || defaultCode);
+                        }
+                    }
+                };
+                
+                const handleComplete = () => {
+                    markCompleted(projectId);
+                    isCompletedStatus.value = true;
+                };
+                
+                const handleCodeChange = (newCode) => {
+                    code.value = newCode;
+                    saveCode(projectId, newCode);
+                };
+                
+                onMounted(async () => {
+                    await nextTick();
+                    
+                    if (typeof CodeMirror !== 'undefined') {
+                        const textarea = document.getElementById('code-editor');
+                        if (textarea) {
+                            editor = CodeMirror.fromTextArea(textarea, {
+                                mode: 'python',
+                                theme: 'dracula',
+                                lineNumbers: true,
+                                indentUnit: 4,
+                                tabSize: 4,
+                                indentWithTabs: false,
+                                lineWrapping: true,
+                                autoCloseBrackets: true,
+                                matchBrackets: true
+                            });
+                            
+                            editor.setValue(code.value);
+                            
+                            editor.on('change', () => {
+                                handleCodeChange(editor.getValue());
+                            });
+                        }
+                    }
+                });
+                
+                return {
+                    code,
+                    output,
+                    isRunning,
+                    isCompletedStatus,
+                    showAnswer,
+                    projectId,
+                    projectTitle,
+                    difficulty,
+                    difficultyLabel,
+                    headers,
+                    rows,
+                    handleRun,
+                    handleReset,
+                    handleShowAnswer,
+                    handleComplete
+                };
+            },
+            template: \`
+                <div class="min-h-screen">
+                    <!-- Header -->
+                    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-50">
+                        <div class="max-w-7xl mx-auto px-6 py-5">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <a href="../index.html" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                        </svg>
+                                        返回首页
+                                    </a>
+                                    <div class="w-px h-8 bg-slate-700"></div>
+                                    <div>
+                                        <h1 class="text-xl font-bold text-white">{{ projectTitle }}</h1>
+                                        <div class="flex items-center gap-2">
+                                            <span :class="['badge', 'badge-' + difficulty]">{{ difficultyLabel }}</span>
+                                            <span v-if="isCompletedStatus" class="badge badge-completed">已完成</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+                    
+                    <main class="max-w-7xl mx-auto px-6 py-8">
+                        <!-- Introduction -->
+                        <section class="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 mb-8 fade-in">
+                            <h2 class="text-2xl font-bold text-white mb-4">项目介绍</h2>
+                            <p class="text-slate-400 mb-6">
+                                使用Apriori算法思想计算商品关联支持度，挖掘"买A必买B"的搭配规律，帮助优化商品陈列和促销策略。
+                            </p>
+                            
+                            <h3 class="text-lg font-semibold text-white mb-3">数据集说明</h3>
+                            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                                <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30">
+                                    <h4 class="text-sm font-medium text-blue-400 mb-2">字段说明</h4>
+                                    <ul class="text-sm text-slate-400 space-y-1">
+                                        <li><code class="code-font text-pink-400">order_id</code> - 订单ID</li>
+                                        <li><code class="code-font text-pink-400">product_id</code> - 商品ID</li>
+                                        <li><code class="code-font text-pink-400">product_name</code> - 商品名称</li>
+                                        <li><code class="code-font text-pink-400">category</code> - 商品类别</li>
+                                        <li><code class="code-font text-pink-400">price</code> - 价格</li>
+                                        <li><code class="code-font text-pink-400">quantity</code> - 数量</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30">
+                                    <h4 class="text-sm font-medium text-green-400 mb-2">任务要求</h4>
+                                    <ul class="text-sm text-slate-400 space-y-1">
+                                        <li>✓ 分析各商品销量排名</li>
+                                        <li>✓ 计算商品组合出现频率</li>
+                                        <li>✓ 找出高频商品组合</li>
+                                        <li>✓ 按类别分析关联关系</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- Data Preview -->
+                            <h3 class="text-lg font-semibold text-white mb-3">数据预览</h3>
+                            <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30 overflow-x-auto">
+                                <table class="data-table w-full text-sm">
+                                    <thead>
+                                        <tr>
+                                            <th v-for="header in headers" :key="header">{{ header }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(row, index) in rows" :key="index">
+                                            <td v-for="(value, header) in row" :key="header" class="code-font">{{ value }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p class="text-slate-400 text-xs mt-2">... showing 20 of 60 rows</p>
+                            </div>
+                        </section>
+                        
+                        <!-- Code Editor -->
+                        <section class="mb-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-xl font-bold text-white">代码编辑器</h2>
+                                <div class="flex items-center gap-3">
+                                    <button @click="handleReset" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                        重置代码
+                                    </button>
+                                    <button @click="handleShowAnswer" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm font-medium transition-colors">
+                                        {{ showAnswer ? '隐藏答案' : '查看答案' }}
+                                    </button>
+                                    <button @click="handleRun" :disabled="isRunning" class="px-6 py-2 btn-primary text-white rounded-lg text-sm font-medium flex items-center gap-2">
+                                        <svg v-if="isRunning" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                        </svg>
+                                        {{ isRunning ? '运行中...' : '运行代码' }}
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 overflow-hidden">
+                                <textarea id="code-editor"></textarea>
+                            </div>
+                        </section>
+                        
+                        <!-- Output Console -->
+                        <section class="mb-8">
+                            <h2 class="text-xl font-bold text-white mb-4">输出控制台</h2>
+                            <div class="bg-slate-900 rounded-2xl border border-slate-700 p-6 max-h-96 overflow-y-auto">
+                                <div v-if="output.length === 0" class="text-slate-500 text-center py-8">
+                                    运行代码后输出将显示在这里
+                                </div>
+                                <div v-for="item in output" :key="item.id" class="mb-4 last:mb-0">
+                                    <div v-if="item.type === 'info'" class="text-blue-400 text-sm">{{ item.content }}</div>
+                                    <div v-else-if="item.type === 'text'" class="text-slate-300 text-sm whitespace-pre-wrap font-mono">{{ item.content }}</div>
+                                    <div v-else-if="item.type === 'table'" v-html="item.content" class="overflow-x-auto"></div>
+                                    <div v-else-if="item.type === 'error'" class="text-red-400 text-sm whitespace-pre-wrap font-mono">{{ item.content }}</div>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Complete Button -->
+                        <section class="text-center">
+                            <button v-if="!isCompletedStatus" @click="handleComplete" class="px-8 py-3 bg-green-600 hover:bg-green-500 text-white rounded-xl font-semibold flex items-center gap-2 mx-auto transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                标记完成
+                            </button>
+                            <div v-else class="px-8 py-3 bg-green-900/30 border border-green-700/50 text-green-400 rounded-xl font-semibold flex items-center gap-2 mx-auto justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                项目已完成
+                            </div>
+                        </section>
+                    </main>
+                </div>
+            \`
+        }).mount('#app');
+    </script>
+</body>
+</html>

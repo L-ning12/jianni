@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pandas 数据分析实战训练营</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="common/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="gradient-bg min-h-screen">
+    <div id="app"></div>
+    
+    <script>
+        const { createApp, ref, computed, onMounted } = Vue;
+        
+        const projects = [
+            {
+                id: '01_cart_abandon',
+                title: '购物车放弃分析',
+                difficulty: 'beginner',
+                description: '分析用户加购未付款行为，计算放弃率、时段趋势、核心原因指标',
+                path: 'projects/01_cart_abandon.html'
+            },
+            {
+                id: '02_rfm_analysis',
+                title: 'RFM用户分层',
+                difficulty: 'basic',
+                description: '基于消费金额、频率、最近购买时间做用户价值分层（重要价值/流失预警等）',
+                path: 'projects/02_rfm_analysis.html'
+            },
+            {
+                id: '03_price_anomaly',
+                title: '价格异常检测',
+                difficulty: 'basic',
+                description: '使用IQR、标准差检测商品价格异常，适合风控、定价场景',
+                path: 'projects/03_price_anomaly.html'
+            },
+            {
+                id: '04_kmeans_cluster',
+                title: 'KMeans用户聚类',
+                difficulty: 'advanced',
+                description: '无监督学习自动分群，提取用户特征，实现精准运营',
+                path: 'projects/04_kmeans_cluster.html'
+            },
+            {
+                id: '05_basket_analysis',
+                title: '购物篮商品关联分析',
+                difficulty: 'advanced',
+                description: 'Apriori思想计算商品关联支持度，挖掘“买A必买B”的搭配规律',
+                path: 'projects/05_basket_analysis.html'
+            },
+            {
+                id: '06_behavior_sequence',
+                title: '用户行为序列特征',
+                difficulty: 'advanced',
+                description: '分析用户点击/加购/支付行为序列，计算访问间隔、转化路径',
+                path: 'projects/06_behavior_sequence.html'
+            },
+            {
+                id: '07_promo_compare',
+                title: '促销活动效果对比',
+                difficulty: 'advanced',
+                description: '对比活动周 vs 非活动周的销售额、客单价、转化率差异',
+                path: 'projects/07_promo_compare.html'
+            },
+            {
+                id: '08_sentiment_analysis',
+                title: '评论情感分析',
+                difficulty: 'expert',
+                description: '基于评论评分与文本做情感倾向分析，挖掘用户满意度',
+                path: 'projects/08_sentiment_analysis.html'
+            },
+            {
+                id: '09_ltv_calculation',
+                title: '用户LTV生命周期价值',
+                difficulty: 'expert',
+                description: '计算30天LTV、累计贡献，评估用户长期商业价值',
+                path: 'projects/09_ltv_calculation.html'
+            },
+            {
+                id: '10_realtime_feature',
+                title: '实时特征滚动窗口模拟',
+                difficulty: 'expert',
+                description: '时间窗口滚动统计，模拟实时推荐/风控特征工程',
+                path: 'projects/10_realtime_feature.html'
+            }
+        ];
+        
+        const difficultyLabels = {
+            beginner: '入门',
+            basic: '基础',
+            advanced: '进阶',
+            expert: '专家'
+        };
+        
+        createApp({
+            setup() {
+                const completedProjects = ref([]);
+                
+                const getStorage = () => {
+                    const data = localStorage.getItem('pandas_bootcamp');
+                    return data ? JSON.parse(data) : {};
+                };
+                
+                const completedCount = computed(() => completedProjects.value.length);
+                
+                const isCompleted = (projectId) => {
+                    return completedProjects.value.includes(projectId);
+                };
+                
+                const getDifficultyClass = (difficulty) => {
+                    return `badge-${difficulty}`;
+                };
+                
+                onMounted(() => {
+                    const storage = getStorage();
+                    completedProjects.value = storage.completed || [];
+                });
+                
+                return {
+                    projects,
+                    difficultyLabels,
+                    completedCount,
+                    isCompleted,
+                    getDifficultyClass
+                };
+            },
+            template: `
+                <div class="min-h-screen">
+                    <!-- Header -->
+                    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-50">
+                        <div class="max-w-7xl mx-auto px-6 py-6">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center">
+                                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h1 class="text-2xl font-bold text-white">Pandas 数据分析实战训练营</h1>
+                                        <p class="text-slate-400 text-sm">10 个精选实战项目 · 从入门到进阶</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <div class="text-right">
+                                        <div class="text-3xl font-bold text-blue-400">{{ completedCount }}</div>
+                                        <div class="text-sm text-slate-400">已完成 / 10 项目</div>
+                                    </div>
+                                    <div class="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center border-2 border-slate-700">
+                                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
+                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+                    
+                    <main class="max-w-7xl mx-auto px-6 py-12">
+                        <!-- Hero Section -->
+                        <section class="text-center mb-16 fade-in">
+                            <h2 class="text-5xl font-bold text-white mb-4 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                                让你从零开始掌握数据分析核心技能
+                            </h2>
+                            <p class="text-xl text-slate-400 max-w-3xl mx-auto">
+                                真实业务数据 · 实时在浏览器中运行代码 · 循序渐进学习路径 · 完成项目获取徽章
+                            </p>
+                        </section>
+                        
+                        <!-- Features -->
+                        <section class="grid md:grid-cols-3 gap-6 mb-16">
+                            <div class="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 fade-in" style="animation-delay: 0.1s">
+                                <div class="w-14 h-14 bg-blue-500/20 rounded-xl flex items-center justify-center mb-6">
+                                    <svg class="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-xl font-semibold text-white mb-3">无需配置环境</h3>
+                                <p class="text-slate-400">完全在浏览器中运行 Python 代码，无需安装任何软件</p>
+                            </div>
+                            <div class="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 fade-in" style="animation-delay: 0.2s">
+                                <div class="w-14 h-14 bg-green-500/20 rounded-xl flex items-center justify-center mb-6">
+                                    <svg class="w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-xl font-semibold text-white mb-3">真实业务数据</h3>
+                                <p class="text-slate-400">每个项目都包含模拟的真实电商业务数据</p>
+                            </div>
+                            <div class="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 fade-in" style="animation-delay: 0.3s">
+                                <div class="w-14 h-14 bg-purple-500/20 rounded-xl flex items-center justify-center mb-6">
+                                    <svg class="w-7 h-7 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-xl font-semibold text-white mb-3">循序渐进学习</h3>
+                                <p class="text-slate-400">从入门到专家，难度逐步提升，学习路径清晰</p>
+                            </div>
+                        </section>
+                        
+                        <!-- Learning Path -->
+                        <section class="mb-12">
+                            <h2 class="text-3xl font-bold text-white mb-8">学习路径</h2>
+                            <div class="grid md:grid-cols-4 gap-4">
+                                <div class="bg-slate-800/30 rounded-xl p-5 border border-slate-700/30">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <span class="badge badge-beginner">入门</span>
+                                        <span class="text-slate-400 text-sm">1 个项目</span>
+                                    </div>
+                                    <p class="text-slate-300 text-sm">购物车放弃分析 - 掌握基础数据探索</p>
+                                </div>
+                                <div class="bg-slate-800/30 rounded-xl p-5 border border-slate-700/30">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <span class="badge badge-basic">基础</span>
+                                        <span class="text-slate-400 text-sm">2 个项目</span>
+                                    </div>
+                                    <p class="text-slate-300 text-sm">RFM分层 & 价格异常检测</p>
+                                </div>
+                                <div class="bg-slate-800/30 rounded-xl p-5 border border-slate-700/30">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <span class="badge badge-advanced">进阶</span>
+                                        <span class="text-slate-400 text-sm">4 个项目</span>
+                                    </div>
+                                    <p class="text-slate-300 text-sm">KMeans聚类、购物篮分析、行为序列、促销对比</p>
+                                </div>
+                                <div class="bg-slate-800/30 rounded-xl p-5 border border-slate-700/30">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <span class="badge badge-expert">专家</span>
+                                        <span class="text-slate-400 text-sm">3 个项目</span>
+                                    </div>
+                                    <p class="text-slate-300 text-sm">情感分析、LTV计算、实时特征工程</p>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Projects Grid -->
+                        <section>
+                            <h2 class="text-3xl font-bold text-white mb-8">10 个实战项目</h2>
+                            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <a v-for="(project, index) in projects" 
+                                   :key="project.id" 
+                                   :href="project.path"
+                                   class="project-card bg-slate-800/50 backdrop-blur-sm rounded-2xl p-7 border border-slate-700/50 hover:border-blue-500/50 block group"
+                                   :style="{ animationDelay: (0.1 * index) + 's' }">
+                                    <div class="flex items-start justify-between mb-5">
+                                        <span :class="['badge', getDifficultyClass(project.difficulty)]">
+                                            {{ difficultyLabels[project.difficulty] }}
+                                        </span>
+                                        <div v-if="isCompleted(project.id)" class="flex items-center gap-1.5 text-green-400">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                            <span class="text-sm font-medium">已完成</span>
+                                        </div>
+                                    </div>
+                                    <h3 class="text-xl font-semibold text-white mb-3 group-hover:text-blue-400 transition-colors">
+                                        {{ project.title }}
+                                    </h3>
+                                    <p class="text-slate-400 text-sm leading-relaxed mb-6">
+                                        {{ project.description }}
+                                    </p>
+                                    <div class="flex items-center text-blue-400 text-sm font-medium gap-2">
+                                        开始学习
+                                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                                        </svg>
+                                    </div>
+                                </a>
+                            </div>
+                        </section>
+                    </main>
+                    
+                    <!-- Footer -->
+                    <footer class="border-t border-slate-800 mt-20">
+                        <div class="max-w-7xl mx-auto px-6 py-10">
+                            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                                <div class="text-slate-500 text-sm">
+                                    纯前端项目 · 可直接部署到 Cloudflare Pages
+                                </div>
+                                <div class="flex items-center gap-6 text-sm text-slate-400">
+                                    <span>Powered by Vue 3</span>
+                                    <span>·</span>
+                                    <span>TailwindCSS</span>
+                                    <span>·</span>
+                                    <span>Pyodide</span>
+                                </div>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            `
+        }).mount('#app');
+    </script>
+</body>
+</html>

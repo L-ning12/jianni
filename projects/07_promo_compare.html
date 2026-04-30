@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>促销活动效果对比 - Pandas 数据分析实战训练营</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/python/python.min.js"></script>
+    <link rel="stylesheet" href="../common/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Geist+Mono:wght="400;500&display=swap" rel="stylesheet">
+</head>
+<body class="gradient-bg min-h-screen">
+    <div id="app"></div>
+    
+    <script type="module">
+        const { createApp, ref, onMounted, nextTick } = Vue;
+        import { saveCode, loadCode, markCompleted, isCompleted } from '../common/storage.js';
+        import { runCode } from '../common/code_runner.js';
+        
+        const projectId = '07_promo_compare';
+        const projectTitle = '促销活动效果对比';
+        const difficulty = 'advanced';
+        const difficultyLabel = '进阶';
+        
+        const defaultCode = `import pandas as pd
+import io
+
+# 加载数据
+csv_data = """date,orders,revenue,avg_order_value,conversion_rate,promo_flag
+2024-01-01,150,22500,150,3.2,0
+2024-01-02,165,24750,150,3.5,0
+2024-01-03,180,27000,150,3.8,0
+2024-01-04,170,25500,150,3.6,0
+2024-01-05,160,24000,150,3.4,0
+2024-01-06,190,28500,150,4.0,0
+2024-01-07,200,30000,150,4.2,0
+2024-01-08,280,42000,150,5.8,1
+2024-01-09,320,48000,150,6.7,1
+2024-01-10,350,52500,150,7.3,1
+2024-01-11,330,49500,150,6.9,1
+2024-01-12,300,45000,150,6.3,1
+2024-01-13,250,37500,150,5.2,1
+2024-01-14,220,33000,150,4.6,1
+2024-01-15,185,27750,150,3.9,0
+2024-01-16,175,26250,150,3.7,0
+2024-01-17,168,25200,150,3.5,0
+2024-01-18,172,25800,150,3.6,0
+2024-01-19,165,24750,150,3.5,0
+2024-01-20,158,23700,150,3.3,0
+2024-01-21,175,26250,150,3.7,0
+2024-01-22,180,27000,150,3.8,0
+2024-01-23,290,43500,150,6.1,1
+2024-01-24,330,49500,150,6.9,1
+2024-01-25,360,54000,150,7.5,1
+2024-01-26,340,51000,150,7.1,1
+2024-01-27,310,46500,150,6.5,1
+2024-01-28,260,39000,150,5.4,1
+2024-01-29,230,34500,150,4.8,1
+2024-01-30,190,28500,150,4.0,0
+2024-01-31,180,27000,150,3.8,0"""
+
+df = pd.read_csv(io.StringIO(csv_data))
+
+# TODO: 完成以下分析任务
+# 1. 对比活动周与非活动周的核心指标
+# 2. 计算促销带来的增量效果
+# 3. 分析促销期间的日趋势变化
+# 4. 计算投资回报率
+
+# 查看数据前5行
+print("数据预览:")
+print(df.head())
+`;
+        
+        const answerCode = `import pandas as pd
+import io
+
+csv_data = """date,orders,revenue,avg_order_value,conversion_rate,promo_flag
+2024-01-01,150,22500,150,3.2,0
+2024-01-02,165,24750,150,3.5,0
+2024-01-03,180,27000,150,3.8,0
+2024-01-04,170,25500,150,3.6,0
+2024-01-05,160,24000,150,3.4,0
+2024-01-06,190,28500,150,4.0,0
+2024-01-07,200,30000,150,4.2,0
+2024-01-08,280,42000,150,5.8,1
+2024-01-09,320,48000,150,6.7,1
+2024-01-10,350,52500,150,7.3,1
+2024-01-11,330,49500,150,6.9,1
+2024-01-12,300,45000,150,6.3,1
+2024-01-13,250,37500,150,5.2,1
+2024-01-14,220,33000,150,4.6,1
+2024-01-15,185,27750,150,3.9,0
+2024-01-16,175,26250,150,3.7,0
+2024-01-17,168,25200,150,3.5,0
+2024-01-18,172,25800,150,3.6,0
+2024-01-19,165,24750,150,3.5,0
+2024-01-20,158,23700,150,3.3,0
+2024-01-21,175,26250,150,3.7,0
+2024-01-22,180,27000,150,3.8,0
+2024-01-23,290,43500,150,6.1,1
+2024-01-24,330,49500,150,6.9,1
+2024-01-25,360,54000,150,7.5,1
+2024-01-26,340,51000,150,7.1,1
+2024-01-27,310,46500,150,6.5,1
+2024-01-28,260,39000,150,5.4,1
+2024-01-29,230,34500,150,4.8,1
+2024-01-30,190,28500,150,4.0,0
+2024-01-31,180,27000,150,3.8,0"""
+
+df = pd.read_csv(io.StringIO(csv_data))
+df['date'] = pd.to_datetime(df['date'])
+
+print("=" * 50)
+print("促销活动效果对比分析报告")
+print("=" * 50)
+
+# 1. 分组对比统计
+print("\\n1. 促销期 vs 非促销期指标对比:")
+promo_group = df.groupby('promo_flag').agg({
+    'orders': ['mean', 'sum'],
+    'revenue': ['mean', 'sum'],
+    'conversion_rate': 'mean'
+}).round(1)
+
+# 重命名列
+promo_group.columns = ['订单量_均值', '订单量_总和', '营收_均值', '营收_总和', '转化率_均值']
+print(promo_group)
+
+# 2. 计算促销带来的增量
+print("\\n2. 促销增量分析:")
+non_promo_avg = df[df['promo_flag'] == 0][['orders', 'revenue']].mean()
+promo_days = df[df['promo_flag'] == 1].shape[0]
+
+incremental_orders = (df[df['promo_flag'] == 1]['orders'] - non_promo_avg['orders']).sum()
+incremental_revenue = (df[df['promo_flag'] == 1]['revenue'] - non_promo_avg['revenue']).sum()
+
+print(f"   非促销期日均订单: {non_promo_avg['orders']:.0f}")
+print(f"   非促销期日均营收: {non_promo_avg['revenue']:.0f}")
+print(f"   促销天数: {promo_days}天")
+print(f"   促销带来的增量订单: {incremental_orders:.0f}")
+print(f"   促销带来的增量营收: {incremental_revenue:.0f}")
+
+# 3. 按日期分组的趋势分析
+print("\\n3. 促销期间日趋势:")
+promo_df = df[df['promo_flag'] == 1].copy()
+promo_df = promo_df.sort_values('date')
+
+# 计算相对增长
+first_day = promo_df.iloc[0]
+promo_df['orders_growth_pct'] = ((promo_df['orders'] - first_day['orders']) / first_day['orders'] * 100).round(1)
+
+print("日期\\t\\t订单量\\t转化率%\\t较首日增长%")
+print("-" * 60)
+for _, row in promo_df.iterrows():
+    print(f"{row['date'].date()}\\t{row['orders']}\\t\\t{row['conversion_rate']}\\t\\t{row['orders_growth_pct']}")
+
+# 4. 促销活动效果汇总
+print("\\n4. 活动效果汇总:")
+total_promo_revenue = df[df['promo_flag'] == 1]['revenue'].sum()
+total_non_promo_revenue = df[df['promo_flag'] == 0]['revenue'].sum()
+promo_revenue_ratio = (total_promo_revenue / (total_promo_revenue + total_non_promo_revenue) * 100).round(1)
+
+print(f"   促销期总营收: {total_promo_revenue}")
+print(f"   非促销期总营收: {total_non_promo_revenue}")
+print(f"   促销期营收占比: {promo_revenue_ratio}%")
+
+# 5. 转化率提升分析
+avg_promo_conv = df[df['promo_flag'] == 1]['conversion_rate'].mean()
+avg_non_promo_conv = df[df['promo_flag'] == 0]['conversion_rate'].mean()
+conv_lift = ((avg_promo_conv - avg_non_promo_conv) / avg_non_promo_conv * 100).round(1)
+
+print(f"\\n5. 转化率提升分析:")
+print(f"   非促销期平均转化率: {avg_non_promo_conv:.1f}%")
+print(f"   促销期平均转化率: {avg_promo_conv:.1f}%")
+print(f"   转化率提升: {conv_lift:.1f}%")
+
+print("\\n" + "=" * 50)
+print("分析完成!")
+print("=" * 50)
+`;
+        
+        const csvData = `date,orders,revenue,avg_order_value,conversion_rate,promo_flag
+2024-01-01,150,22500,150,3.2,0
+2024-01-02,165,24750,150,3.5,0
+2024-01-03,180,27000,150,3.8,0
+2024-01-04,170,25500,150,3.6,0
+2024-01-05,160,24000,150,3.4,0
+2024-01-06,190,28500,150,4.0,0
+2024-01-07,200,30000,150,4.2,0
+2024-01-08,280,42000,150,5.8,1
+2024-01-09,320,48000,150,6.7,1
+2024-01-10,350,52500,150,7.3,1
+2024-01-11,330,49500,150,6.9,1
+2024-01-12,300,45000,150,6.3,1
+2024-01-13,250,37500,150,5.2,1
+2024-01-14,220,33000,150,4.6,1
+2024-01-15,185,27750,150,3.9,0
+2024-01-16,175,26250,150,3.7,0
+2024-01-17,168,25200,150,3.5,0
+2024-01-18,172,25800,150,3.6,0
+2024-01-19,165,24750,150,3.5,0
+2024-01-20,158,23700,150,3.3,0
+2024-01-21,175,26250,150,3.7,0
+2024-01-22,180,27000,150,3.8,0
+2024-01-23,290,43500,150,6.1,1
+2024-01-24,330,49500,150,6.9,1
+2024-01-25,360,54000,150,7.5,1
+2024-01-26,340,51000,150,7.1,1
+2024-01-27,310,46500,150,6.5,1
+2024-01-28,260,39000,150,5.4,1
+2024-01-29,230,34500,150,4.8,1
+2024-01-30,190,28500,150,4.0,0
+2024-01-31,180,27000,150,3.8,0`;
+        
+        const parseCSV = (csv) => {
+            const lines = csv.trim().split('\n');
+            const headers = lines[0].split(',');
+            const rows = lines.slice(1, 21).map(line => {
+                const values = line.split(',');
+                const obj = {};
+                headers.forEach((header, index) => {
+                    obj[header] = values[index];
+                });
+                return obj;
+            });
+            return { headers, rows };
+        };
+        
+        const { headers, rows } = parseCSV(csvData);
+        
+        createApp({
+            setup() {
+                const code = ref(loadCode(projectId) || defaultCode);
+                const output = ref([]);
+                const isRunning = ref(false);
+                const isCompletedStatus = ref(isCompleted(projectId));
+                const showAnswer = ref(false);
+                let editor = null;
+                
+                const addOutput = (type, content) => {
+                    output.value.push({
+                        type,
+                        content,
+                        id: Date.now()
+                    });
+                };
+                
+                const handleRun = async () => {
+                    isRunning.value = true;
+                    output.value = [];
+                    addOutput('info', '正在运行代码...');
+                    
+                    try {
+                        await runCode(code.value, (result) => {
+                            if (result.type === 'text') {
+                                addOutput('text', result.content);
+                            } else if (result.type === 'table') {
+                                addOutput('table', result.content);
+                            } else if (result.type === 'error') {
+                                addOutput('error', result.content);
+                            }
+                        });
+                    } catch (error) {
+                        addOutput('error', String(error));
+                    } finally {
+                        isRunning.value = false;
+                    }
+                };
+                
+                const handleReset = () => {
+                    code.value = defaultCode;
+                    if (editor) {
+                        editor.setValue(defaultCode);
+                    }
+                    saveCode(projectId, defaultCode);
+                };
+                
+                const handleShowAnswer = () => {
+                    showAnswer.value = !showAnswer.value;
+                    if (showAnswer.value) {
+                        code.value = answerCode;
+                        if (editor) {
+                            editor.setValue(answerCode);
+                        }
+                    } else {
+                        code.value = loadCode(projectId) || defaultCode;
+                        if (editor) {
+                            editor.setValue(loadCode(projectId) || defaultCode);
+                        }
+                    }
+                };
+                
+                const handleComplete = () => {
+                    markCompleted(projectId);
+                    isCompletedStatus.value = true;
+                };
+                
+                const handleCodeChange = (newCode) => {
+                    code.value = newCode;
+                    saveCode(projectId, newCode);
+                };
+                
+                onMounted(async () => {
+                    await nextTick();
+                    
+                    if (typeof CodeMirror !== 'undefined') {
+                        const textarea = document.getElementById('code-editor');
+                        if (textarea) {
+                            editor = CodeMirror.fromTextArea(textarea, {
+                                mode: 'python',
+                                theme: 'dracula',
+                                lineNumbers: true,
+                                indentUnit: 4,
+                                tabSize: 4,
+                                indentWithTabs: false,
+                                lineWrapping: true,
+                                autoCloseBrackets: true,
+                                matchBrackets: true
+                            });
+                            
+                            editor.setValue(code.value);
+                            
+                            editor.on('change', () => {
+                                handleCodeChange(editor.getValue());
+                            });
+                        }
+                    }
+                });
+                
+                return {
+                    code,
+                    output,
+                    isRunning,
+                    isCompletedStatus,
+                    showAnswer,
+                    projectId,
+                    projectTitle,
+                    difficulty,
+                    difficultyLabel,
+                    headers,
+                    rows,
+                    handleRun,
+                    handleReset,
+                    handleShowAnswer,
+                    handleComplete
+                };
+            },
+            template: \`
+                <div class="min-h-screen">
+                    <!-- Header -->
+                    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-50">
+                        <div class="max-w-7xl mx-auto px-6 py-5">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <a href="../index.html" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                        </svg>
+                                        返回首页
+                                    </a>
+                                    <div class="w-px h-8 bg-slate-700"></div>
+                                    <div>
+                                        <h1 class="text-xl font-bold text-white">{{ projectTitle }}</h1>
+                                        <div class="flex items-center gap-2">
+                                            <span :class="['badge', 'badge-' + difficulty]">{{ difficultyLabel }}</span>
+                                            <span v-if="isCompletedStatus" class="badge badge-completed">已完成</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+                    
+                    <main class="max-w-7xl mx-auto px-6 py-8">
+                        <!-- Introduction -->
+                        <section class="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 mb-8 fade-in">
+                            <h2 class="text-2xl font-bold text-white mb-4">项目介绍</h2>
+                            <p class="text-slate-400 mb-6">
+                                对比活动周与非活动周的销售额、客单价、转化率等指标差异，评估促销活动的效果，分析增量贡献和投资回报率。
+                            </p>
+                            
+                            <h3 class="text-lg font-semibold text-white mb-3">数据集说明</h3>
+                            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                                <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30">
+                                    <h4 class="text-sm font-medium text-blue-400 mb-2">字段说明</h4>
+                                    <ul class="text-sm text-slate-400 space-y-1">
+                                        <li><code class="code-font text-pink-400">date</code> - 日期</li>
+                                        <li><code class="code-font text-pink-400">orders</code> - 订单数</li>
+                                        <li><code class="code-font text-pink-400">revenue</code> - 营收</li>
+                                        <li><code class="code-font text-pink-400">avg_order_value</code> - 客单价</li>
+                                        <li><code class="code-font text-pink-400">conversion_rate</code> - 转化率</li>
+                                        <li><code class="code-font text-pink-400">promo_flag</code> - 促销标记</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30">
+                                    <h4 class="text-sm font-medium text-green-400 mb-2">任务要求</h4>
+                                    <ul class="text-sm text-slate-400 space-y-1">
+                                        <li>✓ 对比活动与非活动核心指标</li>
+                                        <li>✓ 计算促销增量效果</li>
+                                        <li>✓ 分析促销日趋势变化</li>
+                                        <li>✓ 评估投资回报</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- Data Preview -->
+                            <h3 class="text-lg font-semibold text-white mb-3">数据预览</h3>
+                            <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30 overflow-x-auto">
+                                <table class="data-table w-full text-sm">
+                                    <thead>
+                                        <tr>
+                                            <th v-for="header in headers" :key="header">{{ header }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(row, index) in rows" :key="index">
+                                            <td v-for="(value, header) in row" :key="header" class="code-font">{{ value }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p class="text-slate-400 text-xs mt-2">... showing 20 of 31 rows</p>
+                            </div>
+                        </section>
+                        
+                        <!-- Code Editor -->
+                        <section class="mb-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-xl font-bold text-white">代码编辑器</h2>
+                                <div class="flex items-center gap-3">
+                                    <button @click="handleReset" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                        重置代码
+                                    </button>
+                                    <button @click="handleShowAnswer" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm font-medium transition-colors">
+                                        {{ showAnswer ? '隐藏答案' : '查看答案' }}
+                                    </button>
+                                    <button @click="handleRun" :disabled="isRunning" class="px-6 py-2 btn-primary text-white rounded-lg text-sm font-medium flex items-center gap-2">
+                                        <svg v-if="isRunning" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                        </svg>
+                                        {{ isRunning ? '运行中...' : '运行代码' }}
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 overflow-hidden">
+                                <textarea id="code-editor"></textarea>
+                            </div>
+                        </section>
+                        
+                        <!-- Output Console -->
+                        <section class="mb-8">
+                            <h2 class="text-xl font-bold text-white mb-4">输出控制台</h2>
+                            <div class="bg-slate-900 rounded-2xl border border-slate-700 p-6 max-h-96 overflow-y-auto">
+                                <div v-if="output.length === 0" class="text-slate-500 text-center py-8">
+                                    运行代码后输出将显示在这里
+                                </div>
+                                <div v-for="item in output" :key="item.id" class="mb-4 last:mb-0">
+                                    <div v-if="item.type === 'info'" class="text-blue-400 text-sm">{{ item.content }}</div>
+                                    <div v-else-if="item.type === 'text'" class="text-slate-300 text-sm whitespace-pre-wrap font-mono">{{ item.content }}</div>
+                                    <div v-else-if="item.type === 'table'" v-html="item.content" class="overflow-x-auto"></div>
+                                    <div v-else-if="item.type === 'error'" class="text-red-400 text-sm whitespace-pre-wrap font-mono">{{ item.content }}</div>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Complete Button -->
+                        <section class="text-center">
+                            <button v-if="!isCompletedStatus" @click="handleComplete" class="px-8 py-3 bg-green-600 hover:bg-green-500 text-white rounded-xl font-semibold flex items-center gap-2 mx-auto transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                标记完成
+                            </button>
+                            <div v-else class="px-8 py-3 bg-green-900/30 border border-green-700/50 text-green-400 rounded-xl font-semibold flex items-center gap-2 mx-auto justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                项目已完成
+                            </div>
+                        </section>
+                    </main>
+                </div>
+            \`
+        }).mount('#app');
+    </script>
+</body>
+</html>
