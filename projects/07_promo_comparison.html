@@ -6,6 +6,7 @@
     <title>促销活动对比</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/python/python.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.css" rel="stylesheet">
@@ -21,63 +22,160 @@
                     colors: {
                         primary: '#3b82f6',
                         secondary: '#64748b',
+                        accent: '#10b981',
+                        dark: '#1e293b',
+                        light: '#f8fafc',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                        'card-hover': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
                     },
                 },
             }
         }
     </script>
     <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
         .CodeMirror {
-            height: 300px;
-            border-radius: 0.375rem;
+            height: 400px;
+            border-radius: 0.5rem;
+            font-size: 14px;
+            line-height: 1.5;
         }
         .output-area {
-            min-height: 100px;
+            min-height: 150px;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+        }
+        .table-output {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+        }
+        .btn-primary {
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+        }
+        .btn-secondary {
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(100, 116, 139, 0.4);
+        }
+        .card {
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .back-link {
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            transform: translateX(-3px);
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
-        <header class="mb-8">
-            <a href="../index.html" class="text-primary hover:underline mb-4 inline-block">
-                <i class="fa fa-arrow-left mr-2"></i>返回首页
+<body class="font-sans">
+    <div class="container mx-auto px-4 py-12">
+        <header class="mb-12">
+            <a href="../index.html" class="back-link flex items-center text-primary hover:underline mb-6">
+                <i class="fa fa-arrow-left mr-2"></i>
+                <span>返回首页</span>
             </a>
-            <h1 class="text-3xl font-bold text-gray-800">促销活动对比</h1>
-            <p class="text-gray-600 mt-2">对比促销活动与非促销活动的销售情况</p>
-        </header>
-
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 class="text-xl font-semibold mb-4">数据预览</h2>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">user_id</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">date</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">is_promo</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">amount</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200" id="data-preview">
-                        <!-- 数据将通过JavaScript动态填充 -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold">代码编辑器</h2>
+            <div class="flex items-center mb-4">
+                <div class="bg-orange-50 rounded-2xl w-14 h-14 flex items-center justify-center mr-4">
+                    <div class="text-orange-500 text-3xl">
+                        <i class="fa fa-percent"></i>
+                    </div>
+                </div>
                 <div>
-                    <button id="run-btn" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-600 mr-2">
-                        <i class="fa fa-play mr-1"></i>运行
-                    </button>
-                    <button id="answer-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300">
-                        <i class="fa fa-lightbulb-o mr-1"></i>参考答案
-                    </button>
+                    <h1 class="text-4xl font-bold text-gray-800">促销活动对比</h1>
+                    <p class="text-lg text-gray-600 mt-2">对比促销活动与非促销活动的销售情况</p>
                 </div>
             </div>
-            <textarea id="code-editor"># 促销活动对比分析
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- 左侧信息面板 -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-card p-6 card">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">项目信息</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500 mb-2">数据字段</h3>
+                            <ul class="space-y-1 text-sm text-gray-600">
+                                <li><span class="font-medium">user_id:</span> 用户ID</li>
+                                <li><span class="font-medium">date:</span> 订单日期</li>
+                                <li><span class="font-medium">is_promo:</span> 是否促销</li>
+                                <li><span class="font-medium">amount:</span> 订单金额</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500 mb-2">分析目标</h3>
+                            <p class="text-sm text-gray-600">
+                                对比促销活动与非促销活动的销售情况，分析促销效果
+                            </p>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500 mb-2">技能点</h3>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-3 py-1 bg-orange-50 text-orange-500 text-xs font-medium rounded-full">促销分析</span>
+                                <span class="px-3 py-1 bg-orange-50 text-orange-500 text-xs font-medium rounded-full">分组聚合</span>
+                                <span class="px-3 py-1 bg-orange-50 text-orange-500 text-xs font-medium rounded-full">转化率计算</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-card p-6 card mt-6">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">数据预览</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">user_id</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">date</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">is_promo</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">amount</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="data-preview">
+                                <!-- 数据将通过JavaScript动态填充 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧代码和结果面板 -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-xl shadow-card p-6 card mb-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4 sm:mb-0">代码编辑器</h2>
+                        <div class="flex space-x-3">
+                            <button id="run-btn" class="btn-primary bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-blue-600 flex items-center">
+                                <i class="fa fa-play mr-2"></i>运行
+                            </button>
+                            <button id="answer-btn" class="btn-secondary bg-gray-200 text-gray-800 px-5 py-2.5 rounded-lg hover:bg-gray-300 flex items-center">
+                                <i class="fa fa-lightbulb-o mr-2"></i>参考答案
+                            </button>
+                        </div>
+                    </div>
+                    <textarea id="code-editor"># 促销活动对比分析
 # 对比促销活动与非促销活动的销售情况
 
 import pandas as pd
@@ -117,17 +215,28 @@ print(weekly_analysis)
 # 存储结果以便显示
 df_names = ['promo_analysis', 'weekly_analysis']
 </textarea>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="bg-white rounded-xl shadow-card p-6 card">
+                        <h2 class="text-xl font-semibold mb-4 text-gray-800">输出结果</h2>
+                        <div class="output-area" id="output"></div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-card p-6 card">
+                        <h2 class="text-xl font-semibold mb-4 text-gray-800">数据表格</h2>
+                        <div id="table-output" class="table-output"></div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 class="text-xl font-semibold mb-4">输出结果</h2>
-            <div class="bg-gray-50 p-4 rounded-md output-area" id="output"></div>
-        </div>
-
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-semibold mb-4">数据表格</h2>
-            <div id="table-output"></div>
-        </div>
+        <footer class="mt-16 text-center">
+            <div class="max-w-md mx-auto p-6 bg-white rounded-xl shadow-md">
+                <p class="text-gray-600 mb-4">完成分析后，尝试修改代码探索更多洞察</p>
+                <p class="text-sm text-gray-500">© 2026 数据分析训练网站 | 纯前端实现</p>
+            </div>
+        </footer>
     </div>
 
     <script>
@@ -172,7 +281,9 @@ df_names = ['promo_analysis', 'weekly_analysis']
             lineNumbers: true,
             indentUnit: 4,
             tabSize: 4,
-            autofocus: false
+            autofocus: false,
+            lineWrapping: true,
+            fontSize: 14
         });
 
         // 加载保存的代码
@@ -193,10 +304,11 @@ df_names = ['promo_analysis', 'weekly_analysis']
                 const rowData = rows[i].split(',');
                 const tr = document.createElement('tr');
                 
-                for (const value of rowData) {
+                // 只显示前4列，避免表格太宽
+                for (let j = 0; j < Math.min(rowData.length, 4); j++) {
                     const td = document.createElement('td');
-                    td.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-500';
-                    td.textContent = value;
+                    td.className = 'px-4 py-2 whitespace-nowrap text-sm text-gray-500';
+                    td.textContent = rowData[j];
                     tr.appendChild(td);
                 }
                 
