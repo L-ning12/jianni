@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KMeans聚类</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/python/python.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/theme/monokai.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
+    <script src="../common/pyodide_setup.js"></script>
+    <script src="../common/code_runner.js"></script>
+    <script src="../common/storage.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#64748b',
+                        accent: '#10b981',
+                        dark: '#1e293b',
+                        light: '#f8fafc',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                        'card-hover': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                    },
+                },
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        .CodeMirror {
+            height: 400px;
+            border-radius: 0.5rem;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .output-area {
+            min-height: 150px;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+        }
+        .table-output {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+        }
+        .btn-primary {
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+        }
+        .btn-secondary {
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(100, 116, 139, 0.4);
+        }
+        .card {
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .back-link {
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            transform: translateX(-3px);
+        }
+    </style>
+</head>
+<body class="font-sans">
+    <div class="container mx-auto px-4 py-12">
+        <header class="mb-12">
+            <a href="../index.html" class="back-link flex items-center text-primary hover:underline mb-6">
+                <i class="fa fa-arrow-left mr-2"></i>
+                <span>返回首页</span>
+            </a>
+            <div class="flex items-center mb-4">
+                <div class="bg-yellow-50 rounded-2xl w-14 h-14 flex items-center justify-center mr-4">
+                    <div class="text-yellow-500 text-3xl">
+                        <i class="fa fa-circle-o"></i>
+                    </div>
+                </div>
+                <div>
+                    <h1 class="text-4xl font-bold text-gray-800">KMeans聚类</h1>
+                    <p class="text-lg text-gray-600 mt-2">使用KMeans算法对用户进行聚类分析，并计算轮廓系数</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- 左侧信息面板 -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-card p-6 card">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">项目信息</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500 mb-2">数据字段</h3>
+                            <ul class="space-y-1 text-sm text-gray-600">
+                                <li><span class="font-medium">user_id:</span> 用户ID</li>
+                                <li><span class="font-medium">total_amount:</span> 总消费金额</li>
+                                <li><span class="font-medium">freq:</span> 购买频率</li>
+                                <li><span class="font-medium">avg_session_time:</span> 平均会话时间</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500 mb-2">分析目标</h3>
+                            <p class="text-sm text-gray-600">
+                                使用KMeans算法对用户进行聚类分析，并计算轮廓系数选择最佳聚类数
+                            </p>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500 mb-2">技能点</h3>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-3 py-1 bg-yellow-50 text-yellow-500 text-xs font-medium rounded-full">KMeans聚类</span>
+                                <span class="px-3 py-1 bg-yellow-50 text-yellow-500 text-xs font-medium rounded-full">轮廓系数</span>
+                                <span class="px-3 py-1 bg-yellow-50 text-yellow-500 text-xs font-medium rounded-full">特征标准化</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-card p-6 card mt-6">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">数据预览</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">user_id</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">total_amount</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">freq</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">avg_session_time</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="data-preview">
+                                <!-- 数据将通过JavaScript动态填充 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧代码和结果面板 -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-xl shadow-card p-6 card mb-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4 sm:mb-0">代码编辑器</h2>
+                        <div class="flex space-x-3">
+                            <button id="run-btn" class="btn-primary bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-blue-600 flex items-center">
+                                <i class="fa fa-play mr-2"></i>运行
+                            </button>
+                            <button id="answer-btn" class="btn-secondary bg-gray-200 text-gray-800 px-5 py-2.5 rounded-lg hover:bg-gray-300 flex items-center">
+                                <i class="fa fa-lightbulb-o mr-2"></i>参考答案
+                            </button>
+                        </div>
+                    </div>
+                    <textarea id="code-editor"># KMeans聚类分析
+# 使用KMeans算法对用户进行聚类，并计算轮廓系数
+
+import pandas as pd
+import numpy as np
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+from sklearn.preprocessing import StandardScaler
+
+# 准备特征数据
+features = df[['total_amount', 'freq', 'avg_session_time']]
+
+# 标准化特征
+scaler = StandardScaler()
+scaled_features = scaler.fit_transform(features)
+
+# 尝试不同的k值
+k_values = range(2, 6)
+silhouette_scores = []
+
+for k in k_values:
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    cluster_labels = kmeans.fit_predict(scaled_features)
+    score = silhouette_score(scaled_features, cluster_labels)
+    silhouette_scores.append(score)
+    print(f"k={k}, 轮廓系数={score:.4f}")
+
+# 选择最佳k值（轮廓系数最大的）
+best_k = k_values[np.argmax(silhouette_scores)]
+print(f"最佳k值: {best_k}")
+
+# 使用最佳k值进行聚类
+kmeans = KMeans(n_clusters=best_k, random_state=42)
+df['cluster'] = kmeans.fit_predict(scaled_features)
+
+# 分析每个聚类的特征
+cluster_analysis = df.groupby('cluster').agg({
+    'total_amount': 'mean',
+    'freq': 'mean',
+    'avg_session_time': 'mean',
+    'user_id': 'count'
+}).rename(columns={'user_id': 'user_count'})
+
+# 显示结果
+print("\n每个聚类的特征：")
+print(cluster_analysis)
+
+# 存储结果以便显示
+df_names = ['df', 'cluster_analysis']
+</textarea>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="bg-white rounded-xl shadow-card p-6 card">
+                        <h2 class="text-xl font-semibold mb-4 text-gray-800">输出结果</h2>
+                        <div class="output-area" id="output"></div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-card p-6 card">
+                        <h2 class="text-xl font-semibold mb-4 text-gray-800">数据表格</h2>
+                        <div id="table-output" class="table-output"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-16 text-center">
+            <div class="max-w-md mx-auto p-6 bg-white rounded-xl shadow-md">
+                <p class="text-gray-600 mb-4">完成分析后，尝试修改代码探索更多洞察</p>
+                <p class="text-sm text-gray-500">© 2026 数据分析训练网站 | 纯前端实现</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // 示例CSV数据
+        const csvData = `user_id,total_amount,freq,avg_session_time
+1,1000,5,10
+2,2000,10,15
+3,500,2,5
+4,3000,15,20
+5,800,4,8
+6,2500,12,18
+7,600,3,6
+8,3500,18,22
+9,1200,6,12
+10,1800,8,14
+11,400,1,4
+12,2200,11,16
+13,900,5,9
+14,2800,13,19
+15,700,3,7
+16,3200,16,21
+17,1100,6,11
+18,1900,9,15
+19,450,2,5
+20,2300,12,17`;
+
+        // 初始化CodeMirror编辑器
+        const editor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
+            mode: 'python',
+            theme: 'monokai',
+            lineNumbers: true,
+            indentUnit: 4,
+            tabSize: 4,
+            autofocus: false,
+            lineWrapping: true,
+            fontSize: 14
+        });
+
+        // 加载保存的代码
+        const projectId = '04_kmeans_clustering';
+        const savedCode = loadCode(projectId);
+        if (savedCode) {
+            editor.setValue(savedCode);
+        }
+
+        // 填充数据预览
+        function populateDataPreview() {
+            const rows = csvData.split('\n');
+            const headers = rows[0].split(',');
+            const tbody = document.getElementById('data-preview');
+            
+            // 显示前5行数据
+            for (let i = 1; i < Math.min(rows.length, 6); i++) {
+                const rowData = rows[i].split(',');
+                const tr = document.createElement('tr');
+                
+                // 只显示前4列，避免表格太宽
+                for (let j = 0; j < Math.min(rowData.length, 4); j++) {
+                    const td = document.createElement('td');
+                    td.className = 'px-4 py-2 whitespace-nowrap text-sm text-gray-500';
+                    td.textContent = rowData[j];
+                    tr.appendChild(td);
+                }
+                
+                tbody.appendChild(tr);
+            }
+        }
+
+        // 运行按钮点击事件
+        document.getElementById('run-btn').addEventListener('click', async () => {
+            const code = editor.getValue();
+            const outputElement = document.getElementById('output');
+            const tableElement = document.getElementById('table-output');
+            
+            // 保存代码
+            saveCode(projectId, code);
+            
+            // 准备代码（添加数据加载）
+            const fullCode = prepareCodeWithData(code, csvData);
+            
+            // 运行代码
+            outputElement.textContent = '运行中...';
+            await runCode(fullCode, outputElement, tableElement);
+        });
+
+        // 参考答案按钮点击事件
+        document.getElementById('answer-btn').addEventListener('click', () => {
+            const answerCode = `# KMeans聚类分析
+# 使用KMeans算法对用户进行聚类，并计算轮廓系数
+
+import pandas as pd
+import numpy as np
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+from sklearn.preprocessing import StandardScaler
+
+# 准备特征数据
+features = df[['total_amount', 'freq', 'avg_session_time']]
+
+# 标准化特征
+scaler = StandardScaler()
+scaled_features = scaler.fit_transform(features)
+
+# 尝试不同的k值
+k_values = range(2, 6)
+silhouette_scores = []
+
+for k in k_values:
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    cluster_labels = kmeans.fit_predict(scaled_features)
+    score = silhouette_score(scaled_features, cluster_labels)
+    silhouette_scores.append(score)
+    print(f"k={k}, 轮廓系数={score:.4f}")
+
+# 选择最佳k值（轮廓系数最大的）
+best_k = k_values[np.argmax(silhouette_scores)]
+print(f"最佳k值: {best_k}")
+
+# 使用最佳k值进行聚类
+kmeans = KMeans(n_clusters=best_k, random_state=42)
+df['cluster'] = kmeans.fit_predict(scaled_features)
+
+# 分析每个聚类的特征
+cluster_analysis = df.groupby('cluster').agg({
+    'total_amount': 'mean',
+    'freq': 'mean',
+    'avg_session_time': 'mean',
+    'user_id': 'count'
+}).rename(columns={'user_id': 'user_count'})
+
+# 显示结果
+print("\n每个聚类的特征：")
+print(cluster_analysis)
+
+# 存储结果以便显示
+df_names = ['df', 'cluster_analysis']
+`;
+            editor.setValue(answerCode);
+            saveCode(projectId, answerCode);
+        });
+
+        // 初始化
+        async function init() {
+            // 初始化Pyodide
+            await initializePyodide();
+            // 填充数据预览
+            populateDataPreview();
+        }
+
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
