@@ -35,13 +35,19 @@ function dataframeToTable(df) {
     }
 }
 
-export async function runCode(code, onOutput) {
+export async function runCode(code, onOutput, onProgress) {
     try {
+        // Initialize Pyodide with progress callback
+        await initPyodide((stage, message) => {
+            if (onProgress) {
+                onProgress(stage, message);
+            }
+        });
+        
         const pyodide = await initPyodide();
         
         // Capture print output
         let stdout = '';
-        const oldPrint = pyodide.globals.get('print');
         
         pyodide.runPython(`
 import sys
