@@ -5,36 +5,501 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pandas 数据分析实战训练营 | 升级版</title>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft Yahei",sans-serif;}
-        body{background:#f5f7fa;color:#333;line-height:1.6;padding:20px;}
+        *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei", "PingFang SC", -apple-system, BlinkMacSystemFont, sans-serif;}
+        :root{
+            --primary-color:#3498db;
+            --success-color:#27ae60;
+            --warning-color:#f39c12;
+            --danger-color:#e74c3c;
+            --dark-color:#2c3e50;
+            --light-gray:#f5f7fa;
+            --card-shadow:0 4px 15px rgba(0,0,0,0.08);
+            --hover-shadow:0 8px 25px rgba(0,0,0,0.15);
+        }
+        body{background:var(--light-gray);color:#333;line-height:1.6;padding:15px;min-height:100vh;}
         .container{max-width:1200px;margin:0 auto;}
-        header{text-align:center;padding:30px 0;background:linear-gradient(135deg,#2c3e50,#3498db);color:#fff;border-radius:12px;margin-bottom:30px;box-shadow:0 4px 12px #0002;}
-        header h1{font-size:2.2rem;margin-bottom:10px;}
-        .progress-box{background:#fff;padding:15px;border-radius:10px;margin-bottom:25px;box-shadow:0 2px 8px #0001;}
-        .progress-text{font-size:18px;font-weight:bold;color:#2c3e50;}
-        .progress-bar{height:10px;background:#eee;border-radius:5px;margin-top:10px;overflow:hidden;}
-        .progress-inner{height:100%;background:#27ae60;width:0%;transition:0.5s;}
-        .intro-card{background:#fff;padding:20px;border-radius:10px;margin-bottom:30px;box-shadow:0 2px 8px #0001;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;}
-        .intro-item{padding:10px;border-left:4px solid #3498db;}
-        .level-tag{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;color:#fff;margin-right:8px;}
-        .level-rud{background:#3498db;}
-        .level-basic{background:#27ae60;}
-        .level-adv{background:#f39c12;}
-        .level-exp{background:#e74c3c;}
-        .project-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:20px;}
-        .project-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 3px 10px #0001;transition:0.3s;cursor:pointer;}
-        .project-card:hover{transform:translateY(-5px);box-shadow:0 8px 20px #0002;}
-        .project-desc{color:#666;margin:10px 0;font-size:14px;}
-        .btn-start{display:inline-block;padding:8px 16px;background:#3498db;color:#fff;border-radius:6px;text-decoration:none;margin-top:10px;}
-        .badge{float:right;width:30px;height:30px;border-radius:50%;background:#ddd;display:flex;align-items:center;justify-content:center;color:#999;}
-        .badge.done{background:#f1c40f;color:#fff;}
-        .code-box{margin-top:30px;background:#1e1e1e;border-radius:10px;padding:20px;color:#fff;}
-        textarea{width:100%;height:200px;background:#2d2d2d;color:#ccc;border:none;padding:15px;border-radius:6px;resize:none;font-size:14px;}
-        .run-btn{margin-top:10px;padding:8px 20px;background:#27ae60;border:none;color:#fff;border-radius:6px;cursor:pointer;}
-        .output{margin-top:15px;padding:15px;background:#2d2d2d;border-radius:6px;min-height:80px;color:#ccc;}
-        .hide{display:none;}
-        .project-content{background:#fff;padding:25px;border-radius:12px;margin-top:20px;box-shadow:0 2px 10px #0001;}
-        .step{margin:15px 0;padding-left:10px;border-left:3px solid #3498db;}
+        
+        header{
+            text-align:center;
+            padding:35px 20px;
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            color:#fff;
+            border-radius:16px;
+            margin-bottom:25px;
+            box-shadow:var(--card-shadow);
+            position:relative;
+            overflow:hidden;
+        }
+        header::before{
+            content:'';
+            position:absolute;
+            top:-50%;right:-20%;
+            width:100px;height:100px;
+            background:rgba(255,255,255,0.1);
+            border-radius:50%;
+        }
+        header::after{
+            content:'';
+            position:absolute;
+            bottom:-30%;left:-10%;
+            width:80px;height:80px;
+            background:rgba(255,255,255,0.08);
+            border-radius:50%;
+        }
+        header h1{font-size:1.8rem;margin-bottom:8px;position:relative;z-index:1;}
+        header p{font-size:0.9rem;opacity:0.9;position:relative;z-index:1;}
+        
+        .progress-box{
+            background:#fff;
+            padding:20px;
+            border-radius:12px;
+            margin-bottom:20px;
+            box-shadow:var(--card-shadow);
+        }
+        .progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+        .progress-text{font-size:16px;font-weight:600;color:var(--dark-color);}
+        .progress-percent{font-size:18px;font-weight:bold;color:var(--primary-color);}
+        .progress-bar{
+            height:12px;
+            background:#e8ecef;
+            border-radius:6px;
+            overflow:hidden;
+            position:relative;
+        }
+        .progress-inner{
+            height:100%;
+            background:linear-gradient(90deg,var(--success-color),var(--primary-color));
+            width:0%;
+            transition:width 0.5s ease-out;
+            border-radius:6px;
+            position:relative;
+        }
+        .progress-inner::after{
+            content:'';
+            position:absolute;
+            right:0;top:0;bottom:0;
+            width:20px;
+            background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3));
+        }
+        
+        .intro-card{
+            background:#fff;
+            padding:20px;
+            border-radius:12px;
+            margin-bottom:25px;
+            box-shadow:var(--card-shadow);
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+            gap:15px;
+        }
+        .intro-item{
+            padding:12px 15px;
+            border-left:4px solid var(--primary-color);
+            background:#f8fafc;
+            border-radius:0 8px 8px 0;
+            font-size:14px;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+        .intro-item svg{width:18px;height:18px;color:var(--success-color);}
+        
+        .filter-tabs{
+            display:flex;
+            gap:10px;
+            margin-bottom:20px;
+            overflow-x:auto;
+            padding-bottom:10px;
+        }
+        .filter-tab{
+            padding:10px 20px;
+            border:none;
+            border-radius:25px;
+            cursor:pointer;
+            font-size:14px;
+            font-weight:500;
+            transition:all 0.3s;
+            white-space:nowrap;
+        }
+        .filter-tab.active{
+            background:var(--primary-color);
+            color:#fff;
+            box-shadow:0 4px 12px rgba(52,152,219,0.3);
+        }
+        .filter-tab:not(.active){
+            background:#fff;
+            color:#666;
+            box-shadow:var(--card-shadow);
+        }
+        .filter-tab:hover:not(.active){
+            background:#f0f5ff;
+            transform:translateY(-2px);
+        }
+        
+        .project-list{
+            display:grid;
+            grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+            gap:20px;
+        }
+        .project-card{
+            background:#fff;
+            border-radius:16px;
+            padding:22px;
+            box-shadow:var(--card-shadow);
+            transition:all 0.35s ease;
+            cursor:pointer;
+            position:relative;
+            overflow:hidden;
+        }
+        .project-card::before{
+            content:'';
+            position:absolute;
+            top:0;left:0;right:0;
+            height:3px;
+            background:linear-gradient(90deg,var(--primary-color),var(--success-color));
+            transform:scaleX(0);
+            transition:transform 0.35s;
+        }
+        .project-card:hover{
+            transform:translateY(-6px);
+            box-shadow:var(--hover-shadow);
+        }
+        .project-card:hover::before{
+            transform:scaleX(1);
+        }
+        
+        .project-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+        .level-tag{
+            display:inline-block;
+            padding:4px 12px;
+            border-radius:20px;
+            font-size:12px;
+            font-weight:600;
+            color:#fff;
+        }
+        .level-rud{background:linear-gradient(135deg,#3498db,#2980b9);}
+        .level-basic{background:linear-gradient(135deg,#27ae60,#1e8449);}
+        .level-adv{background:linear-gradient(135deg,#f39c12,#d68910);}
+        .level-exp{background:linear-gradient(135deg,#e74c3c,#c0392b);}
+        
+        .badge{
+            width:32px;height:32px;
+            border-radius:50%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:16px;
+            font-weight:bold;
+            transition:all 0.3s;
+        }
+        .badge.pending{background:#e8ecef;color:#999;}
+        .badge.done{
+            background:linear-gradient(135deg,#f1c40f,#f39c12);
+            color:#fff;
+            box-shadow:0 4px 12px rgba(241,196,15,0.4);
+            animation:pulse 2s infinite;
+        }
+        @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+        
+        .project-card h3{
+            font-size:1.1rem;
+            color:var(--dark-color);
+            margin-bottom:8px;
+            font-weight:600;
+        }
+        .project-desc{
+            color:#666;
+            font-size:14px;
+            line-height:1.5;
+            margin-bottom:15px;
+            display:-webkit-box;
+            -webkit-line-clamp:2;
+            -webkit-box-orient:vertical;
+            overflow:hidden;
+        }
+        .btn-start{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            padding:10px 18px;
+            background:linear-gradient(135deg,var(--primary-color),#2980b9);
+            color:#fff;
+            border-radius:8px;
+            text-decoration:none;
+            font-size:14px;
+            font-weight:500;
+            transition:all 0.3s;
+            border:none;
+            cursor:pointer;
+        }
+        .btn-start:hover{
+            transform:translateX(5px);
+            box-shadow:0 4px 15px rgba(52,152,219,0.3);
+        }
+        
+        .modal-overlay{
+            position:fixed;
+            top:0;left:0;right:0;bottom:0;
+            background:rgba(0,0,0,0.5);
+            display:none;
+            justify-content:center;
+            align-items:flex-start;
+            z-index:1000;
+            padding:20px;
+            overflow-y:auto;
+        }
+        .modal-overlay.active{display:flex;}
+        
+        .modal-content{
+            background:#fff;
+            border-radius:16px;
+            width:100%;
+            max-width:900px;
+            max-height:90vh;
+            overflow:hidden;
+            box-shadow:0 20px 60px rgba(0,0,0,0.3);
+            animation:slideUp 0.3s ease;
+        }
+        @keyframes slideUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+        
+        .modal-header{
+            padding:20px 25px;
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            color:#fff;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            position:sticky;
+            top:0;
+        }
+        .modal-header h2{font-size:1.3rem;font-weight:600;}
+        .close-btn{
+            width:36px;height:36px;
+            border-radius:50%;
+            border:none;
+            background:rgba(255,255,255,0.2);
+            color:#fff;
+            font-size:20px;
+            cursor:pointer;
+            transition:all 0.3s;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+        .close-btn:hover{background:rgba(255,255,255,0.3);transform:rotate(90deg);}
+        
+        .modal-body{padding:25px;overflow-y:auto;max-height:calc(90vh - 80px);}
+        
+        .proj-description{
+            padding:15px;
+            background:#f8fafc;
+            border-radius:10px;
+            margin-bottom:20px;
+            font-size:14px;
+            color:#555;
+            border-left:4px solid var(--primary-color);
+        }
+        
+        .steps-section{margin-bottom:25px;}
+        .steps-section h3{
+            font-size:1rem;
+            font-weight:600;
+            color:var(--dark-color);
+            margin-bottom:15px;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+        .steps-list{
+            display:grid;
+            gap:12px;
+        }
+        .step-item{
+            display:flex;
+            gap:12px;
+            padding:12px 15px;
+            background:#f8fafc;
+            border-radius:8px;
+            transition:all 0.3s;
+        }
+        .step-item:hover{background:#f0f5ff;}
+        .step-num{
+            width:28px;height:28px;
+            border-radius:50%;
+            background:var(--primary-color);
+            color:#fff;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:13px;
+            font-weight:bold;
+            flex-shrink:0;
+        }
+        .step-text{font-size:14px;color:#444;padding-top:4px;}
+        
+        .code-section{margin-bottom:25px;}
+        .code-section h3{
+            font-size:1rem;
+            font-weight:600;
+            color:var(--dark-color);
+            margin-bottom:15px;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+        
+        .code-box{
+            background:#1e1e1e;
+            border-radius:12px;
+            overflow:hidden;
+            margin-bottom:15px;
+        }
+        .code-header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:10px 15px;
+            background:#2d2d2d;
+            border-bottom:1px solid #3d3d3d;
+        }
+        .code-lang{color:#888;font-size:12px;}
+        .copy-btn{
+            padding:5px 12px;
+            background:var(--primary-color);
+            color:#fff;
+            border:none;
+            border-radius:4px;
+            font-size:12px;
+            cursor:pointer;
+            transition:all 0.3s;
+        }
+        .copy-btn:hover{background:#2980b9;}
+        
+        textarea.code-editor{
+            width:100%;
+            min-height:220px;
+            background:#1e1e1e;
+            color:#e0e0e0;
+            border:none;
+            padding:15px;
+            font-family:'Consolas','Monaco','Courier New',monospace;
+            font-size:14px;
+            line-height:1.6;
+            resize:vertical;
+            outline:none;
+            tab-size:4;
+        }
+        textarea.code-editor::placeholder{color:#555;}
+        
+        .editor-actions{display:flex;gap:12px;flex-wrap:wrap;}
+        .action-btn{
+            display:flex;
+            align-items:center;
+            gap:6px;
+            padding:10px 20px;
+            border:none;
+            border-radius:8px;
+            font-size:14px;
+            font-weight:500;
+            cursor:pointer;
+            transition:all 0.3s;
+        }
+        .run-btn{
+            background:linear-gradient(135deg,var(--success-color),#1e8449);
+            color:#fff;
+        }
+        .run-btn:hover{
+            box-shadow:0 4px 15px rgba(39,174,96,0.4);
+            transform:translateY(-2px);
+        }
+        .run-btn:disabled{
+            opacity:0.6;
+            cursor:not-allowed;
+            transform:none;
+        }
+        .reset-btn{
+            background:#e8ecef;
+            color:#555;
+        }
+        .reset-btn:hover{background:#dee2e6;}
+        
+        .output-section{margin-top:20px;}
+        .output-section h3{
+            font-size:1rem;
+            font-weight:600;
+            color:var(--dark-color);
+            margin-bottom:10px;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+        .output-box{
+            background:#1e1e1e;
+            border-radius:10px;
+            padding:15px;
+            min-height:100px;
+            font-family:'Consolas','Monaco','Courier New',monospace;
+            font-size:14px;
+            line-height:1.6;
+            white-space:pre-wrap;
+            word-wrap:break-word;
+            overflow-x:auto;
+        }
+        .output-box.ready{color:#888;}
+        .output-box.running{color:#f39c12;}
+        .output-box.success{color:#27ae60;}
+        .output-box.error{color:#e74c3c;}
+        
+        .modal-footer{
+            padding:20px 25px;
+            border-top:1px solid #eee;
+            display:flex;
+            justify-content:flex-end;
+            gap:12px;
+        }
+        .footer-btn{
+            padding:10px 24px;
+            border:none;
+            border-radius:8px;
+            font-size:14px;
+            font-weight:500;
+            cursor:pointer;
+            transition:all 0.3s;
+        }
+        .footer-btn.secondary{
+            background:#e8ecef;
+            color:#555;
+        }
+        .footer-btn.secondary:hover{background:#dee2e6;}
+        .footer-btn.primary{
+            background:linear-gradient(135deg,var(--warning-color),#d68910);
+            color:#fff;
+        }
+        .footer-btn.primary:hover{
+            box-shadow:0 4px 15px rgba(243,156,18,0.4);
+            transform:translateY(-2px);
+        }
+        
+        .loading-indicator{
+            display:inline-block;
+            width:20px;
+            height:20px;
+            border:2px solid rgba(255,255,255,0.3);
+            border-top-color:#fff;
+            border-radius:50%;
+            animation:spin 0.8s linear infinite;
+        }
+        @keyframes spin{to{transform:rotate(360deg);}}
+        
+        @media(max-width:768px){
+            header h1{font-size:1.4rem;}
+            header p{font-size:0.8rem;}
+            .project-list{grid-template-columns:1fr;}
+            .modal-content{margin:10px;width:calc(100% - 20px);}
+            .modal-body{padding:15px;}
+            .filter-tabs{gap:8px;}
+            .filter-tab{padding:8px 15px;font-size:13px;}
+        }
     </style>
 </head>
 <body>
@@ -45,213 +510,823 @@
         </header>
 
         <div class="progress-box">
-            <div class="progress-text">已完成 <span id="doneNum">0</span> / 10 项目</div>
+            <div class="progress-header">
+                <span class="progress-text">学习进度</span>
+                <span class="progress-percent" id="progressPercent">0%</span>
+            </div>
+            <div class="progress-text" style="font-weight:normal;color:#666;margin-bottom:8px;">
+                已完成 <span id="doneNum" style="color:#3498db;font-weight:bold;">0</span> / 10 项目
+            </div>
             <div class="progress-bar">
                 <div class="progress-inner" id="progressBar"></div>
             </div>
         </div>
 
         <div class="intro-card">
-            <div class="intro-item">✅ 无需安装Python，浏览器直接运行</div>
-            <div class="intro-item">✅ 每个项目自带模拟数据集+参考代码</div>
-            <div class="intro-item">✅ 自动记录学习进度，刷新不丢失</div>
-            <div class="intro-item">✅ 从入门到专家，循序渐进练Pandas</div>
+            <div class="intro-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 20h9M9 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                </svg>
+                无需安装Python，浏览器直接运行
+            </div>
+            <div class="intro-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                </svg>
+                每个项目自带模拟数据集+参考代码
+            </div>
+            <div class="intro-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                </svg>
+                自动记录学习进度，刷新不丢失
+            </div>
+            <div class="intro-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                </svg>
+                从入门到专家，循序渐进练Pandas
+            </div>
+        </div>
+
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">全部项目</button>
+            <button class="filter-tab" data-filter="入门">入门</button>
+            <button class="filter-tab" data-filter="基础">基础</button>
+            <button class="filter-tab" data-filter="进阶">进阶</button>
+            <button class="filter-tab" data-filter="专家">专家</button>
         </div>
 
         <div class="project-list" id="projectList">
         </div>
+    </div>
 
-        <div id="projectDetail" class="hide">
-            <div class="project-content">
-                <h2 id="projTitle"></h2>
-                <div id="projSteps"></div>
-                <div class="code-box">
-                    <h3>在线编写 Pandas 代码</h3>
-                    <textarea id="codeEditor"></textarea>
-                    <button class="run-btn" onclick="runCode()">运行代码</button>
-                    <div class="output" id="codeOutput">运行结果会显示在这里...</div>
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">项目详情</h2>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="proj-description" id="projDescription"></div>
+                
+                <div class="steps-section">
+                    <h3>学习步骤</h3>
+                    <div class="steps-list" id="stepsList"></div>
                 </div>
-                <button class="run-btn" style="background:#3498db;margin-top:20px;" onclick="backToList()">返回项目列表</button>
-                <button class="run-btn" style="background:#f39c12;margin-top:20px;margin-left:10px;" onclick="markDone()">标记为已完成</button>
+                
+                <div class="code-section">
+                    <h3>示例代码</h3>
+                    <div class="code-box">
+                        <div class="code-header">
+                            <span class="code-lang">Python</span>
+                            <button class="copy-btn" onclick="copyCode()">复制代码</button>
+                        </div>
+                        <textarea class="code-editor" id="codeEditor" placeholder="在这里编写你的 Pandas 代码..."></textarea>
+                    </div>
+                    <div class="editor-actions">
+                        <button class="action-btn run-btn" id="runBtn" onclick="runCode()">
+                            <span id="runBtnText">运行代码</span>
+                            <span id="runBtnLoader" class="loading-indicator" style="display:none;"></span>
+                        </button>
+                        <button class="action-btn reset-btn" onclick="resetCode()">重置代码</button>
+                    </div>
+                </div>
+                
+                <div class="output-section">
+                    <h3>运行结果</h3>
+                    <div class="output-box ready" id="outputBox">运行结果会显示在这里...</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="footer-btn secondary" onclick="closeModal()">返回列表</button>
+                <button class="footer-btn primary" onclick="markProjectDone()">
+                    <span id="markBtnText">标记为已完成</span>
+                </button>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
     <script>
-        let pyodideReady = false;
-        
-        async function initPyodide() {
-            try {
-                self.pyodide = await loadPyodide({
-                    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/"
-                });
-                await self.pyodide.loadPackage(["pandas", "numpy"]);
-                pyodideReady = true;
-                console.log("Pyodide 初始化完成");
-            } catch(e) {
-                console.error("Pyodide 初始化失败:", e);
-            }
-        }
-        
-        initPyodide();
-        
         const projects = [
             {
-                name:"购物车放弃分析",
-                level:"入门",
-                levelClass:"level-rud",
-                desc:"分析用户加购未付款行为，计算放弃率、时段趋势、核心原因指标",
-                steps:`
-                <div class="step">1. 导入 pandas 库</div>
-                <div class="step">2. 读取模拟购物车数据</div>
-                <div class="step">3. 查看数据基本信息、缺失值</div>
-                <div class="step">4. 统计加购总数、未支付数量</div>
-                <div class="step">5. 计算购物车放弃率</div>
-                <div class="step">6. 简单业务结论总结</div>
-                `,
-                code:`import pandas as pd
+                id: 0,
+                name: "购物车放弃分析",
+                level: "入门",
+                levelClass: "level-rud",
+                description: "分析用户加购未付款行为，计算放弃率、时段趋势、核心原因指标。通过本项目学习 Pandas 基础数据操作和统计分析。",
+                steps: [
+                    "导入 pandas 库并创建 DataFrame",
+                    "查看数据基本信息和前几行数据",
+                    "统计加购总数和未支付数量",
+                    "计算购物车放弃率",
+                    "分析不同时段的放弃行为",
+                    "总结业务结论"
+                ],
+                code: `import pandas as pd
+
+# 模拟购物车数据
 data = {
-    "user_id":[1,2,3,4,5,6],
-    "cart_time":["08:20","09:10","10:30","14:20","19:50","20:10"],
-    "is_pay":[1,0,1,0,0,1]
+    "user_id": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    "cart_time": ["08:20", "09:10", "10:30", "11:45", "14:20", "15:30", "16:45", "19:50", "20:10", "21:30"],
+    "category": ["电子产品", "服装", "食品", "电子产品", "服装", "食品", "电子产品", "服装", "食品", "电子产品"],
+    "is_pay": [1, 0, 1, 0, 0, 1, 1, 0, 1, 0]
 }
 df = pd.DataFrame(data)
-print("数据形状：",df.shape)
-print("\\n前5行数据：")
+
+print("=== 数据概览 ===")
+print(f"数据形状: {df.shape}")
+print(f"\\n前5行数据:")
 print(df.head())
+
+print("\\n=== 购物车放弃率分析 ===")
 total = len(df)
-not_pay = df[df["is_pay"]==0].shape[0]
-rate = not_pay / total
-print(f"\\n购物车放弃率：{rate:.2%}")`
+paid = df[df["is_pay"] == 1].shape[0]
+not_paid = df[df["is_pay"] == 0].shape[0]
+abandon_rate = not_paid / total
+
+print(f"总加购数: {total}")
+print(f"已支付: {paid}")
+print(f"未支付: {not_paid}")
+print(f"购物车放弃率: {abandon_rate:.2%}")
+
+print("\\n=== 按商品类别分析 ===")
+category_stats = df.groupby("category")["is_pay"].agg(["count", "sum"])
+category_stats["放弃率"] = 1 - category_stats["sum"] / category_stats["count"]
+print(category_stats.round(2))`
             },
             {
-                name:"RFM用户分层",
-                level:"基础",
-                levelClass:"level-basic",
-                desc:"基于消费金额、频率、最近购买时间做用户价值分层",
-                steps:`
-                <div class="step">1. 导入 pandas</div>
-                <div class="step">2. 构造用户消费数据</div>
-                <div class="step">3. 计算 R/F/M 三个指标</div>
-                <div class="step">4. 分值分箱打分</div>
-                <div class="step">5. 用户价值分层归类</div>
-                `,
-                code:`import pandas as pd
-from datetime import datetime
+                id: 1,
+                name: "RFM用户分层",
+                level: "基础",
+                levelClass: "level-basic",
+                description: "基于消费金额、频率、最近购买时间做用户价值分层，识别高价值客户和潜在流失客户。",
+                steps: [
+                    "导入 pandas 和 datetime 库",
+                    "构造用户消费数据",
+                    "计算 R(最近购买)、F(购买频率)、M(消费金额) 三个指标",
+                    "对指标进行分箱打分",
+                    "根据分数进行用户价值分层归类",
+                    "分析各层级用户特征"
+                ],
+                code: `import pandas as pd
+from datetime import datetime, timedelta
+
+# 模拟用户消费数据
 data = {
-    "user_id":[101,102,103,104],
-    "order_date":["2025-05-01","2025-04-20","2025-03-15","2025-05-05"],
-    "order_count":[5,2,1,8],
-    "amount":[580,230,99,1200]
+    "user_id": [101, 102, 103, 104, 105, 106, 107, 108],
+    "last_purchase": ["2025-05-01", "2025-04-20", "2025-03-15", "2025-05-05", 
+                      "2025-04-10", "2025-02-28", "2025-05-03", "2025-01-15"],
+    "order_count": [5, 2, 1, 8, 3, 1, 6, 2],
+    "total_amount": [580, 230, 99, 1200, 450, 85, 780, 160]
 }
 df = pd.DataFrame(data)
-print(df)`
+df["last_purchase"] = pd.to_datetime(df["last_purchase"])
+
+print("=== 用户数据 ===")
+print(df)
+
+print("\\n=== 计算RFM指标 ===")
+today = pd.to_datetime("2025-05-06")
+df["R"] = (today - df["last_purchase"]).dt.days
+df["F"] = df["order_count"]
+df["M"] = df["total_amount"]
+
+print(df[["user_id", "R", "F", "M"]])
+
+print("\\n=== RFM分箱打分(5分制) ===")
+df["R_score"] = pd.qcut(df["R"], 5, labels=[5, 4, 3, 2, 1])
+df["F_score"] = pd.qcut(df["F"], 5, labels=[1, 2, 3, 4, 5], duplicates="drop")
+df["M_score"] = pd.qcut(df["M"], 5, labels=[1, 2, 3, 4, 5], duplicates="drop")
+
+print(df[["user_id", "R_score", "F_score", "M_score"]])`
             },
             {
-                name:"价格异常检测",
-                level:"基础",
-                levelClass:"level-basic",
-                desc:"使用IQR、标准差检测商品价格异常，适合风控定价",
-                steps:`<div class="step">1.导入库</div><div class="step">2.商品价格数据</div><div class="step">3.四分位数IQR计算</div><div class="step">4.筛选异常高价/低价</div>`,
-                code:`import pandas as pd
+                id: 2,
+                name: "价格异常检测",
+                level: "基础",
+                levelClass: "level-basic",
+                description: "使用IQR方法检测商品价格异常值，适用于风控定价场景，识别异常高价或低价商品。",
+                steps: [
+                    "导入 pandas 和 numpy 库",
+                    "构造商品价格数据（含异常值）",
+                    "计算四分位数和 IQR",
+                    "确定异常值范围",
+                    "筛选并标记异常高价和低价",
+                    "输出异常检测结果"
+                ],
+                code: `import pandas as pd
 import numpy as np
-price = [29,30,32,28,31,999,27,33,29,1200]
-df = pd.DataFrame({"price":price})
+
+# 模拟商品价格数据（包含异常值）
+price_data = {
+    "product_id": [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010],
+    "product_name": ["商品A", "商品B", "商品C", "商品D", "商品E", 
+                     "商品F", "商品G", "商品H", "商品I", "商品J"],
+    "price": [29, 30, 32, 28, 31, 999, 27, 33, 29, 1200]
+}
+df = pd.DataFrame(price_data)
+
+print("=== 原始价格数据 ===")
+print(df)
+
+print("\\n=== IQR异常检测 ===")
 Q1 = df["price"].quantile(0.25)
 Q3 = df["price"].quantile(0.75)
 IQR = Q3 - Q1
-low = Q1 - 1.5*IQR
-high = Q3 + 1.5*IQR
-err = df[(df.price<low)|(df.price>high)]
-print("异常价格：\\n",err)`
+
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+print(f"Q1(下四分位数): {Q1}")
+print(f"Q3(上四分位数): {Q3}")
+print(f"IQR(四分位距): {IQR}")
+print(f"正常值范围: [{lower_bound}, {upper_bound}]")
+
+print("\\n=== 异常价格检测结果 ===")
+outliers = df[(df["price"] < lower_bound) | (df["price"] > upper_bound)]
+print(outliers)
+
+print("\\n=== 正常价格数据 ===")
+normal_data = df[(df["price"] >= lower_bound) & (df["price"] <= upper_bound)]
+print(normal_data)`
             },
-            {name:"KMeans用户聚类",level:"进阶",levelClass:"level-adv",desc:"无监督学习自动分群，提取用户特征精准运营",steps:"<div class='step'>适合练习Pandas数据预处理+数值归一化</div>",code:`import pandas as pd`},
-            {name:"购物篮商品关联分析",level:"进阶",levelClass:"level-adv",desc:"挖掘买A必买B搭配规律",steps:"<div class='step'>练习分组、统计、组合计数</div>",code:`import pandas as pd`},
-            {name:"用户行为序列特征",level:"进阶",levelClass:"level-adv",desc:"分析点击/加购/支付转化路径",steps:"<div class='step'>时间排序、行为分组统计</div>",code:`import pandas as pd`},
-            {name:"促销活动效果对比",level:"进阶",levelClass:"level-adv",desc:"对比活动与非活动周销量、转化率",steps:"<div class='step'>分组聚合、均值对比</div>",code:`import pandas as pd`},
-            {name:"评论情感分析",level:"专家",levelClass:"level-exp",desc:"基于评分做用户满意度分析",steps:"<div class='step'>文本分类、分组统计好评率</div>",code:`import pandas as pd`},
-            {name:"用户LTV生命周期价值",level:"专家",levelClass:"level-exp",desc:"计算用户长期商业价值",steps:"<div class='step'>累计求和、分组用户价值</div>",code:`import pandas as pd`},
-            {name:"实时特征滚动窗口模拟",level:"专家",levelClass:"level-exp",desc:"时间窗口滚动统计特征工程",steps:"<div class='step'>滚动窗口、shift偏移计算</div>",code:`import pandas as pd`}
+            {
+                id: 3,
+                name: "KMeans用户聚类",
+                level: "进阶",
+                levelClass: "level-adv",
+                description: "使用无监督学习自动对用户进行分群，提取用户特征进行精准运营。",
+                steps: [
+                    "导入 pandas 和 sklearn 库",
+                    "准备用户行为数据",
+                    "数据预处理和归一化",
+                    "使用 KMeans 进行聚类",
+                    "分析各聚类群体特征",
+                    "输出聚类结果"
+                ],
+                code: `import pandas as pd
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+
+# 模拟用户行为数据
+user_data = {
+    "user_id": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    "avg_spend": [150, 280, 80, 320, 95, 220, 180, 450, 70, 380],
+    "visit_freq": [3, 8, 2, 12, 1, 6, 4, 15, 1, 10],
+    "avg_stay": [5, 15, 3, 20, 2, 12, 8, 25, 2, 18]
+}
+df = pd.DataFrame(user_data)
+
+print("=== 用户行为数据 ===")
+print(df)
+
+print("\\n=== 数据标准化 ===")
+scaler = StandardScaler()
+scaled_data = scaler.fit_transform(df[["avg_spend", "visit_freq", "avg_stay"]])
+
+print("\\n=== KMeans聚类 ===")
+kmeans = KMeans(n_clusters=3, random_state=42)
+df["cluster"] = kmeans.fit_predict(scaled_data)
+
+print("\\n=== 聚类结果 ===")
+print(df[["user_id", "cluster"]])
+
+print("\\n=== 各聚类中心特征 ===")
+cluster_centers = scaler.inverse_transform(kmeans.cluster_centers_)
+centers_df = pd.DataFrame(cluster_centers, columns=["avg_spend", "visit_freq", "avg_stay"])
+centers_df["cluster"] = centers_df.index
+print(centers_df.round(1))`
+            },
+            {
+                id: 4,
+                name: "购物篮商品关联分析",
+                level: "进阶",
+                levelClass: "level-adv",
+                description: "挖掘买A必买B的商品搭配规律，用于商品推荐和促销策略制定。",
+                steps: [
+                    "导入 pandas 库",
+                    "准备购物篮交易数据",
+                    "统计商品组合出现频率",
+                    "计算支持度和置信度",
+                    "挖掘强关联规则",
+                    "输出关联分析结果"
+                ],
+                code: `import pandas as pd
+from collections import defaultdict
+
+# 模拟购物篮数据
+transactions = [
+    ["牛奶", "面包", "鸡蛋"],
+    ["牛奶", "面包", "饼干", "鸡蛋"],
+    ["面包", "饼干"],
+    ["牛奶", "鸡蛋", "饼干"],
+    ["牛奶", "面包", "鸡蛋", "酸奶"],
+    ["面包", "酸奶"],
+    ["牛奶", "面包"],
+    ["牛奶", "鸡蛋", "酸奶"]
+]
+
+print("=== 购物篮数据 ===")
+for i, items in enumerate(transactions, 1):
+    print(f"订单{i}: {', '.join(items)}")
+
+print("\\n=== 商品组合统计 ===")
+pair_counts = defaultdict(int)
+single_counts = defaultdict(int)
+
+for transaction in transactions:
+    items = sorted(transaction)
+    for i in range(len(items)):
+        single_counts[items[i]] += 1
+        for j in range(i + 1, len(items)):
+            pair = (items[i], items[j])
+            pair_counts[pair] += 1
+
+print("单品购买次数:")
+for item, count in single_counts.items():
+    print(f"  {item}: {count}次")
+
+print("\\n商品组合购买次数:")
+for pair, count in pair_counts.items():
+    print(f"  {pair[0]} + {pair[1]}: {count}次")
+
+print("\\n=== 关联规则(置信度) ===")
+total_transactions = len(transactions)
+for (item1, item2), count in pair_counts.items():
+    support = count / total_transactions
+    confidence = count / single_counts[item1]
+    print(f"购买{item1}后购买{item2}: 支持度={support:.2%}, 置信度={confidence:.2%}")`
+            },
+            {
+                id: 5,
+                name: "用户行为序列特征",
+                level: "进阶",
+                levelClass: "level-adv",
+                description: "分析用户点击、加购、支付的转化路径，优化用户体验和转化率。",
+                steps: [
+                    "导入 pandas 库",
+                    "准备用户行为日志数据",
+                    "按用户和时间排序",
+                    "分析行为序列模式",
+                    "计算各环节转化率",
+                    "找出主要流失环节"
+                ],
+                code: `import pandas as pd
+
+# 模拟用户行为数据
+behavior_data = {
+    "user_id": [1, 1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5],
+    "behavior": ["浏览", "点击", "加购", "浏览", "点击", 
+                 "浏览", "点击", "加购", "支付", "浏览", "点击", "加购", "浏览", "点击"],
+    "time": ["10:00", "10:01", "10:03", "11:00", "11:02", 
+             "14:00", "14:01", "14:05", "14:08", "15:00", "15:02", "15:04", "16:00", "16:01"]
+}
+df = pd.DataFrame(behavior_data)
+
+print("=== 用户行为数据 ===")
+print(df)
+
+print("\\n=== 行为路径分析 ===")
+user_paths = df.groupby("user_id")["behavior"].apply(list).reset_index()
+print(user_paths)
+
+print("\\n=== 转化漏斗分析 ===")
+funnel = {}
+funnel["浏览"] = df[df["behavior"] == "浏览"]["user_id"].nunique()
+funnel["点击"] = df[df["behavior"] == "点击"]["user_id"].nunique()
+funnel["加购"] = df[df["behavior"] == "加购"]["user_id"].nunique()
+funnel["支付"] = df[df["behavior"] == "支付"]["user_id"].nunique()
+
+print("各环节用户数:")
+for step, count in funnel.items():
+    print(f"  {step}: {count}人")
+
+print("\\n转化率:")
+steps = ["浏览", "点击", "加购", "支付"]
+for i in range(len(steps) - 1):
+    rate = funnel[steps[i+1]] / funnel[steps[i]]
+    print(f"  {steps[i]} -> {steps[i+1]}: {rate:.2%}")`
+            },
+            {
+                id: 6,
+                name: "促销活动效果对比",
+                level: "进阶",
+                levelClass: "level-adv",
+                description: "对比促销活动与非活动期间的销量和转化率，评估活动效果。",
+                steps: [
+                    "导入 pandas 库",
+                    "准备促销活动数据",
+                    "分组统计活动期和非活动期数据",
+                    "对比销量、客单价、转化率",
+                    "计算活动带来的增量",
+                    "评估活动ROI"
+                ],
+                code: `import pandas as pd
+
+# 模拟销售数据
+sales_data = {
+    "date": ["2025-04-01", "2025-04-02", "2025-04-03", "2025-04-04", "2025-04-05",
+             "2025-04-06", "2025-04-07", "2025-04-08", "2025-04-09", "2025-04-10",
+             "2025-04-11", "2025-04-12", "2025-04-13", "2025-04-14", "2025-04-15"],
+    "is_promo": [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+    "sales": [12000, 11500, 12500, 11800, 13000, 
+              22000, 25000, 23500, 24000, 22500,
+              12800, 13200, 12100, 11900, 12600],
+    "orders": [85, 82, 88, 84, 90, 155, 175, 165, 170, 160, 92, 95, 86, 85, 91],
+    "visitors": [500, 480, 520, 490, 530, 800, 850, 820, 830, 810, 510, 530, 495, 485, 515]
+}
+df = pd.DataFrame(sales_data)
+
+print("=== 销售数据 ===")
+print(df)
+
+print("\\n=== 促销活动效果对比 ===")
+promo_stats = df.groupby("is_promo").agg({
+    "sales": ["mean", "sum"],
+    "orders": ["mean", "sum"],
+    "visitors": ["mean", "sum"]
+}).round(1)
+promo_stats.columns = ["平均销售额", "总销售额", "平均订单数", "总订单数", "平均访客数", "总访客数"]
+promo_stats.index = ["非活动期", "活动期"]
+print(promo_stats)
+
+print("\\n=== 转化率分析 ===")
+df["conversion_rate"] = df["orders"] / df["visitors"]
+df["avg_order_value"] = df["sales"] / df["orders"]
+
+rate_stats = df.groupby("is_promo").agg({
+    "conversion_rate": "mean",
+    "avg_order_value": "mean"
+}).round(3)
+rate_stats.columns = ["转化率", "客单价"]
+rate_stats.index = ["非活动期", "活动期"]
+print(rate_stats)
+
+print("\\n=== 活动增量计算 ===")
+baseline_sales = df[df["is_promo"] == 0]["sales"].mean() * 5
+actual_sales = df[df["is_promo"] == 1]["sales"].sum()
+increment = actual_sales - baseline_sales
+print(f"活动期间实际销售额: {actual_sales}")
+print(f"预计非活动期销售额: {baseline_sales:.0f}")
+print(f"活动带来的销售增量: {increment:.0f}")`
+            },
+            {
+                id: 7,
+                name: "评论情感分析",
+                level: "专家",
+                levelClass: "level-exp",
+                description: "基于用户评分和评论内容做满意度分析，提取关键改进点。",
+                steps: [
+                    "导入 pandas 库",
+                    "准备商品评论数据",
+                    "分析评分分布",
+                    "计算好评率和差评率",
+                    "关键词提取和情感倾向分析",
+                    "生成改进建议"
+                ],
+                code: `import pandas as pd
+
+# 模拟商品评论数据
+review_data = {
+    "review_id": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    "product": ["手机", "手机", "手机", "手机", "手机", "耳机", "耳机", "耳机", "耳机", "耳机"],
+    "rating": [5, 4, 3, 5, 2, 5, 4, 3, 5, 4],
+    "comment": [
+        "质量很好，物流也快，非常满意！",
+        "整体不错，就是包装有点简单",
+        "使用一周感觉一般，电池续航不太理想",
+        "完美！比预期好很多",
+        "差评！客服态度很差，退货麻烦",
+        "音质很棒，佩戴舒适",
+        "续航时间长，性价比高",
+        "连接不太稳定，有时候会断连",
+        "非常喜欢，已经推荐给朋友",
+        "做工精细，值得购买"
+    ]
+}
+df = pd.DataFrame(review_data)
+
+print("=== 评论数据 ===")
+print(df)
+
+print("\\n=== 评分分布 ===")
+rating_dist = df["rating"].value_counts().sort_index()
+print(rating_dist)
+
+print("\\n=== 按商品统计 ===")
+product_stats = df.groupby("product").agg({
+    "rating": ["mean", "count"],
+}).round(2)
+product_stats.columns = ["平均评分", "评论数"]
+print(product_stats)
+
+print("\\n=== 好评率计算 ===")
+df["is_positive"] = df["rating"] >= 4
+positive_rate = df.groupby("product")["is_positive"].mean().round(2) * 100
+print(f"各商品好评率:")
+for product, rate in positive_rate.items():
+    print(f"  {product}: {rate}%")
+
+print("\\n=== 差评关键词分析 ===")
+bad_reviews = df[df["rating"] <= 2]["comment"].tolist()
+print("差评内容:")
+for i, review in enumerate(bad_reviews, 1):
+    print(f"  {i}. {review}")`
+            },
+            {
+                id: 8,
+                name: "用户LTV生命周期价值",
+                level: "专家",
+                levelClass: "level-exp",
+                description: "计算用户长期商业价值，指导营销资源分配和客户关系管理。",
+                steps: [
+                    "导入 pandas 库",
+                    "准备用户消费历史数据",
+                    "计算累计消费金额",
+                    "按用户分层计算LTV",
+                    "分析不同层级用户特征",
+                    "预测未来LTV"
+                ],
+                code: `import pandas as pd
+
+# 模拟用户消费历史数据
+ltv_data = {
+    "user_id": [1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 5, 5, 5, 5],
+    "order_date": ["2025-01-15", "2025-02-20", "2025-03-10", "2025-04-05",
+                   "2025-01-20", "2025-02-25", "2025-04-15",
+                   "2025-01-05", "2025-01-25", "2025-02-10", "2025-03-20", "2025-04-25",
+                   "2025-02-15", "2025-03-20",
+                   "2025-01-10", "2025-02-05", "2025-03-01", "2025-04-10"],
+    "amount": [150, 200, 180, 220, 300, 250, 350, 
+               80, 120, 90, 150, 110, 400, 450,
+               100, 130, 95, 140]
+}
+df = pd.DataFrame(ltv_data)
+df["order_date"] = pd.to_datetime(df["order_date"])
+
+print("=== 用户消费数据 ===")
+print(df)
+
+print("\\n=== 计算用户LTV ===")
+user_ltv = df.groupby("user_id").agg({
+    "amount": ["sum", "mean", "count"],
+    "order_date": ["min", "max"]
+})
+user_ltv.columns = ["总消费", "平均订单额", "订单数", "首单日期", "最后订单日期"]
+user_ltv["LTV"] = user_ltv["总消费"]
+user_ltv["购买周期(天)"] = (user_ltv["最后订单日期"] - user_ltv["首单日期"]).dt.days
+
+print(user_ltv.round(1))
+
+print("\\n=== LTV分层 ===")
+ltv_bins = [0, 300, 600, 1000]
+ltv_labels = ["低价值", "中价值", "高价值"]
+user_ltv["价值层级"] = pd.cut(user_ltv["LTV"], bins=ltv_bins, labels=ltv_labels)
+
+print("各价值层级用户数:")
+print(user_ltv["价值层级"].value_counts())
+
+print("\\n各层级平均指标:")
+level_stats = user_ltv.groupby("价值层级").agg({
+    "LTV": "mean",
+    "订单数": "mean",
+    "平均订单额": "mean"
+}).round(1)
+print(level_stats)`
+            },
+            {
+                id: 9,
+                name: "实时特征滚动窗口模拟",
+                level: "专家",
+                levelClass: "level-exp",
+                description: "模拟时间窗口滚动统计特征工程，用于实时数据分析和监控。",
+                steps: [
+                    "导入 pandas 库",
+                    "准备时间序列数据",
+                    "设置滚动窗口",
+                    "计算滚动统计特征",
+                    "分析趋势变化",
+                    "可视化结果"
+                ],
+                code: `import pandas as pd
+
+# 模拟时间序列数据
+dates = pd.date_range(start="2025-05-01", periods=14, freq="D")
+ts_data = {
+    "date": dates,
+    "sales": [1200, 1350, 1100, 1400, 1600, 1550, 1450, 
+              1700, 1650, 1800, 1750, 1900, 1850, 2000],
+    "visitors": [80, 95, 75, 100, 115, 110, 105, 
+                 125, 120, 135, 130, 145, 140, 155]
+}
+df = pd.DataFrame(ts_data)
+df.set_index("date", inplace=True)
+
+print("=== 时间序列数据 ===")
+print(df)
+
+print("\\n=== 7天滚动窗口统计 ===")
+df["rolling_7d_mean"] = df["sales"].rolling(window=7).mean()
+df["rolling_7d_max"] = df["sales"].rolling(window=7).max()
+df["rolling_7d_min"] = df["sales"].rolling(window=7).min()
+df["rolling_7d_std"] = df["sales"].rolling(window=7).std()
+
+print(df[["sales", "rolling_7d_mean", "rolling_7d_max", "rolling_7d_min"]].round(1))
+
+print("\\n=== 3天环比变化 ===")
+df["sales_pct_change"] = df["sales"].pct_change(periods=3) * 100
+df["visitors_pct_change"] = df["visitors"].pct_change(periods=3) * 100
+
+print(df[["sales", "sales_pct_change", "visitors", "visitors_pct_change"]].round(1))
+
+print("\\n=== 累积统计 ===")
+df["cumulative_sales"] = df["sales"].cumsum()
+df["cumulative_visitors"] = df["visitors"].cumsum()
+df["avg_daily_sales"] = df["cumulative_sales"] / df.index.day
+
+print(df[["cumulative_sales", "cumulative_visitors", "avg_daily_sales"]].round(1))`
+            }
         ];
 
         let doneList = JSON.parse(localStorage.getItem("pandasDone")) || [];
+        let currentProject = null;
+        let originalCode = "";
 
-        function renderProjects(){
+        function renderProjects(filter = "all") {
             const wrap = document.getElementById("projectList");
             wrap.innerHTML = "";
-            projects.forEach((item,idx)=>{
-                const isDone = doneList.includes(idx);
+            
+            const filteredProjects = filter === "all" 
+                ? projects 
+                : projects.filter(p => p.level === filter);
+            
+            filteredProjects.forEach((item) => {
+                const isDone = doneList.includes(item.id);
                 wrap.innerHTML += `
-                <div class="project-card" onclick="openProject(${idx})">
-                    <span class="level-tag ${item.levelClass}">${item.level}</span>
-                    <span class="badge ${isDone?'done':''}">${isDone?'✓':''}</span>
+                <div class="project-card" onclick="openProject(${item.id})">
+                    <div class="project-header">
+                        <span class="level-tag ${item.levelClass}">${item.level}</span>
+                        <span class="badge ${isDone ? 'done' : 'pending'}">${isDone ? '✓' : ''}</span>
+                    </div>
                     <h3>${item.name}</h3>
-                    <p class="project-desc">${item.desc}</p>
-                    <a class="btn-start">开始学习</a>
+                    <p class="project-desc">${item.description}</p>
+                    <button class="btn-start">开始学习</button>
                 </div>
                 `;
             });
+            
             updateProgress();
         }
 
-        function updateProgress(){
+        function updateProgress() {
             const done = doneList.length;
+            const total = projects.length;
+            const percent = Math.round((done / total) * 100);
+            
             document.getElementById("doneNum").innerText = done;
-            const per = (done/10)*100;
-            document.getElementById("progressBar").style.width = per+"%";
+            document.getElementById("progressPercent").innerText = `${percent}%`;
+            document.getElementById("progressBar").style.width = `${percent}%`;
         }
 
-        let nowIdx = 0;
-        function openProject(idx){
-            nowIdx = idx;
-            const item = projects[idx];
-            document.getElementById("projTitle").innerText = item.name;
-            document.getElementById("projSteps").innerHTML = item.steps;
-            document.getElementById("codeEditor").value = item.code;
-            document.getElementById("codeOutput").innerText = "运行结果会显示在这里...";
-            document.getElementById("projectList").classList.add("hide");
-            document.getElementById("projectDetail").classList.remove("hide");
+        function openProject(projectId) {
+            currentProject = projects.find(p => p.id === projectId);
+            if (!currentProject) return;
+            
+            originalCode = currentProject.code;
+            
+            document.getElementById("modalTitle").innerText = currentProject.name;
+            document.getElementById("projDescription").innerText = currentProject.description;
+            
+            const stepsList = document.getElementById("stepsList");
+            stepsList.innerHTML = "";
+            currentProject.steps.forEach((step, index) => {
+                stepsList.innerHTML += `
+                <div class="step-item">
+                    <div class="step-num">${index + 1}</div>
+                    <div class="step-text">${step}</div>
+                </div>
+                `;
+            });
+            
+            document.getElementById("codeEditor").value = currentProject.code;
+            document.getElementById("outputBox").innerText = "运行结果会显示在这里...";
+            document.getElementById("outputBox").className = "output-box ready";
+            
+            const isDone = doneList.includes(projectId);
+            const markBtn = document.getElementById("markBtnText");
+            markBtn.innerText = isDone ? "已完成 ✓" : "标记为已完成";
+            
+            document.getElementById("modalOverlay").classList.add("active");
+            document.body.style.overflow = "hidden";
         }
 
-        function backToList(){
-            document.getElementById("projectDetail").classList.add("hide");
-            document.getElementById("projectList").classList.remove("hide");
+        function closeModal() {
+            document.getElementById("modalOverlay").classList.remove("active");
+            document.body.style.overflow = "";
+            currentProject = null;
         }
 
-        function markDone(){
-            if(!doneList.includes(nowIdx)){
-                doneList.push(nowIdx);
-                localStorage.setItem("pandasDone",JSON.stringify(doneList));
-                renderProjects();
-                alert("已标记为完成，进度自动保存！");
-            }else{
-                alert("该项目已经完成啦");
-            }
-        }
-
-        async function runCode(){
+        function copyCode() {
             const code = document.getElementById("codeEditor").value;
-            const out = document.getElementById("codeOutput");
-            
-            if (!pyodideReady) {
-                out.innerText = "Python环境正在初始化中，请稍候...";
-                return;
-            }
-            
-            out.innerText = "正在运行...";
-            try {
-                await self.pyodide.runPythonAsync(code);
-                const stdout = self.pyodide.runPython("import sys; sys.stdout.getvalue()");
-                out.innerText = stdout || "代码执行完成，无返回文本";
-            }catch(e){
-                out.innerText = "报错："+e.toString();
+            navigator.clipboard.writeText(code).then(() => {
+                const copyBtn = document.querySelector(".copy-btn");
+                copyBtn.innerText = "已复制!";
+                setTimeout(() => {
+                    copyBtn.innerText = "复制代码";
+                }, 2000);
+            });
+        }
+
+        function resetCode() {
+            if (currentProject) {
+                document.getElementById("codeEditor").value = currentProject.code;
+                document.getElementById("outputBox").innerText = "运行结果会显示在这里...";
+                document.getElementById("outputBox").className = "output-box ready";
             }
         }
 
-        window.onload = function(){
-            renderProjects();
+        async function runCode() {
+            const code = document.getElementById("codeEditor").value;
+            const outputBox = document.getElementById("outputBox");
+            const runBtn = document.getElementById("runBtn");
+            const runBtnText = document.getElementById("runBtnText");
+            const runBtnLoader = document.getElementById("runBtnLoader");
+            
+            outputBox.innerText = "正在初始化Python环境...";
+            outputBox.className = "output-box running";
+            runBtn.disabled = true;
+            runBtnText.style.display = "none";
+            runBtnLoader.style.display = "inline-block";
+            
+            try {
+                const result = await pyscript.runPython(code);
+                if (result !== undefined) {
+                    outputBox.innerText = String(result);
+                } else {
+                    const captured = await pyscript.runPython(`
+import io
+import sys
+sys.stdout = io.StringIO()
+${code}
+sys.stdout.getvalue()
+                    `);
+                    outputBox.innerText = captured || "代码执行完成，无返回文本";
+                }
+                outputBox.className = "output-box success";
+            } catch (error) {
+                outputBox.innerText = "错误: " + String(error);
+                outputBox.className = "output-box error";
+            } finally {
+                runBtn.disabled = false;
+                runBtnText.style.display = "inline-block";
+                runBtnLoader.style.display = "none";
+            }
         }
+
+        function markProjectDone() {
+            if (!currentProject) return;
+            
+            const projectId = currentProject.id;
+            if (!doneList.includes(projectId)) {
+                doneList.push(projectId);
+                localStorage.setItem("pandasDone", JSON.stringify(doneList));
+                updateProgress();
+                renderProjects(document.querySelector(".filter-tab.active").dataset.filter);
+                
+                const markBtn = document.getElementById("markBtnText");
+                markBtn.innerText = "已完成 ✓";
+                
+                alert("🎉 恭喜！已标记为完成，学习进度已自动保存！");
+            } else {
+                alert("该项目已经完成啦！");
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            renderProjects();
+            
+            document.querySelectorAll(".filter-tab").forEach(tab => {
+                tab.addEventListener("click", () => {
+                    document.querySelectorAll(".filter-tab").forEach(t => t.classList.remove("active"));
+                    tab.classList.add("active");
+                    renderProjects(tab.dataset.filter);
+                });
+            });
+            
+            document.getElementById("modalOverlay").addEventListener("click", (e) => {
+                if (e.target === document.getElementById("modalOverlay")) {
+                    closeModal();
+                }
+            });
+            
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape" && document.getElementById("modalOverlay").classList.contains("active")) {
+                    closeModal();
+                }
+            });
+        });
     </script>
 </body>
 </html>
