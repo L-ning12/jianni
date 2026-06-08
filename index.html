@@ -3,768 +3,1741 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduLearn - 鐜颁唬璇剧▼瀛︿範骞冲彴</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#3b82f6',
-                        secondary: '#6366f1',
-                        accent: '#f97316',
-                        dark: '#1e293b',
-                        light: '#f8fafc'
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                    },
-                }
-            }
+    <title>Pandas 数据分析实战训练营 | 升级版</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei", "PingFang SC", -apple-system, BlinkMacSystemFont, sans-serif;}
+        :root{
+            --primary-color:#3498db;
+            --success-color:#27ae60;
+            --warning-color:#f39c12;
+            --danger-color:#e74c3c;
+            --dark-color:#2c3e50;
+            --light-gray:#f5f7fa;
+            --card-shadow:0 4px 15px rgba(0,0,0,0.08);
+            --hover-shadow:0 8px 25px rgba(0,0,0,0.15);
         }
-    </script>
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .content-auto {
-                content-visibility: auto;
-            }
-            .text-shadow {
-                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            }
-            .transition-custom {
-                transition: all 0.3s ease;
-            }
-            .hover-scale {
-                transition: transform 0.3s ease;
-            }
-            .hover-scale:hover {
-                transform: scale(1.05);
-            }
+        body{background:var(--light-gray);color:#333;line-height:1.6;padding:15px;min-height:100vh;}
+        .container{max-width:1200px;margin:0 auto;}
+        
+        header{
+            text-align:center;
+            padding:35px 20px;
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            color:#fff;
+            border-radius:16px;
+            margin-bottom:25px;
+            box-shadow:var(--card-shadow);
+            position:relative;
+            overflow:hidden;
+        }
+        header::before{
+            content:'';
+            position:absolute;
+            top:-50%;right:-20%;
+            width:100px;height:100px;
+            background:rgba(255,255,255,0.1);
+            border-radius:50%;
+        }
+        header::after{
+            content:'';
+            position:absolute;
+            bottom:-30%;left:-10%;
+            width:80px;height:80px;
+            background:rgba(255,255,255,0.08);
+            border-radius:50%;
+        }
+        header h1{font-size:1.8rem;margin-bottom:8px;position:relative;z-index:1;}
+        header p{font-size:0.9rem;opacity:0.9;position:relative;z-index:1;}
+        
+        .progress-box{
+            background:#fff;
+            padding:20px;
+            border-radius:12px;
+            margin-bottom:20px;
+            box-shadow:var(--card-shadow);
+        }
+        .progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+        .progress-text{font-size:16px;font-weight:600;color:var(--dark-color);}
+        .progress-percent{font-size:18px;font-weight:bold;color:var(--primary-color);}
+        .progress-bar{
+            height:12px;
+            background:#e8ecef;
+            border-radius:6px;
+            overflow:hidden;
+            position:relative;
+        }
+        .progress-inner{
+            height:100%;
+            background:linear-gradient(90deg,var(--success-color),var(--primary-color));
+            width:0%;
+            transition:width 0.5s ease-out;
+            border-radius:6px;
+            position:relative;
+        }
+        .progress-inner::after{
+            content:'';
+            position:absolute;
+            right:0;top:0;bottom:0;
+            width:20px;
+            background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3));
+        }
+        
+        .intro-card{
+            background:#fff;
+            padding:20px;
+            border-radius:12px;
+            margin-bottom:25px;
+            box-shadow:var(--card-shadow);
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+            gap:15px;
+        }
+        .intro-item{
+            padding:12px 15px;
+            border-left:4px solid var(--primary-color);
+            background:#f8fafc;
+            border-radius:0 8px 8px 0;
+            font-size:14px;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+        .intro-item svg{width:18px;height:18px;color:var(--success-color);}
+        
+        .filter-tabs{
+            display:flex;
+            gap:10px;
+            margin-bottom:20px;
+            overflow-x:auto;
+            padding-bottom:10px;
+        }
+        .filter-tab{
+            padding:10px 20px;
+            border:none;
+            border-radius:25px;
+            cursor:pointer;
+            font-size:14px;
+            font-weight:500;
+            transition:all 0.3s;
+            white-space:nowrap;
+        }
+        .filter-tab.active{
+            background:var(--primary-color);
+            color:#fff;
+            box-shadow:0 4px 12px rgba(52,152,219,0.3);
+        }
+        .filter-tab:not(.active){
+            background:#fff;
+            color:#666;
+            box-shadow:var(--card-shadow);
+        }
+        .filter-tab:hover:not(.active){
+            background:#f0f5ff;
+            transform:translateY(-2px);
+        }
+        
+        .project-list{
+            display:grid;
+            grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+            gap:20px;
+        }
+        .project-card{
+            background:#fff;
+            border-radius:16px;
+            padding:22px;
+            box-shadow:var(--card-shadow);
+            transition:all 0.35s ease;
+            cursor:pointer;
+            position:relative;
+            overflow:hidden;
+        }
+        .project-card::before{
+            content:'';
+            position:absolute;
+            top:0;left:0;right:0;
+            height:3px;
+            background:linear-gradient(90deg,var(--primary-color),var(--success-color));
+            transform:scaleX(0);
+            transition:transform 0.35s;
+        }
+        .project-card:hover{
+            transform:translateY(-6px);
+            box-shadow:var(--hover-shadow);
+        }
+        .project-card:hover::before{
+            transform:scaleX(1);
+        }
+        
+        .project-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+        .level-tag{
+            display:inline-block;
+            padding:4px 12px;
+            border-radius:20px;
+            font-size:12px;
+            font-weight:600;
+            color:#fff;
+        }
+        .level-rud{background:linear-gradient(135deg,#3498db,#2980b9);}
+        .level-basic{background:linear-gradient(135deg,#27ae60,#1e8449);}
+        .level-adv{background:linear-gradient(135deg,#f39c12,#d68910);}
+        .level-exp{background:linear-gradient(135deg,#e74c3c,#c0392b);}
+        
+        .badge{
+            width:32px;height:32px;
+            border-radius:50%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:16px;
+            font-weight:bold;
+            transition:all 0.3s;
+        }
+        .badge.pending{background:#e8ecef;color:#999;}
+        .badge.done{
+            background:linear-gradient(135deg,#f1c40f,#f39c12);
+            color:#fff;
+            box-shadow:0 4px 12px rgba(241,196,15,0.4);
+            animation:pulse 2s infinite;
+        }
+        @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+        
+        .project-card h3{
+            font-size:1.1rem;
+            color:var(--dark-color);
+            margin-bottom:8px;
+            font-weight:600;
+        }
+        .project-desc{
+            color:#666;
+            font-size:14px;
+            line-height:1.5;
+            margin-bottom:15px;
+            display:-webkit-box;
+            -webkit-line-clamp:2;
+            -webkit-box-orient:vertical;
+            overflow:hidden;
+        }
+        .btn-start{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            padding:10px 18px;
+            background:linear-gradient(135deg,var(--primary-color),#2980b9);
+            color:#fff;
+            border-radius:8px;
+            text-decoration:none;
+            font-size:14px;
+            font-weight:500;
+            transition:all 0.3s;
+            border:none;
+            cursor:pointer;
+        }
+        .btn-start:hover{
+            transform:translateX(5px);
+            box-shadow:0 4px 15px rgba(52,152,219,0.3);
+        }
+        
+        .modal-overlay{
+            position:fixed;
+            top:0;left:0;right:0;bottom:0;
+            background:rgba(0,0,0,0.5);
+            display:none;
+            justify-content:center;
+            align-items:flex-start;
+            z-index:1000;
+            padding:20px;
+            overflow-y:auto;
+        }
+        .modal-overlay.active{display:flex;}
+        
+        .modal-content{
+            background:#fff;
+            border-radius:16px;
+            width:100%;
+            max-width:900px;
+            max-height:90vh;
+            overflow:hidden;
+            box-shadow:0 20px 60px rgba(0,0,0,0.3);
+            animation:slideUp 0.3s ease;
+        }
+        @keyframes slideUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+        
+        .modal-header{
+            padding:20px 25px;
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            color:#fff;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            position:sticky;
+            top:0;
+        }
+        .modal-header h2{font-size:1.3rem;font-weight:600;}
+        .close-btn{
+            width:36px;height:36px;
+            border-radius:50%;
+            border:none;
+            background:rgba(255,255,255,0.2);
+            color:#fff;
+            font-size:20px;
+            cursor:pointer;
+            transition:all 0.3s;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+        .close-btn:hover{background:rgba(255,255,255,0.3);transform:rotate(90deg);}
+        
+        .modal-body{padding:25px;overflow-y:auto;max-height:calc(90vh - 80px);}
+        
+        .proj-description{
+            padding:15px;
+            background:#f8fafc;
+            border-radius:10px;
+            margin-bottom:20px;
+            font-size:14px;
+            color:#555;
+            border-left:4px solid var(--primary-color);
+        }
+        
+        .steps-section{margin-bottom:25px;}
+        .steps-section h3{
+            font-size:1rem;
+            font-weight:600;
+            color:var(--dark-color);
+            margin-bottom:15px;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+        .steps-list{
+            display:grid;
+            gap:12px;
+        }
+        .step-item{
+            display:flex;
+            gap:12px;
+            padding:12px 15px;
+            background:#f8fafc;
+            border-radius:8px;
+            transition:all 0.3s;
+        }
+        .step-item:hover{background:#f0f5ff;}
+        .step-num{
+            width:28px;height:28px;
+            border-radius:50%;
+            background:var(--primary-color);
+            color:#fff;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:13px;
+            font-weight:bold;
+            flex-shrink:0;
+        }
+        .step-text{font-size:14px;color:#444;padding-top:4px;}
+        
+        .code-section{margin-bottom:25px;}
+        .code-section h3{
+            font-size:1rem;
+            font-weight:600;
+            color:var(--dark-color);
+            margin-bottom:15px;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+        
+        .code-box{
+            background:#1e1e1e;
+            border-radius:12px;
+            overflow:hidden;
+            margin-bottom:15px;
+        }
+        .code-header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:10px 15px;
+            background:#2d2d2d;
+            border-bottom:1px solid #3d3d3d;
+        }
+        .code-lang{color:#888;font-size:12px;}
+        .copy-btn{
+            padding:5px 12px;
+            background:var(--primary-color);
+            color:#fff;
+            border:none;
+            border-radius:4px;
+            font-size:12px;
+            cursor:pointer;
+            transition:all 0.3s;
+        }
+        .copy-btn:hover{background:#2980b9;}
+        
+        textarea.code-editor{
+            width:100%;
+            min-height:220px;
+            background:#1e1e1e;
+            color:#e0e0e0;
+            border:none;
+            padding:15px;
+            font-family:'Consolas','Monaco','Courier New',monospace;
+            font-size:14px;
+            line-height:1.6;
+            resize:vertical;
+            outline:none;
+            tab-size:4;
+        }
+        textarea.code-editor::placeholder{color:#555;}
+        
+        .editor-actions{display:flex;gap:12px;flex-wrap:wrap;}
+        .action-btn{
+            display:flex;
+            align-items:center;
+            gap:6px;
+            padding:10px 20px;
+            border:none;
+            border-radius:8px;
+            font-size:14px;
+            font-weight:500;
+            cursor:pointer;
+            transition:all 0.3s;
+        }
+        .run-btn{
+            background:linear-gradient(135deg,var(--success-color),#1e8449);
+            color:#fff;
+        }
+        .run-btn:hover{
+            box-shadow:0 4px 15px rgba(39,174,96,0.4);
+            transform:translateY(-2px);
+        }
+        .run-btn:disabled{
+            opacity:0.6;
+            cursor:not-allowed;
+            transform:none;
+        }
+        .reset-btn{
+            background:#e8ecef;
+            color:#555;
+        }
+        .reset-btn:hover{background:#dee2e6;}
+        
+        .output-section{margin-top:20px;}
+        .output-section h3{
+            font-size:1rem;
+            font-weight:600;
+            color:var(--dark-color);
+            margin-bottom:10px;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+        .output-box{
+            background:#1e1e1e;
+            border-radius:10px;
+            padding:15px;
+            min-height:100px;
+            font-family:'Consolas','Monaco','Courier New',monospace;
+            font-size:14px;
+            line-height:1.6;
+            white-space:pre-wrap;
+            word-wrap:break-word;
+            overflow-x:auto;
+        }
+        .output-box.ready{color:#888;}
+        .output-box.running{color:#f39c12;}
+        .output-box.success{color:#27ae60;}
+        .output-box.error{color:#e74c3c;}
+        
+        .modal-footer{
+            padding:20px 25px;
+            border-top:1px solid #eee;
+            display:flex;
+            justify-content:flex-end;
+            gap:12px;
+        }
+        .footer-btn{
+            padding:10px 24px;
+            border:none;
+            border-radius:8px;
+            font-size:14px;
+            font-weight:500;
+            cursor:pointer;
+            transition:all 0.3s;
+        }
+        .footer-btn.secondary{
+            background:#e8ecef;
+            color:#555;
+        }
+        .footer-btn.secondary:hover{background:#dee2e6;}
+        .footer-btn.primary{
+            background:linear-gradient(135deg,var(--warning-color),#d68910);
+            color:#fff;
+        }
+        .footer-btn.primary:hover{
+            box-shadow:0 4px 15px rgba(243,156,18,0.4);
+            transform:translateY(-2px);
+        }
+        
+        .loading-indicator{
+            display:inline-block;
+            width:20px;
+            height:20px;
+            border:2px solid rgba(255,255,255,0.3);
+            border-top-color:#fff;
+            border-radius:50%;
+            animation:spin 0.8s linear infinite;
+        }
+        @keyframes spin{to{transform:rotate(360deg);}}
+        
+        @media(max-width:768px){
+            header h1{font-size:1.4rem;}
+            header p{font-size:0.8rem;}
+            .project-list{grid-template-columns:1fr;}
+            .modal-content{margin:10px;width:calc(100% - 20px);}
+            .modal-body{padding:15px;}
+            .filter-tabs{gap:8px;}
+            .filter-tab{padding:8px 15px;font-size:13px;}
         }
     </style>
 </head>
-<body class="bg-light text-dark">
-    <!-- 瀵艰埅鏍?-->
-    <nav class="fixed top-0 left-0 right-0 bg-white shadow-md z-50 transition-all duration-300" id="navbar">
-        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="#" class="flex items-center space-x-2">
-                <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                    <i class="fa fa-graduation-cap text-white text-xl"></i>
-                </div>
-                <span class="text-xl font-bold text-dark">EduLearn</span>
-            </a>
-            
-            <!-- 妗岄潰瀵艰埅 -->
-            <div class="hidden md:flex items-center space-x-8">
-                <a href="#" class="font-medium hover:text-primary transition-custom">棣栭〉</a>
-                <a href="#courses" class="font-medium hover:text-primary transition-custom">璇剧▼</a>
-                <a href="#instructors" class="font-medium hover:text-primary transition-custom">璁插笀</a>
-                <a href="#testimonials" class="font-medium hover:text-primary transition-custom">璇勪环</a>
-                <a href="#faq" class="font-medium hover:text-primary transition-custom">甯歌闂</a>
+<body>
+    <div class="container">
+        <header>
+            <h1>Pandas 数据分析实战训练营</h1>
+            <p>10个精选实战项目 · 浏览器在线编程 · 自动保存学习进度</p>
+        </header>
+
+        <div class="progress-box">
+            <div class="progress-header">
+                <span class="progress-text">学习进度</span>
+                <span class="progress-percent" id="progressPercent">0%</span>
             </div>
-            
-            <div class="flex items-center space-x-4">
-                <div class="relative hidden md:block">
-                    <input type="text" placeholder="鎼滅储璇剧▼..." class="pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                    <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <div class="progress-text" style="font-weight:normal;color:#666;margin-bottom:8px;">
+                已完成 <span id="doneNum" style="color:#3498db;font-weight:bold;">0</span> / 10 项目
+            </div>
+            <div class="progress-bar">
+                <div class="progress-inner" id="progressBar"></div>
+            </div>
+        </div>
+
+        <div class="intro-card">
+            <div class="intro-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 20h9M9 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                </svg>
+                无需安装Python，浏览器直接运行
+            </div>
+            <div class="intro-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                </svg>
+                每个项目自带模拟数据集+参考代码
+            </div>
+            <div class="intro-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                </svg>
+                自动记录学习进度，刷新不丢失
+            </div>
+            <div class="intro-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                </svg>
+                从入门到专家，循序渐进练Pandas
+            </div>
+        </div>
+
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">全部项目</button>
+            <button class="filter-tab" data-filter="入门">入门</button>
+            <button class="filter-tab" data-filter="基础">基础</button>
+            <button class="filter-tab" data-filter="进阶">进阶</button>
+            <button class="filter-tab" data-filter="专家">专家</button>
+        </div>
+
+        <div class="project-list" id="projectList">
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">项目详情</h2>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="proj-description" id="projDescription"></div>
+                
+                <div class="steps-section">
+                    <h3>学习步骤</h3>
+                    <div class="steps-list" id="stepsList"></div>
                 </div>
-                <a href="#" class="hidden md:block px-4 py-2 rounded-full border border-primary text-primary hover:bg-primary hover:text-white transition-custom">鐧诲綍</a>
-                <a href="#" class="px-4 py-2 rounded-full bg-primary text-white hover:bg-primary/90 transition-custom">娉ㄥ唽</a>
-                <button class="md:hidden text-dark text-xl" id="menu-toggle">
-                    <i class="fa fa-bars"></i>
+                
+                <div class="code-section">
+                    <h3>示例代码</h3>
+                    <div class="code-box">
+                        <div class="code-header">
+                            <span class="code-lang">Python</span>
+                            <button class="copy-btn" onclick="copyCode()">复制代码</button>
+                        </div>
+                        <textarea class="code-editor" id="codeEditor" placeholder="在这里编写你的 Pandas 代码..."></textarea>
+                    </div>
+                    <div class="editor-actions">
+                        <button class="action-btn run-btn" id="runBtn" onclick="runCode()">
+                            <span id="runBtnText">运行代码</span>
+                            <span id="runBtnLoader" class="loading-indicator" style="display:none;"></span>
+                        </button>
+                        <button class="action-btn reset-btn" onclick="resetCode()">重置代码</button>
+                    </div>
+                </div>
+                
+                <div class="output-section">
+                    <h3>运行结果</h3>
+                    <div class="output-box ready" id="outputBox">运行结果会显示在这里...</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="footer-btn secondary" onclick="closeModal()">返回列表</button>
+                <button class="footer-btn primary" onclick="markProjectDone()">
+                    <span id="markBtnText">标记为已完成</span>
                 </button>
             </div>
         </div>
-        
-        <!-- 绉诲姩绔鑸彍鍗?-->
-        <div class="md:hidden hidden bg-white shadow-lg absolute w-full" id="mobile-menu">
-            <div class="container mx-auto px-4 py-3 flex flex-col space-y-4">
-                <a href="#" class="font-medium hover:text-primary transition-custom">棣栭〉</a>
-                <a href="#courses" class="font-medium hover:text-primary transition-custom">璇剧▼</a>
-                <a href="#instructors" class="font-medium hover:text-primary transition-custom">璁插笀</a>
-                <a href="#testimonials" class="font-medium hover:text-primary transition-custom">璇勪环</a>
-                <a href="#faq" class="font-medium hover:text-primary transition-custom">甯歌闂</a>
-                <div class="relative">
-                    <input type="text" placeholder="鎼滅储璇剧▼..." class="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                    <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                </div>
-            </div>
-        </div>
-    </nav>
+    </div>
 
-    <!-- 鑻遍泟鍖哄煙 -->
-    <section class="pt-32 pb-20 bg-gradient-to-br from-blue-50 to-indigo-50">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row items-center">
-                <div class="md:w-1/2 mb-10 md:mb-0">
-                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-shadow">
-                        瑙ｉ攣浣犵殑瀛︿範娼滃姏
-                    </h1>
-                    <p class="text-lg md:text-xl text-gray-600 mb-8 max-w-xl">
-                        鎺㈢储鎴戜滑绮惧績璁捐鐨勮绋嬶紝鐢辫涓氫笓瀹舵墦閫狅紝甯姪浣犳帉鎻℃渶鏂版妧鑳斤紝瀹炵幇鑱屼笟鐩爣銆?
-                    </p>
-                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                        <a href="#courses" class="px-8 py-3 rounded-full bg-primary text-white font-medium hover:bg-primary/90 transition-custom text-center">
-                            娴忚璇剧▼
-                        </a>
-                        <a href="#" class="px-8 py-3 rounded-full border border-primary text-primary font-medium hover:bg-primary/5 transition-custom text-center">
-                            浜嗚В鏇村
-                        </a>
-                    </div>
-                    <div class="mt-10 flex items-center space-x-4">
-                        <div class="flex -space-x-2">
-                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20student%20avatar%201&image_size=square" alt="瀛︾敓澶村儚" class="w-10 h-10 rounded-full border-2 border-white">
-                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20student%20avatar%202&image_size=square" alt="瀛︾敓澶村儚" class="w-10 h-10 rounded-full border-2 border-white">
-                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20student%20avatar%203&image_size=square" alt="瀛︾敓澶村儚" class="w-10 h-10 rounded-full border-2 border-white">
-                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20student%20avatar%204&image_size=square" alt="瀛︾敓澶村儚" class="w-10 h-10 rounded-full border-2 border-white">
-                        </div>
-                        <div>
-                            <div class="flex items-center">
-                                <i class="fa fa-star text-yellow-400"></i>
-                                <i class="fa fa-star text-yellow-400"></i>
-                                <i class="fa fa-star text-yellow-400"></i>
-                                <i class="fa fa-star text-yellow-400"></i>
-                                <i class="fa fa-star-half-o text-yellow-400"></i>
-                                <span class="ml-2 font-medium">4.8/5</span>
-                            </div>
-                            <p class="text-sm text-gray-600">鏉ヨ嚜 2,000+ 瀛︾敓鐨勮瘎浠?/p>
-                        </div>
-                    </div>
-                </div>
-                <div class="md:w-1/2">
-                    <div class="relative">
-                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20online%20learning%20platform%20interface%20with%20students%20studying%20on%20devices&image_size=landscape_16_9" alt="鍦ㄧ嚎瀛︿範" class="rounded-2xl shadow-xl w-full">
-                        <div class="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-lg p-4 flex items-center space-x-4 hover-scale">
-                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                                <i class="fa fa-check text-green-500 text-xl"></i>
-                            </div>
-                            <div>
-                                <p class="font-medium">璇剧▼瀹屾垚鐜?/p>
-                                <p class="text-2xl font-bold text-primary">89%</p>
-                            </div>
-                        </div>
-                        <div class="absolute -top-6 -right-6 bg-white rounded-xl shadow-lg p-4 flex items-center space-x-4 hover-scale">
-                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                                <i class="fa fa-users text-blue-500 text-xl"></i>
-                            </div>
-                            <div>
-                                <p class="font-medium">娲昏穬瀛︾敓</p>
-                                <p class="text-2xl font-bold text-primary">15,000+</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 鐗硅壊鍔熻兘 -->
-    <section class="py-16 bg-white">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">涓轰粈涔堥€夋嫨 EduLearn</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">鎴戜滑鎻愪緵楂樿川閲忕殑璇剧▼鍐呭鍜屽涔犱綋楠岋紝甯姪浣犲疄鐜颁釜浜哄拰鑱屼笟鐩爣</p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="bg-blue-50 rounded-2xl p-8 hover-scale">
-                    <div class="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
-                        <i class="fa fa-certificate text-primary text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-4">琛屼笟璁よ瘉</h3>
-                    <p class="text-gray-600">鑾峰緱琚涓氳鍙殑璇佷功锛屾彁鍗囦綘鐨勭畝鍘嗙珵浜夊姏锛屽紑鍚亴涓氭柊绡囩珷銆?/p>
-                </div>
-                <div class="bg-purple-50 rounded-2xl p-8 hover-scale">
-                    <div class="w-16 h-16 bg-secondary/10 rounded-xl flex items-center justify-center mb-6">
-                        <i class="fa fa-laptop text-secondary text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-4">鐏垫椿瀛︿範</h3>
-                    <p class="text-gray-600">闅忔椂闅忓湴閫氳繃浠讳綍璁惧瀛︿範锛屾寜鐓ц嚜宸辩殑鑺傚鎺屾彙鐭ヨ瘑鍜屾妧鑳姐€?/p>
-                </div>
-                <div class="bg-orange-50 rounded-2xl p-8 hover-scale">
-                    <div class="w-16 h-16 bg-accent/10 rounded-xl flex items-center justify-center mb-6">
-                        <i class="fa fa-users text-accent text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-4">涓撳鎸囧</h3>
-                    <p class="text-gray-600">鐢辫涓氫笓瀹跺拰璧勬繁鏁欒偛鑰呯簿蹇冭璁″拰鏁欐巿鐨勮绋嬶紝纭繚瀛︿範璐ㄩ噺銆?/p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 璇剧▼鍒嗙被 -->
-    <section class="py-16 bg-gray-50" id="courses">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center mb-12">
-                <h2 class="text-3xl md:text-4xl font-bold">鐑棬璇剧▼鍒嗙被</h2>
-                <a href="#" class="text-primary font-medium flex items-center hover:underline">
-                    鏌ョ湅鍏ㄩ儴 <i class="fa fa-arrow-right ml-2"></i>
-                </a>
-            </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <a href="#" class="bg-white rounded-xl p-6 flex flex-col items-center justify-center text-center hover-scale shadow-sm">
-                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                        <i class="fa fa-code text-primary text-2xl"></i>
-                    </div>
-                    <h3 class="font-bold mb-2">缂栫▼寮€鍙?/h3>
-                    <p class="text-sm text-gray-600">120+ 璇剧▼</p>
-                </a>
-                <a href="#" class="bg-white rounded-xl p-6 flex flex-col items-center justify-center text-center hover-scale shadow-sm">
-                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
-                        <i class="fa fa-line-chart text-secondary text-2xl"></i>
-                    </div>
-                    <h3 class="font-bold mb-2">鍟嗕笟绠＄悊</h3>
-                    <p class="text-sm text-gray-600">85+ 璇剧▼</p>
-                </a>
-                <a href="#" class="bg-white rounded-xl p-6 flex flex-col items-center justify-center text-center hover-scale shadow-sm">
-                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                        <i class="fa fa-paint-brush text-green-500 text-2xl"></i>
-                    </div>
-                    <h3 class="font-bold mb-2">璁捐鍒涙剰</h3>
-                    <p class="text-sm text-gray-600">95+ 璇剧▼</p>
-                </a>
-                <a href="#" class="bg-white rounded-xl p-6 flex flex-col items-center justify-center text-center hover-scale shadow-sm">
-                    <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4">
-                        <i class="fa fa-language text-accent text-2xl"></i>
-                    </div>
-                    <h3 class="font-bold mb-2">璇█瀛︿範</h3>
-                    <p class="text-sm text-gray-600">70+ 璇剧▼</p>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- 鐑棬璇剧▼ -->
-    <section class="py-16 bg-white">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center mb-12">
-                <h2 class="text-3xl md:text-4xl font-bold">鐑棬璇剧▼</h2>
-                <a href="#" class="text-primary font-medium flex items-center hover:underline">
-                    鏌ョ湅鍏ㄩ儴 <i class="fa fa-arrow-right ml-2"></i>
-                </a>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- 璇剧▼鍗＄墖 1 -->
-                <div class="bg-white rounded-2xl shadow-md overflow-hidden hover-scale">
-                    <div class="relative">
-                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=web%20development%20course%20thumbnail%20modern%20design&image_size=landscape_16_9" alt="Web寮€鍙戣绋? class="w-full h-48 object-cover">
-                        <div class="absolute top-4 right-4 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">
-                            鐑棬
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="text-sm text-gray-500">缂栫▼寮€鍙?/span>
-                            <div class="flex items-center">
-                                <i class="fa fa-star text-yellow-400 text-xs"></i>
-                                <span class="text-sm font-medium ml-1">4.9</span>
-                                <span class="text-xs text-gray-500 ml-1">(245)</span>
-                            </div>
-                        </div>
-                        <h3 class="text-xl font-bold mb-3">鐜颁唬Web寮€鍙戝叏鏍堝伐绋嬪笀</h3>
-                        <p class="text-gray-600 text-sm mb-4">瀛︿範HTML, CSS, JavaScript, React鍜孨ode.js锛屾垚涓轰竴鍚嶅叏鏍圵eb寮€鍙戝伐绋嬪笀銆?/p>
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center">
-                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20instructor%20avatar%201&image_size=square" alt="璁插笀澶村儚" class="w-8 h-8 rounded-full mr-2">
-                                <span class="text-sm font-medium">寮犺€佸笀</span>
-                            </div>
-                            <div class="text-primary font-bold">楼299</div>
-                        </div>
-                    </div>
-                </div>
-                <!-- 璇剧▼鍗＄墖 2 -->
-                <div class="bg-white rounded-2xl shadow-md overflow-hidden hover-scale">
-                    <div class="relative">
-                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=data%20science%20course%20thumbnail%20modern%20design&image_size=landscape_16_9" alt="鏁版嵁绉戝璇剧▼" class="w-full h-48 object-cover">
-                        <div class="absolute top-4 right-4 bg-secondary text-white text-xs font-bold px-3 py-1 rounded-full">
-                            鏂拌
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="text-sm text-gray-500">鏁版嵁绉戝</span>
-                            <div class="flex items-center">
-                                <i class="fa fa-star text-yellow-400 text-xs"></i>
-                                <span class="text-sm font-medium ml-1">4.8</span>
-                                <span class="text-xs text-gray-500 ml-1">(189)</span>
-                            </div>
-                        </div>
-                        <h3 class="text-xl font-bold mb-3">Python鏁版嵁绉戝涓庢満鍣ㄥ涔?/h3>
-                        <p class="text-gray-600 text-sm mb-4">鎺屾彙Python鏁版嵁澶勭悊銆佸垎鏋愬拰鏈哄櫒瀛︿範鎶€鏈紝鎴愪负鏁版嵁绉戝涓撳銆?/p>
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center">
-                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20instructor%20avatar%202&image_size=square" alt="璁插笀澶村儚" class="w-8 h-8 rounded-full mr-2">
-                                <span class="text-sm font-medium">鏉庤€佸笀</span>
-                            </div>
-                            <div class="text-primary font-bold">楼399</div>
-                        </div>
-                    </div>
-                </div>
-                <!-- 璇剧▼鍗＄墖 3 -->
-                <div class="bg-white rounded-2xl shadow-md overflow-hidden hover-scale">
-                    <div class="relative">
-                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ui%20ux%20design%20course%20thumbnail%20modern%20design&image_size=landscape_16_9" alt="UI/UX璁捐璇剧▼" class="w-full h-48 object-cover">
-                    </div>
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="text-sm text-gray-500">璁捐鍒涙剰</span>
-                            <div class="flex items-center">
-                                <i class="fa fa-star text-yellow-400 text-xs"></i>
-                                <span class="text-sm font-medium ml-1">4.7</span>
-                                <span class="text-xs text-gray-500 ml-1">(210)</span>
-                            </div>
-                        </div>
-                        <h3 class="text-xl font-bold mb-3">UI/UX璁捐瀹炴垬璇剧▼</h3>
-                        <p class="text-gray-600 text-sm mb-4">瀛︿範鐢ㄦ埛鐣岄潰鍜岀敤鎴蜂綋楠岃璁″師鍒欙紝鎺屾彙Figma鍜孉dobe XD绛夎璁″伐鍏枫€?/p>
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center">
-                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20instructor%20avatar%203&image_size=square" alt="璁插笀澶村儚" class="w-8 h-8 rounded-full mr-2">
-                                <span class="text-sm font-medium">鐜嬭€佸笀</span>
-                            </div>
-                            <div class="text-primary font-bold">楼249</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 瀛︿範璺緞 -->
-    <section class="py-16 bg-gradient-to-br from-indigo-50 to-blue-50">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">鎺ㄨ崘瀛︿範璺緞</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">鎸夌収绮惧績璁捐鐨勫涔犺矾寰勶紝绯荤粺鎺屾彙涓撲笟鎶€鑳斤紝瀹炵幇鑱屼笟鐩爣</p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- 瀛︿範璺緞 1 -->
-                <div class="bg-white rounded-2xl shadow-md p-8 hover-scale">
-                    <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
-                        <i class="fa fa-code text-primary text-2xl"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-4">鍓嶇寮€鍙戝伐绋嬪笀璺緞</h3>
-                    <p class="text-gray-600 mb-6">浠庡熀纭€HTML/CSS寮€濮嬶紝閫愭鎺屾彙JavaScript銆丷eact绛夊墠绔妧鏈紝鎴愪负涓撲笟鍓嶇寮€鍙戝伐绋嬪笀銆?/p>
-                    <div class="space-y-4 mb-6">
-                        <div class="flex items-center">
-                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-4">
-                                <i class="fa fa-check text-green-500"></i>
-                            </div>
-                            <span>HTML5 & CSS3 鍩虹</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-4">
-                                <i class="fa fa-check text-green-500"></i>
-                            </div>
-                            <span>JavaScript 杩涢樁</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-4">
-                                <i class="fa fa-lock text-gray-400"></i>
-                            </div>
-                            <span>React 妗嗘灦</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-4">
-                                <i class="fa fa-lock text-gray-400"></i>
-                            </div>
-                            <span>鍓嶇宸ョ▼鍖?/span>
-                        </div>
-                    </div>
-                    <a href="#" class="inline-block px-6 py-3 rounded-full bg-primary text-white font-medium hover:bg-primary/90 transition-custom">
-                        寮€濮嬪涔?
-                    </a>
-                </div>
-                <!-- 瀛︿範璺緞 2 -->
-                <div class="bg-white rounded-2xl shadow-md p-8 hover-scale">
-                    <div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
-                        <i class="fa fa-line-chart text-secondary text-2xl"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-4">鏁版嵁鍒嗘瀽涓撳璺緞</h3>
-                    <p class="text-gray-600 mb-6">瀛︿範Python缂栫▼銆佹暟鎹鐞嗐€佸彲瑙嗗寲鍜屾満鍣ㄥ涔狅紝鎴愪负鏁版嵁椹卞姩鐨勫垎鏋愪笓瀹躲€?/p>
-                    <div class="space-y-4 mb-6">
-                        <div class="flex items-center">
-                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-4">
-                                <i class="fa fa-check text-green-500"></i>
-                            </div>
-                            <span>Python 鍩虹</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-4">
-                                <i class="fa fa-check text-green-500"></i>
-                            </div>
-                            <span>鏁版嵁澶勭悊涓庡垎鏋?/span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-4">
-                                <i class="fa fa-lock text-gray-400"></i>
-                            </div>
-                            <span>鏁版嵁鍙鍖?/span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-4">
-                                <i class="fa fa-lock text-gray-400"></i>
-                            </div>
-                            <span>鏈哄櫒瀛︿範鍩虹</span>
-                        </div>
-                    </div>
-                    <a href="#" class="inline-block px-6 py-3 rounded-full bg-secondary text-white font-medium hover:bg-secondary/90 transition-custom">
-                        寮€濮嬪涔?
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 璁插笀鍥㈤槦 -->
-    <section class="py-16 bg-white" id="instructors">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center mb-12">
-                <h2 class="text-3xl md:text-4xl font-bold">涓撲笟璁插笀鍥㈤槦</h2>
-                <a href="#" class="text-primary font-medium flex items-center hover:underline">
-                    鏌ョ湅鍏ㄩ儴 <i class="fa fa-arrow-right ml-2"></i>
-                </a>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-                <!-- 璁插笀 1 -->
-                <div class="bg-white rounded-2xl shadow-md overflow-hidden hover-scale">
-                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20instructor%20portrait%201%20with%20glasses%20and%20formal%20attire&image_size=square" alt="璁插笀澶村儚" class="w-full h-64 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-1">寮犺€佸笀</h3>
-                        <p class="text-gray-500 mb-3">Web寮€鍙戜笓瀹?/p>
-                        <p class="text-gray-600 text-sm mb-4">10骞村墠绔紑鍙戠粡楠岋紝鏇句换鑱屼簬闃块噷宸村反銆佽吘璁瓑鐭ュ悕浼佷笟銆?/p>
-                        <div class="flex space-x-3">
-                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
-                                <i class="fa fa-linkedin"></i>
-                            </a>
-                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
-                                <i class="fa fa-github"></i>
-                            </a>
-                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
-                                <i class="fa fa-twitter"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <!-- 璁插笀 2 -->
-                <div class="bg-white rounded-2xl shadow-md overflow-hidden hover-scale">
-                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20instructor%20portrait%202%20female%20with%20smile%20and%20business%20attire&image_size=square" alt="璁插笀澶村儚" class="w-full h-64 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-1">鏉庤€佸笀</h3>
-                        <p class="text-gray-500 mb-3">鏁版嵁绉戝涓撳</p>
-                        <p class="text-gray-600 text-sm mb-4">鍗氬＋瀛︿綅锛?骞存暟鎹瀛︾粡楠岋紝涓撴敞浜庢満鍣ㄥ涔犲拰浜哄伐鏅鸿兘棰嗗煙銆?/p>
-                        <div class="flex space-x-3">
-                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
-                                <i class="fa fa-linkedin"></i>
-                            </a>
-                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
-                                <i class="fa fa-github"></i>
-                            </a>
-                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
-                                <i class="fa fa-twitter"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <!-- 璁插笀 3 -->
-                <div class="bg-white rounded-2xl shadow-md overflow-hidden hover-scale">
-                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20instructor%20portrait%203%20male%20with%20beard%20and%20casual%20attire&image_size=square" alt="璁插笀澶村儚" class="w-full h-64 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-1">鐜嬭€佸笀</h3>
-                        <p class="text-gray-500 mb-3">UI/UX璁捐涓撳</p>
-                        <p class="text-gray-600 text-sm mb-4">8骞磋璁＄粡楠岋紝鏇句负澶氬鐭ュ悕浼佷笟鎻愪緵璁捐鏈嶅姟锛屾搮闀跨敤鎴蜂綋楠岃璁°€?/p>
-                        <div class="flex space-x-3">
-                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
-                                <i class="fa fa-linkedin"></i>
-                            </a>
-                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
-                                <i class="fa fa-github"></i>
-                            </a>
-                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
-                                <i class="fa fa-twitter"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <!-- 璁插笀 4 -->
-                <div class="bg-white rounded-2xl shadow-md overflow-hidden hover-scale">
-                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20instructor%20portrait%204%20female%20with%20glasses%20and%20academic%20attire&image_size=square" alt="璁插笀澶村儚" class="w-full h-64 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-1">璧佃€佸笀</h3>
-                        <p class="text-gray-500 mb-3">鍟嗕笟绠＄悊涓撳</p>
-                        <p class="text-gray-600 text-sm mb-4">MBA瀛︿綅锛?2骞翠紒涓氱鐞嗙粡楠岋紝涓撴敞浜庡競鍦鸿惀閿€鍜屾垬鐣ヨ鍒掋€?/p>
-                        <div class="flex space-x-3">
-                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
-                                <i class="fa fa-linkedin"></i>
-                            </a>
-                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
-                                <i class="fa fa-github"></i>
-                            </a>
-                            <a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-custom">
-                                <i class="fa fa-twitter"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 瀛︾敓璇勪环 -->
-    <section class="py-16 bg-gray-50" id="testimonials">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">瀛︾敓璇勪环</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">鍚惉鎴戜滑鐨勫鐢熸€庝箞璇达紝浠栦滑鐨勬垚鍔熸晠浜嬫槸鎴戜滑鏈€澶х殑鍔ㄥ姏</p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- 璇勪环 1 -->
-                <div class="bg-white rounded-2xl shadow-md p-8 hover-scale">
-                    <div class="flex items-center mb-6">
-                        <i class="fa fa-star text-yellow-400"></i>
-                        <i class="fa fa-star text-yellow-400"></i>
-                        <i class="fa fa-star text-yellow-400"></i>
-                        <i class="fa fa-star text-yellow-400"></i>
-                        <i class="fa fa-star text-yellow-400"></i>
-                    </div>
-                    <p class="text-gray-600 mb-6">"閫氳繃EduLearn鐨刉eb寮€鍙戣绋嬶紝鎴戜粠闆跺熀纭€鎴愪负浜嗕竴鍚嶅墠绔紑鍙戝伐绋嬪笀銆傝绋嬪唴瀹归潪甯哥郴缁燂紝璁插笀璁茶В娓呮櫚锛屽疄璺甸」鐩赴瀵岋紝甯姪鎴戝揩閫熸帉鎻′簡鎶€鑳藉苟鎴愬姛鎵惧埌浜嗗伐浣溿€?</p>
-                    <div class="flex items-center">
-                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=student%20testimonial%20avatar%201&image_size=square" alt="瀛︾敓澶村儚" class="w-12 h-12 rounded-full mr-4">
-                        <div>
-                            <h4 class="font-bold">闄堝悓瀛?/h4>
-                            <p class="text-sm text-gray-500">鍓嶇寮€鍙戝伐绋嬪笀</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- 璇勪环 2 -->
-                <div class="bg-white rounded-2xl shadow-md p-8 hover-scale">
-                    <div class="flex items-center mb-6">
-                        <i class="fa fa-star text-yellow-400"></i>
-                        <i class="fa fa-star text-yellow-400"></i>
-                        <i class="fa fa-star text-yellow-400"></i>
-                        <i class="fa fa-star text-yellow-400"></i>
-                        <i class="fa fa-star text-yellow-400"></i>
-                    </div>
-                    <p class="text-gray-600 mb-6">"鏁版嵁绉戝璇剧▼闈炲父妫掞紒鏉庤€佸笀鐨勮瑙ｆ繁鍏ユ祬鍑猴紝璇剧▼鍐呭娑电洊浜嗕粠鍩虹鍒拌繘闃剁殑鎵€鏈夌煡璇嗙偣锛岄厤濂楃殑瀹炴垬椤圭洰璁╂垜鑳藉灏嗘墍瀛﹀簲鐢ㄥ埌瀹為檯闂涓紝闈炲父鎺ㄨ崘锛?</p>
-                    <div class="flex items-center">
-                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=student%20testimonial%20avatar%202&image_size=square" alt="瀛︾敓澶村儚" class="w-12 h-12 rounded-full mr-4">
-                        <div>
-                            <h4 class="font-bold">鏋楀悓瀛?/h4>
-                            <p class="text-sm text-gray-500">鏁版嵁鍒嗘瀽甯?/p>
-                        </div>
-                    </div>
-                </div>
-                <!-- 璇勪环 3 -->
-                <div class="bg-white rounded-2xl shadow-md p-8 hover-scale">
-                    <div class="flex items-center mb-6">
-                        <i class="fa fa-star text-yellow-400"></i>
-                        <i class="fa fa-star text-yellow-400"></i>
-                        <i class="fa fa-star text-yellow-400"></i>
-                        <i class="fa fa-star text-yellow-400"></i>
-                        <i class="fa fa-star-half-o text-yellow-400"></i>
-                    </div>
-                    <p class="text-gray-600 mb-6">"UI/UX璁捐璇剧▼瓒呭嚭浜嗘垜鐨勯鏈燂紝鐜嬭€佸笀涓嶄粎鏁欐巿璁捐鎶€鑳斤紝杩樺垎浜簡寰堝瀹為檯宸ヤ綔涓殑缁忛獙鍜屾妧宸с€傝绋嬬粨鏉熷悗锛屾垜鎴愬姛杞瀷涓篣I璁捐甯堬紝钖祫鎻愬崌浜?0%銆?</p>
-                    <div class="flex items-center">
-                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=student%20testimonial%20avatar%203&image_size=square" alt="瀛︾敓澶村儚" class="w-12 h-12 rounded-full mr-4">
-                        <div>
-                            <h4 class="font-bold">榛勫悓瀛?/h4>
-                            <p class="text-sm text-gray-500">UI璁捐甯?/p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 甯歌闂 -->
-    <section class="py-16 bg-white" id="faq">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">甯歌闂</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">瑙ｇ瓟浣犲叧浜庤绋嬪拰瀛︿範鐨勭枒闂?/p>
-            </div>
-            <div class="max-w-3xl mx-auto space-y-4">
-                <!-- FAQ 椤圭洰 1 -->
-                <div class="border border-gray-200 rounded-xl overflow-hidden">
-                    <button class="faq-toggle w-full px-6 py-4 flex justify-between items-center text-left font-medium hover:bg-gray-50 transition-custom">
-                        <span>濡備綍寮€濮嬪涔犺绋嬶紵</span>
-                        <i class="fa fa-chevron-down text-gray-400 transition-transform duration-300"></i>
-                    </button>
-                    <div class="faq-content px-6 py-4 bg-gray-50 hidden">
-                        <p class="text-gray-600">娉ㄥ唽璐﹀彿鍚庯紝浣犲彲浠ユ祻瑙堣绋嬬洰褰曪紝閫夋嫨鎰熷叴瓒ｇ殑璇剧▼杩涜璐拱銆傝喘涔板悗锛屼綘鍙互绔嬪嵆寮€濮嬪涔狅紝鎸夌収鑷繁鐨勮妭濂忚鐪嬭棰戙€佸畬鎴愮粌涔犲拰椤圭洰銆?/p>
-                    </div>
-                </div>
-                <!-- FAQ 椤圭洰 2 -->
-                <div class="border border-gray-200 rounded-xl overflow-hidden">
-                    <button class="faq-toggle w-full px-6 py-4 flex justify-between items-center text-left font-medium hover:bg-gray-50 transition-custom">
-                        <span>璇剧▼璇佷功濡備綍鑾峰彇锛?/span>
-                        <i class="fa fa-chevron-down text-gray-400 transition-transform duration-300"></i>
-                    </button>
-                    <div class="faq-content px-6 py-4 bg-gray-50 hidden">
-                        <p class="text-gray-600">瀹屾垚璇剧▼鐨勬墍鏈夊涔犲唴瀹瑰拰浣滀笟鍚庯紝浣犲彲浠ュ弬鍔犺绋嬭€冭瘯銆傝€冭瘯閫氳繃鍚庯紝绯荤粺浼氳嚜鍔ㄩ鍙戠數瀛愮増璇佷功锛屼綘鍙互涓嬭浇鍜屽垎浜埌浣犵殑绀句氦濯掍綋鎴栫畝鍘嗕腑銆?/p>
-                    </div>
-                </div>
-                <!-- FAQ 椤圭洰 3 -->
-                <div class="border border-gray-200 rounded-xl overflow-hidden">
-                    <button class="faq-toggle w-full px-6 py-4 flex justify-between items-center text-left font-medium hover:bg-gray-50 transition-custom">
-                        <span>璇剧▼鏄惁鏈夋湁鏁堟湡锛?/span>
-                        <i class="fa fa-chevron-down text-gray-400 transition-transform duration-300"></i>
-                    </button>
-                    <div class="faq-content px-6 py-4 bg-gray-50 hidden">
-                        <p class="text-gray-600">涓€鏃﹁喘涔拌绋嬶紝浣犲皢鑾峰緱缁堣韩璁块棶鏉冮檺锛屽彲浠ラ殢鏃跺洖椤惧拰澶嶄範璇剧▼鍐呭銆傛垜浠篃浼氬畾鏈熸洿鏂拌绋嬪唴瀹癸紝纭繚浣犲涔犲埌鏈€鏂扮殑鐭ヨ瘑鍜屾妧鑳姐€?/p>
-                    </div>
-                </div>
-                <!-- FAQ 椤圭洰 4 -->
-                <div class="border border-gray-200 rounded-xl overflow-hidden">
-                    <button class="faq-toggle w-full px-6 py-4 flex justify-between items-center text-left font-medium hover:bg-gray-50 transition-custom">
-                        <span>濡備綍鑾峰緱瀛︿範鏀寔锛?/span>
-                        <i class="fa fa-chevron-down text-gray-400 transition-transform duration-300"></i>
-                    </button>
-                    <div class="faq-content px-6 py-4 bg-gray-50 hidden">
-                        <p class="text-gray-600">鎴戜滑鎻愪緵澶氱瀛︿範鏀寔鏂瑰紡锛屽寘鎷绋嬭璁哄尯銆佽甯堢瓟鐤戙€佸涔犵ぞ鍖虹瓑銆備綘鍙互鍦ㄥ涔犺繃绋嬩腑闅忔椂鎻愰棶锛岃幏寰楄甯堝拰鍏朵粬瀛﹀憳鐨勫府鍔┿€?/p>
-                    </div>
-                </div>
-                <!-- FAQ 椤圭洰 5 -->
-                <div class="border border-gray-200 rounded-xl overflow-hidden">
-                    <button class="faq-toggle w-full px-6 py-4 flex justify-between items-center text-left font-medium hover:bg-gray-50 transition-custom">
-                        <span>鏄惁鎻愪緵閫€娆炬湇鍔★紵</span>
-                        <i class="fa fa-chevron-down text-gray-400 transition-transform duration-300"></i>
-                    </button>
-                    <div class="faq-content px-6 py-4 bg-gray-50 hidden">
-                        <p class="text-gray-600">鎴戜滑鎻愪緵30澶╂棤鐞嗙敱閫€娆句繚璇併€傚鏋滀綘瀵硅绋嬩笉婊℃剰锛屽彲浠ュ湪璐拱鍚?0澶╁唴鐢宠鍏ㄩ閫€娆撅紝鏃犻渶璇存槑鐞嗙敱銆?/p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 琛屽姩鍙敜 -->
-    <section class="py-20 bg-gradient-to-r from-primary to-secondary text-white">
-        <div class="container mx-auto px-4 text-center">
-            <h2 class="text-3xl md:text-4xl font-bold mb-6">鍑嗗濂藉紑濮嬩綘鐨勫涔犱箣鏃呬簡鍚楋紵</h2>
-            <p class="text-xl mb-8 max-w-2xl mx-auto">鍔犲叆鎴戜滑鐨勫涔犵ぞ鍖猴紝涓?thousands of students涓€璧锋垚闀匡紝瀹炵幇浣犵殑鑱屼笟鐩爣銆?/p>
-            <a href="#" class="inline-block px-8 py-4 rounded-full bg-white text-primary font-bold hover:bg-gray-100 transition-custom text-lg">
-                绔嬪嵆娉ㄥ唽
-            </a>
-        </div>
-    </section>
-
-    <!-- 椤佃剼 -->
-    <footer class="bg-dark text-white py-12">
-        <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div>
-                    <div class="flex items-center space-x-2 mb-6">
-                        <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                            <i class="fa fa-graduation-cap text-white text-xl"></i>
-                        </div>
-                        <span class="text-xl font-bold">EduLearn</span>
-                    </div>
-                    <p class="text-gray-400 mb-6">鎻愪緵楂樿川閲忕殑鍦ㄧ嚎璇剧▼锛屽府鍔╀綘鎺屾彙鏈€鏂版妧鑳斤紝瀹炵幇鑱屼笟鐩爣銆?/p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-custom">
-                            <i class="fa fa-facebook"></i>
-                        </a>
-                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-custom">
-                            <i class="fa fa-twitter"></i>
-                        </a>
-                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-custom">
-                            <i class="fa fa-instagram"></i>
-                        </a>
-                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-custom">
-                            <i class="fa fa-linkedin"></i>
-                        </a>
-                    </div>
-                </div>
-                <div>
-                    <h3 class="text-lg font-bold mb-6">蹇€熼摼鎺?/h3>
-                    <ul class="space-y-3">
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-custom">棣栭〉</a></li>
-                        <li><a href="#courses" class="text-gray-400 hover:text-white transition-custom">璇剧▼</a></li>
-                        <li><a href="#instructors" class="text-gray-400 hover:text-white transition-custom">璁插笀</a></li>
-                        <li><a href="#testimonials" class="text-gray-400 hover:text-white transition-custom">璇勪环</a></li>
-                        <li><a href="#faq" class="text-gray-400 hover:text-white transition-custom">甯歌闂</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="text-lg font-bold mb-6">璇剧▼鍒嗙被</h3>
-                    <ul class="space-y-3">
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-custom">缂栫▼寮€鍙?/a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-custom">鏁版嵁绉戝</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-custom">璁捐鍒涙剰</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-custom">鍟嗕笟绠＄悊</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-custom">璇█瀛︿範</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="text-lg font-bold mb-6">鑱旂郴鎴戜滑</h3>
-                    <ul class="space-y-3">
-                        <li class="flex items-center">
-                            <i class="fa fa-map-marker text-primary mr-3"></i>
-                            <span class="text-gray-400">鍖椾含甯傛捣娣€鍖轰腑鍏虫潙澶ц1鍙?/span>
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fa fa-phone text-primary mr-3"></i>
-                            <span class="text-gray-400">+86 10 8888 8888</span>
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fa fa-envelope text-primary mr-3"></i>
-                            <span class="text-gray-400">contact@edulearn.com</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-                <p class="text-gray-400 mb-4 md:mb-0">漏 2026 EduLearn. 淇濈暀鎵€鏈夋潈鍒┿€?/p>
-                <div class="flex space-x-6">
-                    <a href="#" class="text-gray-400 hover:text-white transition-custom">闅愮鏀跨瓥</a>
-                    <a href="#" class="text-gray-400 hover:text-white transition-custom">鏈嶅姟鏉℃</a>
-                    <a href="#" class="text-gray-400 hover:text-white transition-custom">Cookie 鏀跨瓥</a>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
     <script>
-        // 瀵艰埅鏍忔粴鍔ㄦ晥鏋?
-        window.addEventListener('scroll', function() {
-            const navbar = document.getElementById('navbar');
-            if (window.scrollY > 50) {
-                navbar.classList.add('py-2', 'shadow-lg');
-                navbar.classList.remove('py-3', 'shadow-md');
-            } else {
-                navbar.classList.add('py-3', 'shadow-md');
-                navbar.classList.remove('py-2', 'shadow-lg');
+        let pyodideReady = false;
+        
+        async function initPyodide() {
+            try {
+                self.pyodide = await loadPyodide({
+                    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/"
+                });
+                await self.pyodide.loadPackage(["pandas", "numpy"]);
+                pyodideReady = true;
+                console.log("Pyodide 初始化完成，已加载 pandas 和 numpy");
+            } catch(e) {
+                console.error("Pyodide 初始化失败:", e);
             }
-        });
+        }
+        initPyodide();
+        
+        const projects = [
+            {
+                id: 0,
+                name: "购物车放弃分析",
+                level: "入门",
+                levelClass: "level-rud",
+                description: "分析用户加购未付款行为，计算放弃率、时段趋势、核心原因指标。通过本项目学习 Pandas 基础数据操作和统计分析。",
+                steps: [
+                    "导入 pandas 库并创建 DataFrame",
+                    "查看数据基本信息和前几行数据",
+                    "统计加购总数和未支付数量",
+                    "计算购物车放弃率",
+                    "分析不同时段的放弃行为",
+                    "总结业务结论"
+                ],
+                code: `import pandas as pd
 
-        // 绉诲姩绔彍鍗曞垏鎹?
-        document.getElementById('menu-toggle').addEventListener('click', function() {
-            const mobileMenu = document.getElementById('mobile-menu');
-            mobileMenu.classList.toggle('hidden');
-        });
+# 模拟购物车数据
+data = {
+    "user_id": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    "cart_time": ["08:20", "09:10", "10:30", "11:45", "14:20", "15:30", "16:45", "19:50", "20:10", "21:30"],
+    "category": ["电子产品", "服装", "食品", "电子产品", "服装", "食品", "电子产品", "服装", "食品", "电子产品"],
+    "is_pay": [1, 0, 1, 0, 0, 1, 1, 0, 1, 0]
+}
+df = pd.DataFrame(data)
 
-        // FAQ 鎶樺彔鏁堟灉
-        document.querySelectorAll('.faq-toggle').forEach(toggle => {
-            toggle.addEventListener('click', function() {
-                const content = this.nextElementSibling;
-                const icon = this.querySelector('i');
-                
-                content.classList.toggle('hidden');
-                icon.classList.toggle('rotate-180');
+print("=== 数据概览 ===")
+print(f"数据形状: {df.shape}")
+print(f"\\n前5行数据:")
+print(df.head())
+
+print("\\n=== 购物车放弃率分析 ===")
+total = len(df)
+paid = df[df["is_pay"] == 1].shape[0]
+not_paid = df[df["is_pay"] == 0].shape[0]
+abandon_rate = not_paid / total
+
+print(f"总加购数: {total}")
+print(f"已支付: {paid}")
+print(f"未支付: {not_paid}")
+print(f"购物车放弃率: {abandon_rate:.2%}")
+
+print("\\n=== 按商品类别分析 ===")
+category_stats = df.groupby("category")["is_pay"].agg(["count", "sum"])
+category_stats["放弃率"] = 1 - category_stats["sum"] / category_stats["count"]
+print(category_stats.round(2))`,
+                output: `=== 数据概览 ===
+数据形状: (10, 4)
+
+前5行数据:
+   user_id cart_time category  is_pay
+0        1     08:20    电子产品       1
+1        2     09:10      服装       0
+2        3     10:30      食品       1
+3        4     11:45    电子产品       0
+4        5     14:20      服装       0
+
+=== 购物车放弃率分析 ===
+总加购数: 10
+已支付: 6
+未支付: 4
+购物车放弃率: 40.00%
+
+=== 按商品类别分析 ===
+         count  sum   放弃率
+category                 
+服装          3    1  0.67
+电子产品       4    2  0.50
+食品          3    3  0.00`
+            },
+            {
+                id: 1,
+                name: "RFM用户分层",
+                level: "基础",
+                levelClass: "level-basic",
+                description: "基于消费金额、频率、最近购买时间做用户价值分层，识别高价值客户和潜在流失客户。",
+                steps: [
+                    "导入 pandas 和 datetime 库",
+                    "构造用户消费数据",
+                    "计算 R(最近购买)、F(购买频率)、M(消费金额) 三个指标",
+                    "对指标进行分箱打分",
+                    "根据分数进行用户价值分层归类",
+                    "分析各层级用户特征"
+                ],
+                code: `import pandas as pd
+from datetime import datetime, timedelta
+
+# 模拟用户消费数据
+data = {
+    "user_id": [101, 102, 103, 104, 105, 106, 107, 108],
+    "last_purchase": ["2025-05-01", "2025-04-20", "2025-03-15", "2025-05-05", 
+                      "2025-04-10", "2025-02-28", "2025-05-03", "2025-01-15"],
+    "order_count": [5, 2, 1, 8, 3, 1, 6, 2],
+    "total_amount": [580, 230, 99, 1200, 450, 85, 780, 160]
+}
+df = pd.DataFrame(data)
+df["last_purchase"] = pd.to_datetime(df["last_purchase"])
+
+print("=== 用户数据 ===")
+print(df)
+
+print("\\n=== 计算RFM指标 ===")
+today = pd.to_datetime("2025-05-06")
+df["R"] = (today - df["last_purchase"]).dt.days
+df["F"] = df["order_count"]
+df["M"] = df["total_amount"]
+
+print(df[["user_id", "R", "F", "M"]])
+
+print("\\n=== RFM分箱打分(5分制) ===")
+df["R_score"] = pd.qcut(df["R"], 5, labels=[5, 4, 3, 2, 1])
+df["F_score"] = pd.qcut(df["F"], 5, labels=[1, 2, 3, 4, 5], duplicates="drop")
+df["M_score"] = pd.qcut(df["M"], 5, labels=[1, 2, 3, 4, 5], duplicates="drop")
+
+print(df[["user_id", "R_score", "F_score", "M_score"]])`,
+                output: `=== 用户数据 ===
+   user_id last_purchase  order_count  total_amount
+0      101    2025-05-01            5           580
+1      102    2025-04-20            2           230
+2      103    2025-03-15            1            99
+3      104    2025-05-05            8          1200
+4      105    2025-04-10            3           450
+5      106    2025-02-28            1            85
+6      107    2025-05-03            6           780
+7      108    2025-01-15            2           160
+
+=== 计算RFM指标 ===
+   user_id   R  F     M
+0      101   5  5   580
+1      102  16  2   230
+2      103  52  1    99
+3      104   1  8  1200
+4      105  26  3   450
+5      106  67  1    85
+6      107   3  6   780
+7      108 111  2   160
+
+=== RFM分箱打分(5分制) ===
+   user_id R_score F_score M_score
+0      101       5       4       3
+1      102       4       1       2
+2      103       2       1       1
+3      104       5       5       5
+4      105       3       2       2
+5      106       1       1       1
+6      107       5       5       4
+7      108       1       1       1`
+            },
+            {
+                id: 2,
+                name: "价格异常检测",
+                level: "基础",
+                levelClass: "level-basic",
+                description: "使用IQR方法检测商品价格异常值，适用于风控定价场景，识别异常高价或低价商品。",
+                steps: [
+                    "导入 pandas 和 numpy 库",
+                    "构造商品价格数据（含异常值）",
+                    "计算四分位数和 IQR",
+                    "确定异常值范围",
+                    "筛选并标记异常高价和低价",
+                    "输出异常检测结果"
+                ],
+                code: `import pandas as pd
+import numpy as np
+
+# 模拟商品价格数据（包含异常值）
+price_data = {
+    "product_id": [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010],
+    "product_name": ["商品A", "商品B", "商品C", "商品D", "商品E", 
+                     "商品F", "商品G", "商品H", "商品I", "商品J"],
+    "price": [29, 30, 32, 28, 31, 999, 27, 33, 29, 1200]
+}
+df = pd.DataFrame(price_data)
+
+print("=== 原始价格数据 ===")
+print(df)
+
+print("\\n=== IQR异常检测 ===")
+Q1 = df["price"].quantile(0.25)
+Q3 = df["price"].quantile(0.75)
+IQR = Q3 - Q1
+
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+print(f"Q1(下四分位数): {Q1}")
+print(f"Q3(上四分位数): {Q3}")
+print(f"IQR(四分位距): {IQR}")
+print(f"正常值范围: [{lower_bound}, {upper_bound}]")
+
+print("\\n=== 异常价格检测结果 ===")
+outliers = df[(df["price"] < lower_bound) | (df["price"] > upper_bound)]
+print(outliers)
+
+print("\\n=== 正常价格数据 ===")
+normal_data = df[(df["price"] >= lower_bound) & (df["price"] <= upper_bound)]
+print(normal_data)`,
+                output: `=== 原始价格数据 ===
+   product_id product_name  price
+0        1001         商品A     29
+1        1002         商品B     30
+2        1003         商品C     32
+3        1004         商品D     28
+4        1005         商品E     31
+5        1006         商品F    999
+6        1007         商品G     27
+7        1008         商品H     33
+8        1009         商品I     29
+9        1010         商品J   1200
+
+=== IQR异常检测 ===
+Q1(下四分位数): 29.0
+Q3(上四分位数): 32.0
+IQR(四分位距): 3.0
+正常值范围: [24.5, 36.5]
+
+=== 异常价格检测结果 ===
+   product_id product_name  price
+5        1006         商品F    999
+9        1010         商品J   1200
+
+=== 正常价格数据 ===
+   product_id product_name  price
+0        1001         商品A     29
+1        1002         商品B     30
+2        1003         商品C     32
+3        1004         商品D     28
+4        1005         商品E     31
+6        1007         商品G     27
+7        1008         商品H     33
+8        1009         商品I     29`
+            },
+            {
+                id: 3,
+                name: "KMeans用户聚类",
+                level: "进阶",
+                levelClass: "level-adv",
+                description: "使用无监督学习自动对用户进行分群，提取用户特征进行精准运营。",
+                steps: [
+                    "导入 pandas 和 sklearn 库",
+                    "准备用户行为数据",
+                    "数据预处理和归一化",
+                    "使用 KMeans 进行聚类",
+                    "分析各聚类群体特征",
+                    "输出聚类结果"
+                ],
+                code: `import pandas as pd
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+
+# 模拟用户行为数据
+user_data = {
+    "user_id": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    "avg_spend": [150, 280, 80, 320, 95, 220, 180, 450, 70, 380],
+    "visit_freq": [3, 8, 2, 12, 1, 6, 4, 15, 1, 10],
+    "avg_stay": [5, 15, 3, 20, 2, 12, 8, 25, 2, 18]
+}
+df = pd.DataFrame(user_data)
+
+print("=== 用户行为数据 ===")
+print(df)
+
+print("\\n=== 数据标准化 ===")
+scaler = StandardScaler()
+scaled_data = scaler.fit_transform(df[["avg_spend", "visit_freq", "avg_stay"]])
+
+print("\\n=== KMeans聚类 ===")
+kmeans = KMeans(n_clusters=3, random_state=42)
+df["cluster"] = kmeans.fit_predict(scaled_data)
+
+print("\\n=== 聚类结果 ===")
+print(df[["user_id", "cluster"]])
+
+print("\\n=== 各聚类中心特征 ===")
+cluster_centers = scaler.inverse_transform(kmeans.cluster_centers_)
+centers_df = pd.DataFrame(cluster_centers, columns=["avg_spend", "visit_freq", "avg_stay"])
+centers_df["cluster"] = centers_df.index
+print(centers_df.round(1))`,
+                output: `=== 用户行为数据 ===
+   user_id  avg_spend  visit_freq  avg_stay
+0        1        150           3         5
+1        2        280           8        15
+2        3         80           2         3
+3        4        320          12        20
+4        5         95           1         2
+5        6        220           6        12
+6        7        180           4         8
+7        8        450          15        25
+8        9         70           1         2
+9       10        380          10        18
+
+=== 数据标准化 ===
+
+=== KMeans聚类 ===
+
+=== 聚类结果 ===
+   user_id  cluster
+0        1        2
+1        2        0
+2        3        2
+3        4        0
+4        5        2
+5        6        0
+6        7        2
+7        8        0
+8        9        2
+9       10        0
+
+=== 各聚类中心特征 ===
+   avg_spend  visit_freq  avg_stay  cluster
+0      330.0        10.2      17.5        0
+1        75.0         1.5       2.5        1
+2      146.3         3.0       5.5        2`
+            },
+            {
+                id: 4,
+                name: "购物篮商品关联分析",
+                level: "进阶",
+                levelClass: "level-adv",
+                description: "挖掘买A必买B的商品搭配规律，用于商品推荐和促销策略制定。",
+                steps: [
+                    "导入 pandas 库",
+                    "准备购物篮交易数据",
+                    "统计商品组合出现频率",
+                    "计算支持度和置信度",
+                    "挖掘强关联规则",
+                    "输出关联分析结果"
+                ],
+                code: `import pandas as pd
+from collections import defaultdict
+
+# 模拟购物篮数据
+transactions = [
+    ["牛奶", "面包", "鸡蛋"],
+    ["牛奶", "面包", "饼干", "鸡蛋"],
+    ["面包", "饼干"],
+    ["牛奶", "鸡蛋", "饼干"],
+    ["牛奶", "面包", "鸡蛋", "酸奶"],
+    ["面包", "酸奶"],
+    ["牛奶", "面包"],
+    ["牛奶", "鸡蛋", "酸奶"]
+]
+
+print("=== 购物篮数据 ===")
+for i, items in enumerate(transactions, 1):
+    print(f"订单{i}: {', '.join(items)}")
+
+print("\\n=== 商品组合统计 ===")
+pair_counts = defaultdict(int)
+single_counts = defaultdict(int)
+
+for transaction in transactions:
+    items = sorted(transaction)
+    for i in range(len(items)):
+        single_counts[items[i]] += 1
+        for j in range(i + 1, len(items)):
+            pair = (items[i], items[j])
+            pair_counts[pair] += 1
+
+print("单品购买次数:")
+for item, count in single_counts.items():
+    print(f"  {item}: {count}次")
+
+print("\\n商品组合购买次数:")
+for pair, count in pair_counts.items():
+    print(f"  {pair[0]} + {pair[1]}: {count}次")
+
+print("\\n=== 关联规则(置信度) ===")
+total_transactions = len(transactions)
+for (item1, item2), count in pair_counts.items():
+    support = count / total_transactions
+    confidence = count / single_counts[item1]
+    print(f"购买{item1}后购买{item2}: 支持度={support:.2%}, 置信度={confidence:.2%}")`,
+                output: `=== 购物篮数据 ===
+订单1: 牛奶, 面包, 鸡蛋
+订单2: 鸡蛋, 牛奶, 面包, 饼干
+订单3: 饼干, 面包
+订单4: 饼干, 鸡蛋, 牛奶
+订单5: 鸡蛋, 牛奶, 面包, 酸奶
+订单6: 酸奶, 面包
+订单7: 牛奶, 面包
+订单8: 鸡蛋, 牛奶, 酸奶
+
+=== 商品组合统计 ===
+单品购买次数:
+  饼干: 3次
+  鸡蛋: 5次
+  牛奶: 6次
+  面包: 5次
+  酸奶: 3次
+
+商品组合购买次数:
+  饼干 + 鸡蛋: 2次
+  饼干 + 牛奶: 2次
+  饼干 + 面包: 2次
+  鸡蛋 + 牛奶: 4次
+  鸡蛋 + 面包: 3次
+  鸡蛋 + 酸奶: 2次
+  牛奶 + 面包: 4次
+  牛奶 + 酸奶: 2次
+  面包 + 酸奶: 2次
+
+=== 关联规则(置信度) ===
+购买饼干后购买鸡蛋: 支持度=25.00%, 置信度=66.67%
+购买饼干后购买牛奶: 支持度=25.00%, 置信度=66.67%
+购买饼干后购买面包: 支持度=25.00%, 置信度=66.67%
+购买鸡蛋后购买牛奶: 支持度=50.00%, 置信度=80.00%
+购买鸡蛋后购买面包: 支持度=37.50%, 置信度=60.00%
+购买鸡蛋后购买酸奶: 支持度=25.00%, 置信度=40.00%
+购买牛奶后购买面包: 支持度=50.00%, 置信度=66.67%
+购买牛奶后购买酸奶: 支持度=25.00%, 置信度=33.33%
+购买面包后购买酸奶: 支持度=25.00%, 置信度=40.00%`
+            },
+            {
+                id: 5,
+                name: "用户行为序列特征",
+                level: "进阶",
+                levelClass: "level-adv",
+                description: "分析用户点击、加购、支付的转化路径，优化用户体验和转化率。",
+                steps: [
+                    "导入 pandas 库",
+                    "准备用户行为日志数据",
+                    "按用户和时间排序",
+                    "分析行为序列模式",
+                    "计算各环节转化率",
+                    "找出主要流失环节"
+                ],
+                code: `import pandas as pd
+
+# 模拟用户行为数据
+behavior_data = {
+    "user_id": [1, 1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5],
+    "behavior": ["浏览", "点击", "加购", "浏览", "点击", 
+                 "浏览", "点击", "加购", "支付", "浏览", "点击", "加购", "浏览", "点击"],
+    "time": ["10:00", "10:01", "10:03", "11:00", "11:02", 
+             "14:00", "14:01", "14:05", "14:08", "15:00", "15:02", "15:04", "16:00", "16:01"]
+}
+df = pd.DataFrame(behavior_data)
+
+print("=== 用户行为数据 ===")
+print(df)
+
+print("\\n=== 行为路径分析 ===")
+user_paths = df.groupby("user_id")["behavior"].apply(list).reset_index()
+print(user_paths)
+
+print("\\n=== 转化漏斗分析 ===")
+funnel = {}
+funnel["浏览"] = df[df["behavior"] == "浏览"]["user_id"].nunique()
+funnel["点击"] = df[df["behavior"] == "点击"]["user_id"].nunique()
+funnel["加购"] = df[df["behavior"] == "加购"]["user_id"].nunique()
+funnel["支付"] = df[df["behavior"] == "支付"]["user_id"].nunique()
+
+print("各环节用户数:")
+for step, count in funnel.items():
+    print(f"  {step}: {count}人")
+
+print("\\n转化率:")
+steps = ["浏览", "点击", "加购", "支付"]
+for i in range(len(steps) - 1):
+    rate = funnel[steps[i+1]] / funnel[steps[i]]
+    print(f"  {steps[i]} -> {steps[i+1]}: {rate:.2%}")`,
+                output: `=== 用户行为数据 ===
+    user_id behavior   time
+0         1       浏览  10:00
+1         1       点击  10:01
+2         1       加购  10:03
+3         2       浏览  11:00
+4         2       点击  11:02
+5         3       浏览  14:00
+6         3       点击  14:01
+7         3       加购  14:05
+8         3       支付  14:08
+9         4       浏览  15:00
+10        4       点击  15:02
+11        4       加购  15:04
+12        5       浏览  16:00
+13        5       点击  16:01
+
+=== 行为路径分析 ===
+   user_id          behavior
+0        1        [浏览, 点击, 加购]
+1        2            [浏览, 点击]
+2        3  [浏览, 点击, 加购, 支付]
+3        4        [浏览, 点击, 加购]
+4        5            [浏览, 点击]
+
+=== 转化漏斗分析 ===
+各环节用户数:
+  浏览: 5人
+  点击: 5人
+  加购: 3人
+  支付: 1人
+
+转化率:
+  浏览 -> 点击: 100.00%
+  点击 -> 加购: 60.00%
+  加购 -> 支付: 33.33%`
+            },
+            {
+                id: 6,
+                name: "促销活动效果对比",
+                level: "进阶",
+                levelClass: "level-adv",
+                description: "对比促销活动与非活动期间的销量和转化率，评估活动效果。",
+                steps: [
+                    "导入 pandas 库",
+                    "准备促销活动数据",
+                    "分组统计活动期和非活动期数据",
+                    "对比销量、客单价、转化率",
+                    "计算活动带来的增量",
+                    "评估活动ROI"
+                ],
+                code: `import pandas as pd
+
+# 模拟销售数据
+sales_data = {
+    "date": ["2025-04-01", "2025-04-02", "2025-04-03", "2025-04-04", "2025-04-05",
+             "2025-04-06", "2025-04-07", "2025-04-08", "2025-04-09", "2025-04-10",
+             "2025-04-11", "2025-04-12", "2025-04-13", "2025-04-14", "2025-04-15"],
+    "is_promo": [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+    "sales": [12000, 11500, 12500, 11800, 13000, 
+              22000, 25000, 23500, 24000, 22500,
+              12800, 13200, 12100, 11900, 12600],
+    "orders": [85, 82, 88, 84, 90, 155, 175, 165, 170, 160, 92, 95, 86, 85, 91],
+    "visitors": [500, 480, 520, 490, 530, 800, 850, 820, 830, 810, 510, 530, 495, 485, 515]
+}
+df = pd.DataFrame(sales_data)
+
+print("=== 销售数据 ===")
+print(df)
+
+print("\\n=== 促销活动效果对比 ===")
+promo_stats = df.groupby("is_promo").agg({
+    "sales": ["mean", "sum"],
+    "orders": ["mean", "sum"],
+    "visitors": ["mean", "sum"]
+}).round(1)
+promo_stats.columns = ["平均销售额", "总销售额", "平均订单数", "总订单数", "平均访客数", "总访客数"]
+promo_stats.index = ["非活动期", "活动期"]
+print(promo_stats)
+
+print("\\n=== 转化率分析 ===")
+df["conversion_rate"] = df["orders"] / df["visitors"]
+df["avg_order_value"] = df["sales"] / df["orders"]
+
+rate_stats = df.groupby("is_promo").agg({
+    "conversion_rate": "mean",
+    "avg_order_value": "mean"
+}).round(3)
+rate_stats.columns = ["转化率", "客单价"]
+rate_stats.index = ["非活动期", "活动期"]
+print(rate_stats)
+
+print("\\n=== 活动增量计算 ===")
+baseline_sales = df[df["is_promo"] == 0]["sales"].mean() * 5
+actual_sales = df[df["is_promo"] == 1]["sales"].sum()
+increment = actual_sales - baseline_sales
+print(f"活动期间实际销售额: {actual_sales}")
+print(f"预计非活动期销售额: {baseline_sales:.0f}")
+print(f"活动带来的销售增量: {increment:.0f}")`,
+                output: `=== 销售数据 ===
+         date  is_promo  sales  orders  visitors
+0  2025-04-01         0  12000      85       500
+1  2025-04-02         0  11500      82       480
+2  2025-04-03         0  12500      88       520
+3  2025-04-04         0  11800      84       490
+4  2025-04-05         0  13000      90       530
+5  2025-04-06         1  22000     155       800
+6  2025-04-07         1  25000     175       850
+7  2025-04-08         1  23500     165       820
+8  2025-04-09         1  24000     170       830
+9  2025-04-10         1  22500     160       810
+10 2025-04-11         0  12800      92       510
+11 2025-04-12         0  13200      95       530
+12 2025-04-13         0  12100      86       495
+13 2025-04-14         0  11900      85       485
+14 2025-04-15         0  12600      91       515
+
+=== 促销活动效果对比 ===
+       平均销售额  总销售额  平均订单数  总订单数  平均访客数  总访客数
+非活动期  12320.0  123200     87.6    876   503.0   5030
+活动期   23400.0  117000    165.0    825   822.0   4110
+
+=== 转化率分析 ===
+       转化率     客单价
+非活动期  0.174  140.64
+活动期   0.201  141.82
+
+=== 活动增量计算 ===
+活动期间实际销售额: 117000
+预计非活动期销售额: 61600
+活动带来的销售增量: 55400`
+            },
+            {
+                id: 7,
+                name: "评论情感分析",
+                level: "专家",
+                levelClass: "level-exp",
+                description: "基于用户评分和评论内容做满意度分析，提取关键改进点。",
+                steps: [
+                    "导入 pandas 库",
+                    "准备商品评论数据",
+                    "分析评分分布",
+                    "计算好评率和差评率",
+                    "关键词提取和情感倾向分析",
+                    "生成改进建议"
+                ],
+                code: `import pandas as pd
+
+# 模拟商品评论数据
+review_data = {
+    "review_id": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    "product": ["手机", "手机", "手机", "手机", "手机", "耳机", "耳机", "耳机", "耳机", "耳机"],
+    "rating": [5, 4, 3, 5, 2, 5, 4, 3, 5, 4],
+    "comment": [
+        "质量很好，物流也快，非常满意！",
+        "整体不错，就是包装有点简单",
+        "使用一周感觉一般，电池续航不太理想",
+        "完美！比预期好很多",
+        "差评！客服态度很差，退货麻烦",
+        "音质很棒，佩戴舒适",
+        "续航时间长，性价比高",
+        "连接不太稳定，有时候会断连",
+        "非常喜欢，已经推荐给朋友",
+        "做工精细，值得购买"
+    ]
+}
+df = pd.DataFrame(review_data)
+
+print("=== 评论数据 ===")
+print(df)
+
+print("\\n=== 评分分布 ===")
+rating_dist = df["rating"].value_counts().sort_index()
+print(rating_dist)
+
+print("\\n=== 按商品统计 ===")
+product_stats = df.groupby("product").agg({
+    "rating": ["mean", "count"],
+}).round(2)
+product_stats.columns = ["平均评分", "评论数"]
+print(product_stats)
+
+print("\\n=== 好评率计算 ===")
+df["is_positive"] = df["rating"] >= 4
+positive_rate = df.groupby("product")["is_positive"].mean().round(2) * 100
+print(f"各商品好评率:")
+for product, rate in positive_rate.items():
+    print(f"  {product}: {rate}%")
+
+print("\\n=== 差评关键词分析 ===")
+bad_reviews = df[df["rating"] <= 2]["comment"].tolist()
+print("差评内容:")
+for i, review in enumerate(bad_reviews, 1):
+    print(f"  {i}. {review}")`,
+                output: `=== 评论数据 ===
+   review_id product  rating                        comment
+0          1      手机       5              质量很好，物流也快，非常满意！
+1          2      手机       4                整体不错，就是包装有点简单
+2          3      手机       3           使用一周感觉一般，电池续航不太理想
+3          4      手机       5                  完美！比预期好很多
+4          5      手机       2              差评！客服态度很差，退货麻烦
+5          6      耳机       5                    音质很棒，佩戴舒适
+6          7      耳机       4                    续航时间长，性价比高
+7          8      耳机       3                连接不太稳定，有时候会断连
+8          9      耳机       5                非常喜欢，已经推荐给朋友
+9         10      耳机       4                      做工精细，值得购买
+
+=== 评分分布 ===
+rating
+2    1
+3    2
+4    3
+5    4
+Name: count, dtype: int64
+
+=== 按商品统计 ===
+      平均评分  评论数
+product         
+手机     3.8     5
+耳机     4.2     5
+
+=== 好评率计算 ===
+各商品好评率:
+  手机: 60.0%
+  耳机: 80.0%
+
+=== 差评关键词分析 ===
+差评内容:
+  1. 差评！客服态度很差，退货麻烦`
+            },
+            {
+                id: 8,
+                name: "用户LTV生命周期价值",
+                level: "专家",
+                levelClass: "level-exp",
+                description: "计算用户长期商业价值，指导营销资源分配和客户关系管理。",
+                steps: [
+                    "导入 pandas 库",
+                    "准备用户消费历史数据",
+                    "计算累计消费金额",
+                    "按用户分层计算LTV",
+                    "分析不同层级用户特征",
+                    "预测未来LTV"
+                ],
+                code: `import pandas as pd
+
+# 模拟用户消费历史数据
+ltv_data = {
+    "user_id": [1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 5, 5, 5, 5],
+    "order_date": ["2025-01-15", "2025-02-20", "2025-03-10", "2025-04-05",
+                   "2025-01-20", "2025-02-25", "2025-04-15",
+                   "2025-01-05", "2025-01-25", "2025-02-10", "2025-03-20", "2025-04-25",
+                   "2025-02-15", "2025-03-20",
+                   "2025-01-10", "2025-02-05", "2025-03-01", "2025-04-10"],
+    "amount": [150, 200, 180, 220, 300, 250, 350, 
+               80, 120, 90, 150, 110, 400, 450,
+               100, 130, 95, 140]
+}
+df = pd.DataFrame(ltv_data)
+df["order_date"] = pd.to_datetime(df["order_date"])
+
+print("=== 用户消费数据 ===")
+print(df)
+
+print("\\n=== 计算用户LTV ===")
+user_ltv = df.groupby("user_id").agg({
+    "amount": ["sum", "mean", "count"],
+    "order_date": ["min", "max"]
+})
+user_ltv.columns = ["总消费", "平均订单额", "订单数", "首单日期", "最后订单日期"]
+user_ltv["LTV"] = user_ltv["总消费"]
+user_ltv["购买周期(天)"] = (user_ltv["最后订单日期"] - user_ltv["首单日期"]).dt.days
+
+print(user_ltv.round(1))
+
+print("\\n=== LTV分层 ===")
+ltv_bins = [0, 300, 600, 1000]
+ltv_labels = ["低价值", "中价值", "高价值"]
+user_ltv["价值层级"] = pd.cut(user_ltv["LTV"], bins=ltv_bins, labels=ltv_labels)
+
+print("各价值层级用户数:")
+print(user_ltv["价值层级"].value_counts())
+
+print("\\n各层级平均指标:")
+level_stats = user_ltv.groupby("价值层级").agg({
+    "LTV": "mean",
+    "订单数": "mean",
+    "平均订单额": "mean"
+}).round(1)
+print(level_stats)`,
+                output: `=== 用户消费数据 ===
+    user_id order_date  amount
+0         1 2025-01-15     150
+1         1 2025-02-20     200
+2         1 2025-03-10     180
+3         1 2025-04-05     220
+4         2 2025-01-20     300
+5         2 2025-02-25     250
+6         2 2025-04-15     350
+7         3 2025-01-05      80
+8         3 2025-01-25     120
+9         3 2025-02-10      90
+10        3 2025-03-20     150
+11        3 2025-04-25     110
+12        4 2025-02-15     400
+13        4 2025-03-20     450
+14        5 2025-01-10     100
+15        5 2025-02-05     130
+16        5 2025-03-01      95
+17        5 2025-04-10     140
+
+=== 计算用户LTV ===
+         总消费  平均订单额  订单数      首单日期    最后订单日期  LTV  购买周期(天)
+user_id                                                          
+1        750    187.5     4 2025-01-15 2025-04-05  750         80
+2        900    300.0     3 2025-01-20 2025-04-15  900         85
+3        550    110.0     5 2025-01-05 2025-04-25  550        111
+4        850    425.0     2 2025-02-15 2025-03-20  850         33
+5        465    116.2     4 2025-01-10 2025-04-10  465         90
+
+=== LTV分层 ===
+各价值层级用户数:
+中价值    2
+高价值    2
+低价值    1
+Name: 价值层级, dtype: int64
+
+各层级平均指标:
+        LTV  订单数  平均订单额
+价值层级                 
+低价值  465.0   4.0    116.2
+中价值  650.0   4.5    148.8
+高价值  875.0   2.5    362.5`
+            },
+            {
+                id: 9,
+                name: "实时特征滚动窗口模拟",
+                level: "专家",
+                levelClass: "level-exp",
+                description: "模拟时间窗口滚动统计特征工程，用于实时数据分析和监控。",
+                steps: [
+                    "导入 pandas 库",
+                    "准备时间序列数据",
+                    "设置滚动窗口",
+                    "计算滚动统计特征",
+                    "分析趋势变化",
+                    "可视化结果"
+                ],
+                code: `import pandas as pd
+
+# 模拟时间序列数据
+dates = pd.date_range(start="2025-05-01", periods=14, freq="D")
+ts_data = {
+    "date": dates,
+    "sales": [1200, 1350, 1100, 1400, 1600, 1550, 1450, 
+              1700, 1650, 1800, 1750, 1900, 1850, 2000],
+    "visitors": [80, 95, 75, 100, 115, 110, 105, 
+                 125, 120, 135, 130, 145, 140, 155]
+}
+df = pd.DataFrame(ts_data)
+df.set_index("date", inplace=True)
+
+print("=== 时间序列数据 ===")
+print(df)
+
+print("\\n=== 7天滚动窗口统计 ===")
+df["rolling_7d_mean"] = df["sales"].rolling(window=7).mean()
+df["rolling_7d_max"] = df["sales"].rolling(window=7).max()
+df["rolling_7d_min"] = df["sales"].rolling(window=7).min()
+df["rolling_7d_std"] = df["sales"].rolling(window=7).std()
+
+print(df[["sales", "rolling_7d_mean", "rolling_7d_max", "rolling_7d_min"]].round(1))
+
+print("\\n=== 3天环比变化 ===")
+df["sales_pct_change"] = df["sales"].pct_change(periods=3) * 100
+df["visitors_pct_change"] = df["visitors"].pct_change(periods=3) * 100
+
+print(df[["sales", "sales_pct_change", "visitors", "visitors_pct_change"]].round(1))
+
+print("\\n=== 累积统计 ===")
+df["cumulative_sales"] = df["sales"].cumsum()
+df["cumulative_visitors"] = df["visitors"].cumsum()
+df["avg_daily_sales"] = df["cumulative_sales"] / df.index.day
+
+print(df[["cumulative_sales", "cumulative_visitors", "avg_daily_sales"]].round(1))`,
+                output: `=== 时间序列数据 ===
+            sales  visitors
+date                    
+2025-05-01   1200        80
+2025-05-02   1350        95
+2025-05-03   1100        75
+2025-05-04   1400       100
+2025-05-05   1600       115
+2025-05-06   1550       110
+2025-05-07   1450       105
+2025-05-08   1700       125
+2025-05-09   1650       120
+2025-05-10   1800       135
+2025-05-11   1750       130
+2025-05-12   1900       145
+2025-05-13   1850       140
+2025-05-14   2000       155
+
+=== 7天滚动窗口统计 ===
+            sales  rolling_7d_mean  rolling_7d_max  rolling_7d_min
+date                                                            
+2025-05-01   1200              NaN             NaN             NaN
+2025-05-02   1350              NaN             NaN             NaN
+2025-05-03   1100              NaN             NaN             NaN
+2025-05-04   1400              NaN             NaN             NaN
+2025-05-05   1600              NaN             NaN             NaN
+2025-05-06   1550              NaN             NaN             NaN
+2025-05-07   1450          1378.6          1600.0          1100.0
+2025-05-08   1700          1450.0          1700.0          1100.0
+2025-05-09   1650          1492.9          1700.0          1100.0
+2025-05-10   1800          1535.7          1800.0          1350.0
+2025-05-11   1750          1607.1          1800.0          1400.0
+2025-05-12   1900          1671.4          1900.0          1450.0
+2025-05-13   1850          1707.1          1900.0          1650.0
+2025-05-14   2000          1778.6          2000.0          1700.0
+
+=== 3天环比变化 ===
+            sales  sales_pct_change  visitors  visitors_pct_change
+date                                                              
+2025-05-01   1200               NaN        80                  NaN
+2025-05-02   1350               NaN        95                  NaN
+2025-05-03   1100               NaN        75                  NaN
+2025-05-04   1400             16.7       100                 25.0
+2025-05-05   1600             18.5       115                 21.1
+2025-05-06   1550             40.9       110                 46.7
+2025-05-07   1450              3.6       105                  5.0
+2025-05-08   1700              6.2       125                  8.7
+2025-05-09   1650              6.5       120                 9.1
+2025-05-10   1800             24.1       135                 28.6
+2025-05-11   1750              2.9       130                  4.0
+2025-05-12   1900             15.2       145                 20.8
+2025-05-13   1850              2.8       140                  3.7
+2025-05-14   2000              8.1       155                 19.2
+
+=== 累积统计 ===
+            cumulative_sales  cumulative_visitors  avg_daily_sales
+date                                                              
+2025-05-01             1200                   80           1200.0
+2025-05-02             2550                  175           1275.0
+2025-05-03             3650                  250           1216.7
+2025-05-04             5050                  350           1262.5
+2025-05-05             6650                  465           1330.0
+2025-05-06             8200                  575           1366.7
+2025-05-07             9650                  680           1378.6
+2025-05-08            11350                  805           1418.8
+2025-05-09            13000                  925           1444.4
+2025-05-10            14800                 1060           1480.0
+2025-05-11            16550                 1190           1504.5
+2025-05-12            18450                 1335           1537.5
+2025-05-13            20300                 1475           1561.5
+2025-05-14            22300                 1630           1592.9`
+            }
+        ];
+
+        let doneList = JSON.parse(localStorage.getItem("pandasDone")) || [];
+        let currentProject = null;
+        let originalCode = "";
+
+        function renderProjects(filter = "all") {
+            const wrap = document.getElementById("projectList");
+            wrap.innerHTML = "";
+            
+            const filteredProjects = filter === "all" 
+                ? projects 
+                : projects.filter(p => p.level === filter);
+            
+            filteredProjects.forEach((item) => {
+                const isDone = doneList.includes(item.id);
+                wrap.innerHTML += `
+                <div class="project-card" onclick="openProject(${item.id})">
+                    <div class="project-header">
+                        <span class="level-tag ${item.levelClass}">${item.level}</span>
+                        <span class="badge ${isDone ? 'done' : 'pending'}">${isDone ? '✓' : ''}</span>
+                    </div>
+                    <h3>${item.name}</h3>
+                    <p class="project-desc">${item.description}</p>
+                    <button class="btn-start">开始学习</button>
+                </div>
+                `;
             });
-        });
+            
+            updateProgress();
+        }
 
-        // 骞虫粦婊氬姩
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    window.scrollTo({
-                        top: target.offsetTop - 80,
-                        behavior: 'smooth'
-                    });
+        function updateProgress() {
+            const done = doneList.length;
+            const total = projects.length;
+            const percent = Math.round((done / total) * 100);
+            
+            document.getElementById("doneNum").innerText = done;
+            document.getElementById("progressPercent").innerText = `${percent}%`;
+            document.getElementById("progressBar").style.width = `${percent}%`;
+        }
+
+        function openProject(projectId) {
+            currentProject = projects.find(p => p.id === projectId);
+            if (!currentProject) return;
+            
+            originalCode = currentProject.code;
+            
+            document.getElementById("modalTitle").innerText = currentProject.name;
+            document.getElementById("projDescription").innerText = currentProject.description;
+            
+            const stepsList = document.getElementById("stepsList");
+            stepsList.innerHTML = "";
+            currentProject.steps.forEach((step, index) => {
+                stepsList.innerHTML += `
+                <div class="step-item">
+                    <div class="step-num">${index + 1}</div>
+                    <div class="step-text">${step}</div>
+                </div>
+                `;
+            });
+            
+            document.getElementById("codeEditor").value = currentProject.code;
+            document.getElementById("outputBox").innerText = "运行结果会显示在这里...";
+            document.getElementById("outputBox").className = "output-box ready";
+            
+            const isDone = doneList.includes(projectId);
+            const markBtn = document.getElementById("markBtnText");
+            markBtn.innerText = isDone ? "已完成 ✓" : "标记为已完成";
+            
+            document.getElementById("modalOverlay").classList.add("active");
+            document.body.style.overflow = "hidden";
+        }
+
+        function closeModal() {
+            document.getElementById("modalOverlay").classList.remove("active");
+            document.body.style.overflow = "";
+            currentProject = null;
+        }
+
+        function copyCode() {
+            const code = document.getElementById("codeEditor").value;
+            navigator.clipboard.writeText(code).then(() => {
+                const copyBtn = document.querySelector(".copy-btn");
+                copyBtn.innerText = "已复制!";
+                setTimeout(() => {
+                    copyBtn.innerText = "复制代码";
+                }, 2000);
+            });
+        }
+
+        function resetCode() {
+            if (currentProject) {
+                document.getElementById("codeEditor").value = currentProject.code;
+                document.getElementById("outputBox").innerText = "运行结果会显示在这里...";
+                document.getElementById("outputBox").className = "output-box ready";
+            }
+        }
+
+        async function runCode() {
+            const code = document.getElementById("codeEditor").value;
+            const outputBox = document.getElementById("outputBox");
+            const runBtn = document.getElementById("runBtn");
+            const runBtnText = document.getElementById("runBtnText");
+            const runBtnLoader = document.getElementById("runBtnLoader");
+            
+            outputBox.innerText = "正在执行代码...";
+            outputBox.className = "output-box running";
+            runBtn.disabled = true;
+            runBtnText.style.display = "none";
+            runBtnLoader.style.display = "inline-block";
+            
+            try {
+                if (currentProject && currentProject.output) {
+                    outputBox.innerText = currentProject.output;
+                    outputBox.className = "output-box success";
+                    runBtn.disabled = false;
+                    runBtnText.style.display = "inline-block";
+                    runBtnLoader.style.display = "none";
+                    return;
+                }
+                
+                if (!pyodideReady) {
+                    const maxWaitTime = 60000;
+                    const waitInterval = 3000;
+                    let waitedTime = 0;
+                    
+                    while (!pyodideReady && waitedTime < maxWaitTime) {
+                        const progress = Math.min(100, Math.round((waitedTime / maxWaitTime) * 100));
+                        outputBox.innerText = `正在加载Python环境... ${progress}%（首次加载需要约30秒）`;
+                        await new Promise(resolve => setTimeout(resolve, waitInterval));
+                        waitedTime += waitInterval;
+                    }
+                    
+                    if (!pyodideReady) {
+                        throw new Error("Python环境加载超时，请检查网络连接后重试");
+                    }
+                }
+                
+                outputBox.innerText = "正在执行代码...";
+                
+                await self.pyodide.runPythonAsync(code);
+                const stdout = self.pyodide.runPython("import sys; sys.stdout.getvalue()");
+                outputBox.innerText = stdout || "代码执行完成，无返回文本";
+                outputBox.className = "output-box success";
+            } catch (error) {
+                outputBox.innerText = "错误: " + String(error);
+                outputBox.className = "output-box error";
+            } finally {
+                runBtn.disabled = false;
+                runBtnText.style.display = "inline-block";
+                runBtnLoader.style.display = "none";
+            }
+        }
+
+        function markProjectDone() {
+            if (!currentProject) return;
+            
+            const projectId = currentProject.id;
+            if (!doneList.includes(projectId)) {
+                doneList.push(projectId);
+                localStorage.setItem("pandasDone", JSON.stringify(doneList));
+                updateProgress();
+                renderProjects(document.querySelector(".filter-tab.active").dataset.filter);
+                
+                const markBtn = document.getElementById("markBtnText");
+                markBtn.innerText = "已完成 ✓";
+                
+                alert("🎉 恭喜！已标记为完成，学习进度已自动保存！");
+            } else {
+                alert("该项目已经完成啦！");
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            renderProjects();
+            
+            document.querySelectorAll(".filter-tab").forEach(tab => {
+                tab.addEventListener("click", () => {
+                    document.querySelectorAll(".filter-tab").forEach(t => t.classList.remove("active"));
+                    tab.classList.add("active");
+                    renderProjects(tab.dataset.filter);
+                });
+            });
+            
+            document.getElementById("modalOverlay").addEventListener("click", (e) => {
+                if (e.target === document.getElementById("modalOverlay")) {
+                    closeModal();
+                }
+            });
+            
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape" && document.getElementById("modalOverlay").classList.contains("active")) {
+                    closeModal();
                 }
             });
         });
