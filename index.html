@@ -1657,15 +1657,6 @@ date
             runBtnLoader.style.display = "inline-block";
             
             try {
-                if (currentProject && currentProject.output) {
-                    outputBox.innerText = currentProject.output;
-                    outputBox.className = "output-box success";
-                    runBtn.disabled = false;
-                    runBtnText.style.display = "inline-block";
-                    runBtnLoader.style.display = "none";
-                    return;
-                }
-                
                 if (!pyodideReady) {
                     const maxWaitTime = 60000;
                     const waitInterval = 3000;
@@ -1685,8 +1676,15 @@ date
                 
                 outputBox.innerText = "正在执行代码...";
                 
+                // 重置stdout并运行代码
+                self.pyodide.runPython(`
+import sys
+from io import StringIO
+sys.stdout = StringIO()
+                `);
+                
                 await self.pyodide.runPythonAsync(code);
-                const stdout = self.pyodide.runPython("import sys; sys.stdout.getvalue()");
+                const stdout = self.pyodide.runPython("sys.stdout.getvalue()");
                 outputBox.innerText = stdout || "代码执行完成，无返回文本";
                 outputBox.className = "output-box success";
             } catch (error) {
