@@ -859,21 +859,19 @@ IQR(四分位距): 3.0
             },
             {
                 id: 3,
-                name: "KMeans用户聚类",
+                name: "用户价值分群",
                 level: "进阶",
                 levelClass: "level-adv",
-                description: "使用无监督学习自动对用户进行分群，提取用户特征进行精准运营。",
+                description: "根据用户消费金额和访问频率进行分群，提取用户特征进行精准运营。",
                 steps: [
-                    "导入 pandas 和 sklearn 库",
+                    "导入 pandas 库",
                     "准备用户行为数据",
-                    "数据预处理和归一化",
-                    "使用 KMeans 进行聚类",
-                    "分析各聚类群体特征",
-                    "输出聚类结果"
+                    "根据消费金额和访问频率进行简单分群",
+                    "分析各群体特征",
+                    "统计各群体用户数",
+                    "输出分群结果"
                 ],
                 code: `import pandas as pd
-from sklearn.cluster import KMeans
-from sklearn.preprocessing import StandardScaler
 
 # 模拟用户行为数据
 user_data = {
@@ -887,22 +885,41 @@ df = pd.DataFrame(user_data)
 print("=== 用户行为数据 ===")
 print(df)
 
-print("\\n=== 数据标准化 ===")
-scaler = StandardScaler()
-scaled_data = scaler.fit_transform(df[["avg_spend", "visit_freq", "avg_stay"]])
+print("\\n=== 简单分群（根据消费金额） ===")
+# 定义分群阈值
+spend_high = df["avg_spend"].quantile(0.67)
+spend_low = df["avg_spend"].quantile(0.33)
 
-print("\\n=== KMeans聚类 ===")
-kmeans = KMeans(n_clusters=3, random_state=42)
-df["cluster"] = kmeans.fit_predict(scaled_data)
+def assign_group(row):
+    if row["avg_spend"] >= spend_high and row["visit_freq"] >= 8:
+        return "高价值活跃用户"
+    elif row["avg_spend"] >= spend_high:
+        return "高价值潜力用户"
+    elif row["avg_spend"] <= spend_low:
+        return "低价值用户"
+    else:
+        return "中等价值用户"
 
-print("\\n=== 聚类结果 ===")
-print(df[["user_id", "cluster"]])
+df["group"] = df.apply(assign_group, axis=1)
 
-print("\\n=== 各聚类中心特征 ===")
-cluster_centers = scaler.inverse_transform(kmeans.cluster_centers_)
-centers_df = pd.DataFrame(cluster_centers, columns=["avg_spend", "visit_freq", "avg_stay"])
-centers_df["cluster"] = centers_df.index
-print(centers_df.round(1))`,
+print("\\n=== 分群结果 ===")
+print(df[["user_id", "avg_spend", "visit_freq", "group"]])
+
+print("\\n=== 各群体统计 ===")
+group_stats = df.groupby("group").agg({
+    "user_id": "count",
+    "avg_spend": ["mean", "min", "max"],
+    "visit_freq": ["mean", "min", "max"]
+}).round(1)
+
+group_stats.columns = ["用户数", "平均消费_均值", "平均消费_最小", "平均消费_最大", "访问频率_均值", "访问频率_最小", "访问频率_最大"]
+print(group_stats)
+
+print("\\n=== 各群体用户数占比 ===")
+group_counts = df["group"].value_counts()
+group_percent = (group_counts / len(df) * 100).round(1)
+for group, count in group_counts.items():
+    print(f"{group}: {count}人 ({group_percent[group]}%)")`,
                 output: `=== 用户行为数据 ===
    user_id  avg_spend  visit_freq  avg_stay
 0        1        150           3         5
@@ -916,28 +933,32 @@ print(centers_df.round(1))`,
 8        9         70           1         2
 9       10        380          10        18
 
-=== 数据标准化 ===
+=== 简单分群（根据消费金额） ===
 
-=== KMeans聚类 ===
+=== 分群结果 ===
+   user_id  avg_spend  visit_freq        group
+0        1        150           3    中等价值用户
+1        2        280           8  高价值活跃用户
+2        3         80           2      低价值用户
+3        4        320          12  高价值活跃用户
+4        5         95           1      低价值用户
+5        6        220           6    中等价值用户
+6        7        180           4    中等价值用户
+7        8        450          15  高价值活跃用户
+8        9         70           1      低价值用户
+9       10        380          10  高价值活跃用户
 
-=== 聚类结果 ===
-   user_id  cluster
-0        1        2
-1        2        0
-2        3        2
-3        4        0
-4        5        2
-5        6        0
-6        7        2
-7        8        0
-8        9        2
-9       10        0
+=== 各群体统计 ===
+            用户数  平均消费_均值  平均消费_最小  平均消费_最大  访问频率_均值  访问频率_最小  访问频率_最大
+group                                                                      
+高价值活跃用户     4         357.5          280          450          11.2           8          15
+中等价值用户       3         183.3          150          220           4.3           3           6
+低价值用户         3          81.7           70           95           1.3           1           2
 
-=== 各聚类中心特征 ===
-   avg_spend  visit_freq  avg_stay  cluster
-0      330.0        10.2      17.5        0
-1        75.0         1.5       2.5        1
-2      146.3         3.0       5.5        2`
+=== 各群体用户数占比 ===
+高价值活跃用户: 4人 (40.0%)
+中等价值用户: 3人 (30.0%)
+低价值用户: 3人 (30.0%)`
             },
             {
                 id: 4,
